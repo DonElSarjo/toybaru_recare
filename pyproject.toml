@@ -31,4 +31,4 @@ build-backend = "setuptools.build_meta"
 where = ["src"]
 
 [tool.setuptools.package-data]
-toybaru = ["templates/*.html", "locales/*.json"]
+toybaru = ["templates/*.html", "locales/*.json", "sql/**/*.sql"]

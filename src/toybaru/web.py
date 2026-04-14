@@ -17,9 +17,10 @@ from toybaru.client import ToybaruClient
 from toybaru.const import DATA_DIR, REGIONS, BRANDS
 from toybaru.soc_tracker import log_snapshot, get_consumption_estimate, get_snapshot_history
 from toybaru.trip_store import (
-    upsert_trips, get_trip_count, get_trips_from_db, get_stats,
-    get_latest_trip_timestamp, get_detailed_stats,
+    upsert_trips, get_trip_count, get_trips_from_db,
+    get_latest_trip_timestamp,
 )
+from toybaru.trip_stats import get_detailed_stats, get_stats
 
 TEMPLATES_DIR = Path(__file__).parent / "templates"
 LOCALES_DIR = Path(__file__).parent / "locales"
@@ -371,10 +372,10 @@ async def export_trips_csv(vin: str | None = None):
     """Export all trips as CSV download."""
     import csv
     import io
-    from toybaru.trip_store import DB_PATH
+    from toybaru.database import get_db as _open_db
     import sqlite3
 
-    conn = sqlite3.connect(str(DB_PATH))
+    conn = _open_db("trips")
     conn.row_factory = sqlite3.Row
     sql = "SELECT * FROM trips"
     params = []
@@ -405,10 +406,10 @@ async def export_snapshots_csv(vin: str | None = None):
     """Export all snapshots as CSV download."""
     import csv
     import io
-    from toybaru.soc_tracker import DB_PATH as SNAP_DB_PATH
+    from toybaru.database import get_db as _open_db
     import sqlite3
 
-    conn = sqlite3.connect(str(SNAP_DB_PATH))
+    conn = _open_db("snapshots")
     conn.row_factory = sqlite3.Row
     sql = "SELECT * FROM snapshots"
     params = []
@@ -436,10 +437,10 @@ async def export_snapshots_csv(vin: str | None = None):
 @app.get("/api/export/trips.json")
 async def export_trips_json(vin: str | None = None):
     """Export all trips as JSON download (including behaviours and route)."""
-    from toybaru.trip_store import DB_PATH
+    from toybaru.database import get_db as _open_db
     import sqlite3
 
-    conn = sqlite3.connect(str(DB_PATH))
+    conn = _open_db("trips")
     conn.row_factory = sqlite3.Row
     sql = "SELECT * FROM trips"
     params = []
@@ -533,9 +534,9 @@ async def api_reimport(request: Request):
 @app.get("/api/route-svg/{trip_id}")
 async def api_route_svg(trip_id: str, width: int = 800, height: int = 500):
     import sqlite3
-    from toybaru.trip_store import DB_PATH
+    from toybaru.database import get_db as _open_db
 
-    conn = sqlite3.connect(str(DB_PATH))
+    conn = _open_db("trips")
     conn.row_factory = sqlite3.Row
     row = conn.execute("SELECT route_json, behaviours_json FROM trips WHERE id = ?", (trip_id,)).fetchone()
     conn.close()

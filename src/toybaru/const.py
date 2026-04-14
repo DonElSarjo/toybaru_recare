@@ -60,12 +60,12 @@ _DEFAULTS = {
     ),
     "toyota-na": RegionConfig(
         name="Toyota NA",
-        auth_realm="https://login.toyotadriverslogin.com/oauth2/realms/root/realms/tmna-native",
+        auth_realm="https://login.toyotadriverslogin.com/oauth2/realms/root/realms/tmna-native", # thx to antifort
         api_base_url="https://api.telematicsct.com",
         client_id="oneappsdkclient",
         redirect_uri="com.toyota.oneapp:/oauth2Callback",
         basic_auth="b25lYXBwOm9uZWFwcA==",
-        api_key="Y1aVonEtOa18cDwNLGTjt1zqD7aLahwc30WvvvQE",
+        api_key="Y1aVonEtOa18cDwNLGTjt1zqD7aLahwc30WvvvQE", # thx to antifort
         brand="T",
         region="NA",
         auth_service="",

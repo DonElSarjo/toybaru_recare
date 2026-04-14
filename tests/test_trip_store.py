@@ -1,9 +1,9 @@
-"""Tests for trip_store module."""
+"""Tests for trip_store and trip_stats modules."""
 
 from toybaru.trip_store import (
     upsert_trips, get_trip_count, get_trips_from_db, get_latest_trip_timestamp,
-    get_detailed_stats, estimate_kwh_100km,
 )
+from toybaru.trip_stats import get_detailed_stats, estimate_kwh_100km
 
 
 def test_upsert_new(sample_trip):

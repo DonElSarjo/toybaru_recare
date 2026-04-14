@@ -8,9 +8,9 @@ import pytest
 
 @pytest.fixture(autouse=True)
 def tmp_data_dir(tmp_path):
-    """Redirect all DB paths to a temp directory for test isolation."""
-    with patch("toybaru.trip_store.DB_PATH", tmp_path / "trips.db"), \
-         patch("toybaru.soc_tracker.DB_PATH", tmp_path / "snapshots.db"):
+    """Redirect DATA_DIR to temp directory for test isolation."""
+    with patch("toybaru.database.DATA_DIR", tmp_path), \
+         patch("toybaru.const.DATA_DIR", tmp_path):
         yield tmp_path
 
 

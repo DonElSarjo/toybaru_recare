@@ -7,34 +7,13 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-from toybaru.const import DATA_DIR
+from toybaru.database import get_db as _get_db_raw
 
-DB_PATH = DATA_DIR / "snapshots.db"
 BATTERY_CAPACITY_KWH = 71.4
 
 
 def _get_db() -> sqlite3.Connection:
-    DB_PATH.parent.mkdir(parents=True, exist_ok=True)
-    conn = sqlite3.connect(str(DB_PATH))
-    conn.execute("""
-        CREATE TABLE IF NOT EXISTS snapshots (
-            timestamp TEXT PRIMARY KEY,
-            vin TEXT,
-            soc INTEGER,
-            range_km REAL,
-            range_ac_km REAL,
-            odometer REAL,
-            charging_status TEXT,
-            latitude REAL,
-            longitude REAL
-        )
-    """)
-    # Migration: add vin column if missing
-    cols = [r[1] for r in conn.execute("PRAGMA table_info(snapshots)").fetchall()]
-    if "vin" not in cols:
-        conn.execute("ALTER TABLE snapshots ADD COLUMN vin TEXT")
-    conn.commit()
-    return conn
+    return _get_db_raw("snapshots")
 
 
 def log_snapshot(
@@ -60,8 +39,8 @@ def log_snapshot(
         return
     ts = datetime.now(timezone.utc).isoformat()
     conn.execute(
-        "INSERT INTO snapshots (timestamp, vin, soc, range_km, range_ac_km, odometer, charging_status, latitude, longitude) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
-        (ts, vin, soc, range_km, range_ac_km, odometer, charging_status, latitude, longitude),
+        "INSERT INTO snapshots (vin, timestamp, soc, range_km, range_ac_km, odometer, charging_status, latitude, longitude) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        (vin, ts, soc, range_km, range_ac_km, odometer, charging_status, latitude, longitude),
     )
     conn.commit()
     conn.close()
