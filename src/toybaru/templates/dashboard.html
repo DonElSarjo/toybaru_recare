@@ -556,7 +556,7 @@ async function syncTrips() {
   btn.disabled=true;btn.style.opacity='.6';btn.textContent=t('trips.syncing');
   try{const res=await(await fetch(`/api/sync/${currentVin}`,{method:'POST'})).json();
     if(res.error)meta.textContent=t('app.error')+': '+res.error;
-    else{meta.textContent=t('trips.sync_result').replace('{new}',res.new).replace('{updated}',res.updated).replace('{total}',res.db_total);if(res.new>0)loadTripsPage()}
+    else{meta.textContent=t('trips.sync_result').replace('{new}',res.new).replace('{updated}',res.updated).replace('{total}',res.db_total);loadTripsPage()}
   }catch(e){meta.textContent=t('app.error')+': '+e.message}
   btn.disabled=false;btn.style.opacity='1';btn.textContent=t('trips.sync');
 }
@@ -637,7 +637,7 @@ async function showTrip(tripId) {
   h+=`<div class="sbar-legend" style="margin-top:8px"><span class="leg-eco">${t('efficiency.eco')}</span><span class="leg-reku">${t('efficiency.reku')}</span><span class="leg-power">${t('efficiency.power')}</span><span style="color:var(--muted);font-size:11px;margin-left:auto">${t('trips.route_scroll')}</span></div></div>`;
 
   h+=`<details style="margin-top:16px"><summary class="meta" style="cursor:pointer">${t('trips.stats_nerds')}</summary>`;
-  h+=`<pre style="background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:12px;font-size:11px;overflow:auto;max-height:400px;margin-top:8px;font-family:'SF Mono',Menlo,monospace">${JSON.stringify(JSON.parse(r.raw_json||'{}'),null,2)}</pre></details>`;
+  h+=`<pre style="background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:12px;font-size:11px;overflow:auto;max-height:400px;margin-top:8px;font-family:'SF Mono',Menlo,monospace">${JSON.stringify(r,null,2)}</pre></details>`;
 
   el.innerHTML=h;
   const canvas=document.getElementById('routeCanvas');
