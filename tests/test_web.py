@@ -1,15 +1,31 @@
 """Tests for web API endpoints."""
 
 import json
+from unittest.mock import MagicMock
 
 from fastapi.testclient import TestClient
 
 from toybaru.trip_store import upsert_trips
-from toybaru.web import app
+from toybaru.web import app, _sessions
 
 
 def _client():
     return TestClient(app)
+
+
+def _authed_client():
+    """Create a test client with a mock authenticated session."""
+    mock_client = MagicMock()
+    mock_client.auth = MagicMock()
+    mock_client.auth.is_authenticated = True
+    mock_client.api = MagicMock()
+    mock_client.api._is_na = False
+
+    token = "test-session-token"
+    _sessions[token] = mock_client
+
+    c = TestClient(app, cookies={"session": token})
+    return c
 
 
 def test_index_returns_html():
@@ -62,32 +78,37 @@ def test_auth_status_unauthenticated():
 
 
 def test_db_count_empty():
-    resp = _client().get("/api/db/count")
+    c = _authed_client()
+    resp = c.get("/api/db/count")
     assert resp.status_code == 200
     assert resp.json()["count"] == 0
 
 
 def test_db_trips_empty():
-    resp = _client().get("/api/db/trips")
+    c = _authed_client()
+    resp = c.get("/api/db/trips")
     assert resp.status_code == 200
     assert resp.json() == []
 
 
 def test_db_stats_empty():
-    resp = _client().get("/api/db/stats")
+    c = _authed_client()
+    resp = c.get("/api/db/stats")
     assert resp.status_code == 200
     assert resp.json()["total_trips"] == 0
 
 
 def test_db_count_with_data(sample_trips):
     upsert_trips(sample_trips)
-    resp = _client().get("/api/db/count")
+    c = _authed_client()
+    resp = c.get("/api/db/count")
     assert resp.json()["count"] == 5
 
 
 def test_db_trip_detail(sample_trip):
     upsert_trips([sample_trip])
-    resp = _client().get(f"/api/db/trip/{sample_trip['id']}")
+    c = _authed_client()
+    resp = c.get(f"/api/db/trip/{sample_trip['id']}")
     assert resp.status_code == 200
     data = resp.json()
     assert data["id"] == sample_trip["id"]
@@ -96,6 +117,7 @@ def test_db_trip_detail(sample_trip):
 
 
 def test_db_trip_not_found():
-    resp = _client().get("/api/db/trip/nonexistent-id")
+    c = _authed_client()
+    resp = c.get("/api/db/trip/nonexistent-id")
     assert resp.status_code == 200
     assert "error" in resp.json()

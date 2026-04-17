@@ -40,6 +40,11 @@ class ToybaruClient:
         await self.auth.ensure_token()
         return self.auth.uuid
 
+    async def submit_otp(self, code: str) -> str:
+        """Submit OTP code and complete authentication. Returns UUID."""
+        await self.auth.submit_otp(code)
+        return self.auth.uuid
+
     async def get_vehicles(self) -> list[Vehicle]:
         """Get list of vehicles linked to the account."""
         data = await self.api.get_vehicles()

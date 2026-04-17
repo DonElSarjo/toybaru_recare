@@ -20,7 +20,8 @@ class RegionConfig:
     api_key: str
     brand: str
     region: str
-    auth_service: str = "oneapp"
+    auth_service: str = ""
+
 # Brand -> Region mapping for the login UI
 BRANDS = {
     "subaru": {
@@ -30,6 +31,10 @@ BRANDS = {
     "toyota": {
         "label": "Toyota",
         "regions": ["toyota-eu", "toyota-na"],
+    },
+    "toyota-na": {
+        "label": "Toyota NA",
+        "regions": ["toyota-na"],
     },
 }
 
@@ -45,6 +50,7 @@ _DEFAULTS = {
         api_key="tTZipv6liF74PwMfk9Ed68AQ0bISswwf3iHQdqcF",
         brand="S",
         region="EU",
+        auth_service="oneapp",
     ),
     "subaru-na": RegionConfig(
         name="Subaru NA",
@@ -80,6 +86,19 @@ _DEFAULTS = {
         api_key="tTZipv6liF74PwMfk9Ed68AQ0bISswwf3iHQdqcF",
         brand="T",
         region="EU",
+        auth_service="oneapp",
+    ),
+    "toyota-na": RegionConfig(
+        name="Toyota NA",
+        auth_realm="https://login.toyotadriverslogin.com/oauth2/realms/root/realms/tmna-native",
+        api_base_url="https://onecdn.telematicsct.com/oneapi",
+        client_id="oneappsdkclient",
+        redirect_uri="com.toyota.oneapp:/oauth2Callback",
+        basic_auth="",
+        api_key="Y1aVonEtOa18cDwNLGTjt1zqD7aLahwc30WvvvQE",
+        brand="T",
+        region="US",
+        auth_service="OneAppSignIn",
     ),
 }
 
@@ -88,20 +107,24 @@ def _load_regions() -> dict[str, RegionConfig]:
     """Load region configs: built-in defaults, overridden by regions.json if present."""
     regions = dict(_DEFAULTS)
 
+    # Alias map so lowercase keys from user config resolve correctly
+    _alias = {"eu": "subaru-eu", "na": "subaru-na"}
+
     # Check for user config file
     config_path = DATA_DIR / "regions.json"
     if config_path.exists():
         try:
             user_config = json.loads(config_path.read_text())
             for region_name, overrides in user_config.items():
-                region_name = region_name.lower()
-                if region_name in regions:
+                # Resolve aliases for legacy lowercase keys
+                resolved = _alias.get(region_name.lower(), region_name)
+                if resolved in regions:
                     # Merge: start with defaults, override with user values
-                    base = {f.name: getattr(regions[region_name], f.name) for f in fields(RegionConfig)}
+                    base = {f.name: getattr(regions[resolved], f.name) for f in fields(RegionConfig)}
                     base.update(overrides)
-                    regions[region_name] = RegionConfig(**base)
+                    regions[resolved] = RegionConfig(**base)
                 else:
-                    # New region entirely
+                    # New region entirely — preserve original casing
                     regions[region_name] = RegionConfig(**overrides)
         except Exception as e:
             print(f"Warning: Could not load {config_path}: {e}")

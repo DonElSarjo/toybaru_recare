@@ -35,7 +35,11 @@
     "submit": "Anmelden",
     "signing_in": "Anmeldung...",
     "failed": "Anmeldung fehlgeschlagen",
-    "required": "Bitte zuerst anmelden"
+    "required": "Bitte zuerst anmelden",
+    "otp_label": "Einmalpasswort",
+    "otp_sent": "Ein Bestaetigungscode wurde an dein Geraet gesendet",
+    "otp_required": "OTP-Verifizierung erforderlich",
+    "otp_invalid": "Ungueltiger OTP-Code"
   },
   "nav": {
     "vehicle": "Fahrzeug",
@@ -205,6 +209,23 @@
     "lock_desc": "Alle Tueren verriegeln",
     "unlock_desc": "Alle Tueren entriegeln",
     "hazard_desc": "Warnblinker",
-    "horn_desc": "Hupe"
+    "horn_desc": "Hupe",
+    "hatch_lock": "Heckklappe verriegeln",
+    "hatch_unlock": "Heckklappe entriegeln",
+    "headlight_on": "Scheinwerfer an",
+    "headlight_off": "Scheinwerfer aus",
+    "hazard_on": "Warnblinker an",
+    "hazard_off": "Warnblinker aus",
+    "horn": "Hupe betaetigen",
+    "buzzer": "Summer-Warnung",
+    "engine_start": "Motor starten",
+    "engine_stop": "Motor stoppen",
+    "find_vehicle": "Fahrzeug finden",
+    "group_doors": "Tueren",
+    "group_hatch": "Heckklappe",
+    "group_lights": "Lichter",
+    "group_horn": "Hupe",
+    "group_engine": "Motor",
+    "group_find": "Suche"
   }
 }

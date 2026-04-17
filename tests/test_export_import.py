@@ -3,22 +3,41 @@
 import csv
 import io
 import json
+import secrets
+from unittest.mock import MagicMock
 
 import pytest
 from fastapi.testclient import TestClient
 
 from toybaru.trip_store import upsert_trips, get_trip_count, get_trips_from_db
-from toybaru.web import app
+from toybaru.web import app, _sessions, _csrf_tokens
 
 
 @pytest.fixture
 def client():
-    return TestClient(app)
+    """Create authenticated test client with CSRF token."""
+    mock_client = MagicMock()
+    mock_client.auth = MagicMock()
+    mock_client.auth.is_authenticated = True
+    mock_client.api = MagicMock()
+    mock_client.api._is_na = False
+
+    token = "test-export-session"
+    csrf = secrets.token_hex(16)
+    _sessions[token] = mock_client
+    _csrf_tokens[token] = csrf
+
+    c = TestClient(app, cookies={"session": token})
+    yield c, csrf
+
+    _sessions.pop(token, None)
+    _csrf_tokens.pop(token, None)
 
 
 def test_csv_export(client, sample_trips):
+    c, csrf = client
     upsert_trips(sample_trips, vin="TEST")
-    resp = client.get("/api/export/trips.csv?vin=TEST")
+    resp = c.get("/api/export/trips.csv?vin=TEST")
     assert resp.status_code == 200
     assert "text/csv" in resp.headers["content-type"]
     reader = csv.DictReader(io.StringIO(resp.text))
@@ -33,8 +52,9 @@ def test_csv_export(client, sample_trips):
 
 
 def test_json_export(client, sample_trips):
+    c, csrf = client
     upsert_trips(sample_trips, vin="TEST")
-    resp = client.get("/api/export/trips.json?vin=TEST")
+    resp = c.get("/api/export/trips.json?vin=TEST")
     assert resp.status_code == 200
     trips = json.loads(resp.text)
     assert len(trips) == 5
@@ -48,15 +68,15 @@ def test_json_export(client, sample_trips):
 
 
 def test_json_reimport_roundtrip(client, sample_trips):
+    c, csrf = client
     upsert_trips(sample_trips, vin="TEST")
     # Export
-    resp = client.get("/api/export/trips.json?vin=TEST")
+    resp = c.get("/api/export/trips.json?vin=TEST")
     exported = json.loads(resp.text)
     assert len(exported) == 5
 
-    # Clear DB by reimporting to a fresh tmp (autouse fixture handles isolation)
     # Re-import the exported data
-    resp = client.post("/api/reimport", json={"trips": exported})
+    resp = c.post("/api/reimport", json={"trips": exported}, headers={"X-CSRF-Token": csrf})
     assert resp.status_code == 200
     result = resp.json()
     assert result["updated"] == 5  # All already exist
@@ -71,15 +91,16 @@ def test_json_reimport_roundtrip(client, sample_trips):
 
 
 def test_reimport_upsert(client, sample_trip):
+    c, csrf = client
     upsert_trips([sample_trip], vin="TEST")
     assert get_trip_count() == 1
 
     # Export
-    resp = client.get("/api/export/trips.json?vin=TEST")
+    resp = c.get("/api/export/trips.json?vin=TEST")
     exported = json.loads(resp.text)
 
     # Re-import same data - should update, not duplicate
-    resp = client.post("/api/reimport", json={"trips": exported})
+    resp = c.post("/api/reimport", json={"trips": exported}, headers={"X-CSRF-Token": csrf})
     result = resp.json()
     assert result["updated"] == 1
     assert result["new"] == 0

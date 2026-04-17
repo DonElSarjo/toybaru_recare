@@ -38,6 +38,10 @@ class Api:
         self.auth = auth
         self.timeout = timeout
 
+    @property
+    def _is_na(self) -> bool:
+        return self.auth.region.region == "US"
+
     def _compute_client_ref(self, uuid: str) -> str:
         """Compute x-client-ref HMAC-SHA256."""
         mac = hmac.new(CLIENT_VERSION.encode(), uuid.encode(), hashlib.sha256)
@@ -59,8 +63,13 @@ class Api:
             "Content-Type": "application/json",
             "datetime": str(int(datetime.now(timezone.utc).timestamp() * 1000)),
         }
+        if self._is_na:
+            h["x-region"] = "US"
+            h["X-LOCALE"] = "en-US"
         if vin:
             h["VIN"] = vin
+            if self._is_na:
+                h["vin"] = vin
         return h
 
     async def request(
@@ -70,9 +79,12 @@ class Api:
         vin: str | None = None,
         body: dict[str, Any] | None = None,
         params: dict[str, Any] | None = None,
+        extra_headers: dict[str, str] | None = None,
     ) -> dict[str, Any]:
         """Make an authenticated API request and return JSON."""
         headers = await self._headers(vin)
+        if extra_headers:
+            headers.update(extra_headers)
         url = f"{self.auth.region.api_base_url}{endpoint}"
 
         async with make_client(timeout=self.timeout) as client:
@@ -116,15 +128,32 @@ class Api:
         return await self.request("GET", VEHICLE_STATUS_ENDPOINT, vin=vin)
 
     async def get_electric_status(self, vin: str) -> dict[str, Any]:
+        if self._is_na:
+            data = await self.request("GET", "/v2/electric/status", vin=vin)
+            return self._normalize_na_electric(data)
         return await self.request("GET", VEHICLE_ELECTRIC_STATUS_ENDPOINT, vin=vin)
 
     async def refresh_electric_status(self, vin: str) -> dict[str, Any]:
         return await self.request("POST", VEHICLE_ELECTRIC_REALTIME_ENDPOINT, vin=vin)
 
     async def get_location(self, vin: str) -> dict[str, Any]:
+        if self._is_na:
+            # NA: extract location from vehicle status payload
+            status = await self.request("GET", VEHICLE_STATUS_ENDPOINT, vin=vin)
+            return {
+                "vehicleLocation": {
+                    "latitude": status.get("latitude"),
+                    "longitude": status.get("longitude"),
+                }
+            }
         return await self.request("GET", VEHICLE_LOCATION_ENDPOINT, vin=vin)
 
     async def get_telemetry(self, vin: str) -> dict[str, Any]:
+        if self._is_na:
+            return await self.request(
+                "GET", "/v2/telemetry", vin=vin,
+                extra_headers={"GENERATION": "17CYPLUS"},
+            )
         return await self.request("GET", VEHICLE_TELEMETRY_ENDPOINT, vin=vin)
 
     async def get_trips(
@@ -137,6 +166,8 @@ class Api:
         limit: int = 50,
         offset: int = 0,
     ) -> dict[str, Any]:
+        if self._is_na:
+            return {"trips": [], "_note": "Trips not available for Toyota NA"}
         # Params must be encoded directly in the URL path, not as httpx query params
         endpoint = (
             f"{VEHICLE_TRIPS_ENDPOINT}"
@@ -164,6 +195,11 @@ class Api:
         )
 
     async def send_command(self, vin: str, command: str, extra: dict | None = None) -> dict[str, Any]:
+        if self._is_na:
+            return await self.request(
+                "POST", "/v1/global/remote/command", vin=vin,
+                body={"command": command},
+            )
         body = {"command": command}
         if extra:
             body.update(extra)
@@ -171,3 +207,42 @@ class Api:
 
     async def get_account(self) -> dict[str, Any]:
         return await self.request("GET", VEHICLE_ACCOUNT_ENDPOINT)
+
+    @staticmethod
+    def _normalize_na_electric(data: dict[str, Any]) -> dict[str, Any]:
+        """Normalize NA electric status response to match EU format."""
+        charge_info = data.get("vehicleInfo", {}).get("chargeInfo", {})
+        if not charge_info:
+            charge_info = data.get("chargeInfo", data)
+
+        plug = charge_info.get("plugStatus")
+        if plug == 4:
+            charging_status = "charging"
+        elif plug == 12:
+            charging_status = "not connected"
+        else:
+            charging_status = str(plug) if plug is not None else "unknown"
+
+        result: dict[str, Any] = {
+            "batteryLevel": charge_info.get("chargeRemainingAmount"),
+            "evRange": {
+                "value": charge_info.get("evDistance"),
+                "unit": charge_info.get("evDistanceUnit", "km"),
+            },
+            "evRangeWithAc": {
+                "value": charge_info.get("evDistanceAC"),
+                "unit": charge_info.get("evDistanceUnit", "km"),
+            },
+            "chargingStatus": charging_status,
+            "plugStatus": plug,
+        }
+
+        remaining = charge_info.get("remainingChargeTime")
+        if remaining is not None and remaining != 65535:
+            result["remainingChargeTime"] = remaining
+
+        acq = data.get("vehicleInfo", {}).get("acquisitionDatetime")
+        if acq:
+            result["lastUpdateTimestamp"] = acq
+
+        return result

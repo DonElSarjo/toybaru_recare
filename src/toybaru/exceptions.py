@@ -13,6 +13,11 @@ class TokenExpiredError(ToybaruError):
     """Token has expired and could not be refreshed."""
 
 
+class OtpRequiredError(Exception):
+    """Raised when the auth flow pauses for OTP input."""
+    pass
+
+
 class ApiError(ToybaruError):
     """API request failed."""
 

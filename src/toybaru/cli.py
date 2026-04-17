@@ -15,6 +15,7 @@ from rich.table import Table
 
 from toybaru.client import ToybaruClient
 from toybaru.const import DATA_DIR, REGIONS
+from toybaru.exceptions import OtpRequiredError
 
 console = Console()
 CREDS_FILE = DATA_DIR / "credentials.json"
@@ -213,6 +214,14 @@ def login(username: str, password: str, region: str):
             console.print(table)
         else:
             console.print("[yellow]No vehicles found.[/yellow]")
+    except OtpRequiredError:
+        code = click.prompt("Enter the OTP code sent to your device")
+        try:
+            uuid = _run(client.submit_otp(code))
+            console.print(f"[green]Login successful.[/green] UUID: {uuid}")
+        except Exception as e:
+            console.print(f"[red]OTP verification failed: {e}[/red]")
+            sys.exit(1)
     except Exception as e:
         console.print(f"[red]Login failed: {e}[/red]")
         sys.exit(1)
@@ -445,12 +454,20 @@ def export(vin: str, from_date, to_date, fmt: str, output: str | None):
 def logout():
     """Clear saved credentials and tokens."""
     from toybaru.auth.controller import AuthController, TOKEN_FILE
+
+    # Read creds BEFORE deleting files
+    creds = _load_creds()
+
     if TOKEN_FILE.exists():
         TOKEN_FILE.unlink()
     if CREDS_FILE.exists():
         CREDS_FILE.unlink()
 
-    creds = _load_creds()
+    # Also remove session_meta.json
+    meta_file = DATA_DIR / "session_meta.json"
+    if meta_file.exists():
+        meta_file.unlink()
+
     if creds and creds.get("username"):
         try:
             import keyring

@@ -89,6 +89,11 @@ td{padding:10px 12px;border-bottom:1px solid #1c2028;transition:background .1s}
     <input type="email" id="loginEmail" autocomplete="email">
     <label id="loginPwLabel"></label>
     <input type="password" id="loginPw" autocomplete="current-password">
+    <div id="otpGroup" style="display:none">
+      <label id="loginOtpLabel"></label>
+      <input type="text" id="loginOtp" autocomplete="one-time-code" placeholder="000000">
+      <div class="meta" id="otpHint"></div>
+    </div>
     <label id="loginBrandLabel"></label>
     <select id="loginBrand" onchange="updateLoginRegions()"></select>
     <label id="loginRegionLabel"></label>
@@ -253,7 +258,11 @@ function applyI18n() {
   // Tabs
   const tabBar = document.getElementById('tabBar');
   tabBar.innerHTML = '';
-  for (const [key, id] of [['nav.vehicle','vehicle'],['nav.trips','trips'],['nav.stats','stats'],['nav.import','import']]) {
+  const tabList = [['nav.vehicle','vehicle']];
+  if (HAS_TRIPS) {
+    tabList.push(['nav.trips','trips'], ['nav.stats','stats'], ['nav.import','import']);
+  }
+  for (const [key, id] of tabList) {
     const d = document.createElement('div');
     d.className = 'tab' + (id === 'vehicle' ? ' active' : '');
     d.dataset.tab = id;
@@ -266,6 +275,26 @@ function applyI18n() {
 // --- Globals ---
 let currentVin = null;
 let allData = {};
+let _csrfToken = '';
+let UNIT = 'km';
+let HAS_TRIPS = true;
+
+function _postHeaders() {
+  const h = {'Content-Type': 'application/json'};
+  if (_csrfToken) h['X-CSRF-Token'] = _csrfToken;
+  return h;
+}
+
+function normUnit(u) {
+  if (!u) return UNIT;
+  const l = String(u).toLowerCase();
+  if (l === 'mi' || l === 'mile' || l === 'miles') return 'miles';
+  if (l === 'km' || l === 'kilometer' || l === 'kilometers') return 'km';
+  return l;
+}
+
+function speedUnit() { return UNIT === 'miles' ? 'mph' : 'km/h'; }
+function distLabel() { return UNIT === 'miles' ? 'miles' : 'km'; }
 
 function switchTab(id) {
   document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === id));
@@ -324,6 +353,7 @@ function updateLoginRegions() {
 async function checkAuth() {
   const r = await (await fetch('/api/auth/status')).json();
   if (r.authenticated) {
+    if (r.csrf_token) _csrfToken = r.csrf_token;
     document.getElementById('loginView').style.display = 'none';
     document.getElementById('appView').style.display = 'block';
     await loadVehicles();
@@ -334,10 +364,37 @@ async function checkAuth() {
   }
 }
 
+let _otpSession = '';
+
 async function doLogin() {
   const btn = document.getElementById('loginBtn');
   const err = document.getElementById('loginError');
+  const otpGroup = document.getElementById('otpGroup');
   btn.disabled = true; btn.textContent = t('login.signing_in'); err.textContent = '';
+
+  // If OTP field is visible, we're in phase 2
+  if (otpGroup.style.display !== 'none' && _otpSession) {
+    try {
+      const res = await fetch('/api/login/otp', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({otp_session: _otpSession, code: document.getElementById('loginOtp').value}),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || t('login.otp_invalid'));
+      _csrfToken = data.csrf_token || '';
+      document.getElementById('loginPw').value = '';
+      document.getElementById('loginOtp').value = '';
+      otpGroup.style.display = 'none';
+      _otpSession = '';
+      await checkAuth();
+    } catch(e) {
+      err.textContent = t('login.otp_invalid') + ': ' + e.message;
+    }
+    btn.disabled = false; btn.textContent = t('login.submit');
+    return;
+  }
+
   try {
     const res = await fetch('/api/login', {
       method: 'POST',
@@ -349,7 +406,18 @@ async function doLogin() {
       }),
     });
     const data = await res.json();
+    if (data.needs_otp) {
+      _otpSession = data.otp_session;
+      otpGroup.style.display = 'block';
+      document.getElementById('loginOtpLabel').textContent = t('login.otp_label');
+      document.getElementById('otpHint').textContent = t('login.otp_sent');
+      document.getElementById('loginOtp').focus();
+      btn.disabled = false; btn.textContent = t('login.submit');
+      return;
+    }
     if (!res.ok) throw new Error(data.error || t('login.failed'));
+    _csrfToken = data.csrf_token || '';
+    document.getElementById('loginPw').value = '';
     await checkAuth();
   } catch(e) {
     err.textContent = t('login.failed') + ': ' + e.message;
@@ -358,7 +426,8 @@ async function doLogin() {
 }
 
 async function doLogout() {
-  await fetch('/api/logout', {method:'POST'});
+  await fetch('/api/logout', {method:'POST', headers: _postHeaders()});
+  _csrfToken = '';
   location.reload();
 }
 
@@ -380,6 +449,16 @@ async function loadOverview() {
   if (!currentVin) return;
   document.getElementById('lastUpdate').textContent = t('app.loading');
   allData = await (await fetch(`/api/all/${currentVin}`)).json();
+  // Detect unit from battery data
+  if (allData.battery?.evRange?.unit) {
+    UNIT = normUnit(allData.battery.evRange.unit);
+  }
+  // Detect capabilities
+  const prevHasTrips = HAS_TRIPS;
+  if (allData.capabilities) {
+    HAS_TRIPS = allData.capabilities.trips !== false;
+  }
+  if (HAS_TRIPS !== prevHasTrips) applyI18n();
   renderBattery(allData.battery);
   renderStatus(allData.status);
   renderLocation(allData.location);
@@ -391,7 +470,7 @@ async function loadOverview() {
 
 function renderBattery(d) {
   const el = document.getElementById('batteryCard');
-  if(!d||d.error){el.innerHTML=`<div class="section-title">${t('battery.title')}</div><div class="error">${d?.error||'N/A'}</div>`;return}
+  if(!d||d.error){el.innerHTML=`<div class="section-title">${t('battery.title')}</div><div class="error" id="batErr"></div>`;document.getElementById('batErr').textContent=d?.error||'N/A';return}
   const pct=d.batteryLevel,range=d.evRange?.value,rangeAc=d.evRangeWithAc?.value,unit=d.evRange?.unit||'km';
   const cs=d.chargingStatus||'?',csMap={none:t('battery.not_charging'),charging:t('battery.charging'),connected:t('battery.connected')};
   const color=pct>50?'var(--green)':pct>20?'var(--yellow)':'var(--red)';
@@ -414,7 +493,7 @@ async function refreshBattery() {
   if(!currentVin)return;
   const btn=document.getElementById('batRefreshBtn');const st=document.getElementById('batRefreshStatus');
   btn.disabled=true;btn.style.opacity='.6';btn.textContent='...';
-  try{await fetch(`/api/refresh/${currentVin}`,{method:'POST'});st.textContent=t('battery.refresh_sent');
+  try{await fetch(`/api/refresh/${currentVin}`,{method:'POST',headers:_postHeaders()});st.textContent=t('battery.refresh_sent');
     btn.textContent=t('battery.refresh_loading');const c=await(await fetch(`/api/battery/${currentVin}`)).json();if(c&&!c.error)renderBattery(c);
   }catch(e){st.textContent=t('app.error')+': '+e.message}
   btn.disabled=false;btn.textContent=t('battery.refresh_btn');btn.style.opacity='1';
@@ -422,7 +501,7 @@ async function refreshBattery() {
 
 function renderStatus(d) {
   const el=document.getElementById('statusCard');
-  if(!d||d.error){el.innerHTML=`<div class="section-title">${t('status.title')}</div><div class="error">${d?.error||'N/A'}</div>`;return}
+  if(!d||d.error){el.innerHTML=`<div class="section-title">${t('status.title')}</div><div class="error" id="statusErr"></div>`;document.getElementById('statusErr').textContent=d?.error||'N/A';return}
   let h=`<div class="section-title">${t('status.title')}</div>`;
   for(const cat of d.vehicleStatus||[]){
     h+=`<div style="font-size:11px;color:var(--muted);margin-top:6px">${ts(cat.category)}</div>`;
@@ -431,14 +510,14 @@ function renderStatus(d) {
       h+=`<div class="row"><span class="k">${ts(sec.section)}</span><span>${tags}</span></div>`;
     }
   }
-  if(d.telemetry?.odo?.value!=null)h+=`<div class="row" style="margin-top:8px"><span class="k">${t('status.odometer')}</span><span>${d.telemetry.odo.value.toLocaleString(LC)} km</span></div>`;
+  if(d.telemetry?.odo?.value!=null)h+=`<div class="row" style="margin-top:8px"><span class="k">${t('status.odometer')}</span><span>${d.telemetry.odo.value.toLocaleString(LC)} ${normUnit(d.telemetry.odo.unit)||distLabel()}</span></div>`;
   if(d.occurrenceDate)h+=`<div class="row"><span class="k">${t('status.last_update')}</span><span>${fmtDate(d.occurrenceDate)}</span></div>`;
   el.innerHTML=h;
 }
 
 function renderLocation(d) {
   const el=document.getElementById('locationCard');
-  if(!d||d.error){el.innerHTML=`<div class="section-title">${t('location.title')}</div><div class="error">${d?.error||'N/A'}</div>`;return}
+  if(!d||d.error){el.innerHTML=`<div class="section-title">${t('location.title')}</div><div class="error" id="locErr"></div>`;document.getElementById('locErr').textContent=d?.error||'N/A';return}
   const loc=d.vehicleLocation||d,lat=loc.latitude,lon=loc.longitude,ts2=loc.locationAcquisitionDatetime||d.lastTimestamp;
   let h=`<div class="section-title">${t('location.title')}</div>`;
   if(lat&&lon){
@@ -467,10 +546,41 @@ function renderEfficiency(all) {
 function renderRemote() {
   const el=document.getElementById('remoteCard');
   let h=`<div class="section-title">${t('remote.title')}</div>`;
-  h+=`<div style="display:flex;gap:8px;flex-wrap:wrap">`;
-  h+=`<button class="btn" onclick="sendCommand('door-lock')" title="${t('remote.lock_desc')}">&#128274; ${t('remote.lock')}</button>`;
-  h+=`<button class="btn" onclick="sendCommand('door-unlock')" title="${t('remote.unlock_desc')}">&#128275; ${t('remote.unlock')}</button>`;
-  h+=`</div><div class="meta" id="remoteStatus" style="margin-top:8px"></div>`;
+
+  function grp(label, btns) {
+    let g=`<div style="margin-bottom:8px"><div class="meta" style="margin-bottom:4px">${label}</div><div style="display:flex;gap:6px;flex-wrap:wrap">`;
+    for (const b of btns) g+=`<button class="btn btn-sm" onclick="sendCommand('${b.cmd}')" title="${b.tip}">${b.icon} ${b.label}</button>`;
+    g+=`</div></div>`;
+    return g;
+  }
+
+  h+=grp(t('remote.group_doors'), [
+    {cmd:'door-lock', icon:'&#128274;', label:t('remote.lock'), tip:t('remote.lock_desc')},
+    {cmd:'door-unlock', icon:'&#128275;', label:t('remote.unlock'), tip:t('remote.unlock_desc')},
+  ]);
+  h+=grp(t('remote.group_hatch'), [
+    {cmd:'trunk-lock', icon:'&#128274;', label:t('remote.hatch_lock'), tip:t('remote.hatch_lock')},
+    {cmd:'trunk-unlock', icon:'&#128275;', label:t('remote.hatch_unlock'), tip:t('remote.hatch_unlock')},
+  ]);
+  h+=grp(t('remote.group_lights'), [
+    {cmd:'headlight-on', icon:'&#128161;', label:t('remote.headlight_on'), tip:t('remote.headlight_on')},
+    {cmd:'headlight-off', icon:'&#128262;', label:t('remote.headlight_off'), tip:t('remote.headlight_off')},
+    {cmd:'hazard-on', icon:'&#9888;', label:t('remote.hazard_on'), tip:t('remote.hazard_on')},
+    {cmd:'hazard-off', icon:'&#10060;', label:t('remote.hazard_off'), tip:t('remote.hazard_off')},
+  ]);
+  h+=grp(t('remote.group_horn'), [
+    {cmd:'sound-horn', icon:'&#128227;', label:t('remote.horn'), tip:t('remote.horn')},
+    {cmd:'buzzer-warning', icon:'&#128276;', label:t('remote.buzzer'), tip:t('remote.buzzer')},
+  ]);
+  h+=grp(t('remote.group_engine'), [
+    {cmd:'engine-start', icon:'&#9654;', label:t('remote.engine_start'), tip:t('remote.engine_start')},
+    {cmd:'engine-stop', icon:'&#9632;', label:t('remote.engine_stop'), tip:t('remote.engine_stop')},
+  ]);
+  h+=grp(t('remote.group_find'), [
+    {cmd:'find-vehicle', icon:'&#128269;', label:t('remote.find_vehicle'), tip:t('remote.find_vehicle')},
+  ]);
+
+  h+=`<div class="meta" id="remoteStatus" style="margin-top:8px"></div>`;
   el.innerHTML=h;
 }
 
@@ -480,7 +590,7 @@ async function sendCommand(cmd) {
   const st=document.getElementById('remoteStatus');
   st.textContent='...';
   try{
-    const r=await(await fetch(`/api/command/${currentVin}/${cmd}`,{method:'POST'})).json();
+    const r=await(await fetch(`/api/command/${currentVin}/${cmd}`,{method:'POST',headers:_postHeaders()})).json();
     if(r.error)st.textContent=t('app.error')+': '+r.error;
     else st.textContent=t('remote.sent');
   }catch(e){st.textContent=t('app.error')+': '+e.message}
@@ -488,6 +598,8 @@ async function sendCommand(cmd) {
 
 async function renderLastTrip() {
   const el=document.getElementById('lastTripCard');
+  if (!HAS_TRIPS) { el.style.display='none'; return; }
+  el.style.display='';
   el.innerHTML=`<div class="section-title">${t('app.last_trip')}</div><div class="meta">${t('app.loading')}</div>`;
   const trips=await(await fetch(`/api/db/trips?limit=1&vin=${currentVin}`)).json();
   if(!trips?.length){el.innerHTML=`<div class="section-title">${t('app.last_trip')}</div><div class="meta">${t('trips.no_db')}</div>`;return}
@@ -515,10 +627,10 @@ async function renderLastTrip() {
 
   // Key numbers
   h+=`<div style="display:flex;gap:16px">`;
-  h+=`<div class="stat-box" style="padding:0"><div class="stat-num" style="font-size:20px">${km}</div><div class="stat-label">km</div></div>`;
+  h+=`<div class="stat-box" style="padding:0"><div class="stat-num" style="font-size:20px">${km}</div><div class="stat-label">${distLabel()}</div></div>`;
   h+=`<div class="stat-box" style="padding:0"><div class="stat-num" style="font-size:20px">${dur}</div><div class="stat-label">min</div></div>`;
-  h+=`<div class="stat-box" style="padding:0"><div class="stat-num" style="font-size:20px">${r.avg_speed?Math.round(r.avg_speed):'?'}</div><div class="stat-label">&#8709; km/h</div></div>`;
-  h+=`<div class="stat-box" style="padding:0"><div class="stat-num" style="font-size:20px">${r.max_speed?Math.round(r.max_speed):'?'}</div><div class="stat-label">max km/h</div></div>`;
+  h+=`<div class="stat-box" style="padding:0"><div class="stat-num" style="font-size:20px">${r.avg_speed?Math.round(r.avg_speed):'?'}</div><div class="stat-label">&#8709; ${speedUnit()}</div></div>`;
+  h+=`<div class="stat-box" style="padding:0"><div class="stat-num" style="font-size:20px">${r.max_speed?Math.round(r.max_speed):'?'}</div><div class="stat-label">max ${speedUnit()}</div></div>`;
   h+=`</div>`;
 
   // Score
@@ -554,7 +666,7 @@ async function loadTripsPage() {
 async function syncTrips() {
   if(!currentVin)return;const btn=document.getElementById('syncBtn');const meta=document.getElementById('tripsMeta');
   btn.disabled=true;btn.style.opacity='.6';btn.textContent=t('trips.syncing');
-  try{const res=await(await fetch(`/api/sync/${currentVin}`,{method:'POST'})).json();
+  try{const res=await(await fetch(`/api/sync/${currentVin}`,{method:'POST',headers:_postHeaders()})).json();
     if(res.error)meta.textContent=t('app.error')+': '+res.error;
     else{meta.textContent=t('trips.sync_result').replace('{new}',res.new).replace('{updated}',res.updated).replace('{total}',res.db_total);loadTripsPage()}
   }catch(e){meta.textContent=t('app.error')+': '+e.message}
@@ -578,7 +690,7 @@ function renderTripsTable(trips) {
     const timeStr=d2?d2.toLocaleTimeString(LC,{hour:'2-digit',minute:'2-digit'}):'';
     h+=`<tr class="clickable-row" onclick="showTrip('${r.id}')">`;
     h+=`<td><span class="trip-date">${dateStr}</span><br><span class="meta">${timeStr}</span></td>`;
-    h+=`<td class="num"><b>${fmtKm(r.length_m)}</b> <span class="meta">km</span></td>`;
+    h+=`<td class="num"><b>${fmtKm(r.length_m)}</b> <span class="meta">${distLabel()}</span></td>`;
     h+=`<td class="num">${r.duration_s?Math.round(r.duration_s/60):'?'} <span class="meta">min</span></td>`;
     h+=`<td class="num">${r.avg_speed?Math.round(r.avg_speed):'?'} <span class="meta">/ ${r.max_speed?Math.round(r.max_speed):'?'}</span></td>`;
     h+=`<td class="num"><span class="trip-score ${scoreClass(sc)}">${sc??'?'}</span></td>`;
@@ -596,13 +708,13 @@ async function showTrip(tripId) {
   document.getElementById('tripOverlay').classList.add('open');
   const el=document.getElementById('tripDetail');el.innerHTML=`<div class="meta">${t('app.loading')}</div>`;
   const r=await(await fetch(`/api/db/trip/${tripId}`)).json();
-  if(r.error){el.innerHTML=`<div class="error">${r.error}</div>`;return}
+  if(r.error){const errEl=document.createElement('div');errEl.className='error';errEl.textContent=r.error;el.appendChild(errEl);return}
   const p=hdc(r),beh=r.behaviours||[],route=r.route||[];
   let h=`<div class="section-title">${fmtDate(r.start_ts)}</div>`;
   h+=`<div class="grid3" style="margin-bottom:16px">`;
-  h+=`<div class="stat-box"><div class="stat-num">${fmtKm(r.length_m)}</div><div class="stat-label">km</div></div>`;
+  h+=`<div class="stat-box"><div class="stat-num">${fmtKm(r.length_m)}</div><div class="stat-label">${distLabel()}</div></div>`;
   h+=`<div class="stat-box"><div class="stat-num">${r.duration_s?Math.round(r.duration_s/60):'?'}</div><div class="stat-label">min</div></div>`;
-  h+=`<div class="stat-box"><div class="stat-num">${r.avg_speed?Math.round(r.avg_speed):'?'}</div><div class="stat-label">&#8709; km/h</div></div></div>`;
+  h+=`<div class="stat-box"><div class="stat-num">${r.avg_speed?Math.round(r.avg_speed):'?'}</div><div class="stat-label">&#8709; ${speedUnit()}</div></div></div>`;
 
   h+=`<div class="grid2" style="margin-bottom:16px">`;
   h+=`<div class="card"><div class="section-title">${t('trips.scores')}</div>`;
@@ -613,9 +725,9 @@ async function showTrip(tripId) {
   h+=`</div>`;
   h+=`<div class="card"><div class="section-title">${t('trips.driving_modes')}</div>${sbarHtml(p)}`;
   h+=`<div class="sbar-legend"><span class="leg-eco">${t('efficiency.eco')} ${p.eco}%</span><span class="leg-reku">${t('efficiency.reku')} ${p.reku}%</span><span class="leg-power">${t('efficiency.power')} ${p.power}%</span></div>`;
-  h+=`<div class="row" style="margin-top:8px"><span class="k">${tip(t('efficiency.eco'),'efficiency.eco_desc')}</span><span>${p.eco}% (${fmtKm(r.hdc_eco_dist)} km)</span></div>`;
-  h+=`<div class="row"><span class="k">${tip(t('efficiency.reku'),'efficiency.reku_desc')}</span><span>${p.reku}% (${fmtKm(r.hdc_charge_dist)} km)</span></div>`;
-  h+=`<div class="row"><span class="k">${tip(t('efficiency.power'),'efficiency.power_desc')}</span><span>${p.power}% (${fmtKm(r.hdc_power_dist)} km)</span></div>`;
+  h+=`<div class="row" style="margin-top:8px"><span class="k">${tip(t('efficiency.eco'),'efficiency.eco_desc')}</span><span>${p.eco}% (${fmtKm(r.hdc_eco_dist)} ${distLabel()})</span></div>`;
+  h+=`<div class="row"><span class="k">${tip(t('efficiency.reku'),'efficiency.reku_desc')}</span><span>${p.reku}% (${fmtKm(r.hdc_charge_dist)} ${distLabel()})</span></div>`;
+  h+=`<div class="row"><span class="k">${tip(t('efficiency.power'),'efficiency.power_desc')}</span><span>${p.power}% (${fmtKm(r.hdc_power_dist)} ${distLabel()})</span></div>`;
   if(DEBUG&&r.est_kwh_100km)h+=`<div class="row" style="margin-top:8px;border-top:1px solid var(--border);padding-top:8px"><span class="k">${tip(t('efficiency.est_consumption'),'efficiency.est_consumption_desc')}</span><span style="font-weight:600">${r.est_kwh_100km} kWh/100km</span></div>`;
   h+=`</div></div>`;
 
@@ -672,14 +784,14 @@ async function loadStats() {
   h+=`<div class="card stat-box"><div class="stat-num">${s.total_trips.toLocaleString(lc)}</div><div class="stat-label">${t('stats.total_trips')}</div></div>`;
   h+=`<div class="card stat-box"><div class="stat-num">${s.total_km.toLocaleString(lc)}</div><div class="stat-label">${t('stats.total_km')}</div></div>`;
   h+=`<div class="card stat-box"><div class="stat-num">${s.total_hours.toLocaleString(lc)}</div><div class="stat-label">${t('stats.total_hours')}</div></div>`;
-  h+=`<div class="card stat-box"><div class="stat-num">${s.km_per_day}</div><div class="stat-label">${t('stats.km_per_day')}</div></div></div>`;
+  h+=`<div class="card stat-box"><div class="stat-num">${s.km_per_day}</div><div class="stat-label">${distLabel()}/${t('app.days')}</div></div></div>`;
 
   // Scores
   h+=`<div class="grid4" style="margin-bottom:16px">`;
   h+=`<div class="card stat-box"><div class="stat-num">${s.avg_score}</div><div class="stat-label">${t('stats.avg_score')}</div></div>`;
   h+=`<div class="card stat-box"><div class="stat-num">${s.avg_score_accel}</div><div class="stat-label">${t('trips.score_accel')}</div></div>`;
   h+=`<div class="card stat-box"><div class="stat-num">${s.avg_score_braking}</div><div class="stat-label">${t('trips.score_braking')}</div></div>`;
-  h+=`<div class="card stat-box"><div class="stat-num">${s.avg_speed} / ${s.max_speed}</div><div class="stat-label">${t('stats.avg_speed')} / max</div></div></div>`;
+  h+=`<div class="card stat-box"><div class="stat-num">${s.avg_speed} / ${s.max_speed}</div><div class="stat-label">${speedUnit()} &#8709; / max</div></div></div>`;
 
   // Efficiency bar
   h+=`<div class="card" style="margin-bottom:16px"><div class="section-title">${t('stats.efficiency_all')}</div><div class="grid3">`;
@@ -696,7 +808,7 @@ async function loadStats() {
     for(const m of s.monthly){
       const ht=Math.max(4,Math.round(m.km/maxKm*72));
       const ml=m.month.split('-');const mn=new Date(m.month+'-15').toLocaleString(LC,{month:'short'});
-      h+=`<div class="bar-col" title="${m.month}: ${m.km} km, Score ${m.score}"><div class="bar" style="height:${ht}px"></div><div class="bar-label">${mn}</div><div class="bar-label">${ml[0].slice(2)}</div></div>`;
+      h+=`<div class="bar-col" title="${m.month}: ${m.km} ${distLabel()}, Score ${m.score}"><div class="bar" style="height:${ht}px"></div><div class="bar-label">${mn}</div><div class="bar-label">${ml[0].slice(2)}</div></div>`;
     }
     h+=`</div>`;
     // Score trend line under the bars
@@ -712,7 +824,7 @@ async function loadStats() {
   if(s.weekday?.length){
     const maxD=Math.max(...s.weekday.map(d=>d.trips));
     h+=`<div class="card"><div class="section-title">${t('stats.trips_by_weekday')}</div><div class="bar-chart" style="height:60px">`;
-    for(const d of s.weekday){const ht=Math.max(4,Math.round(d.trips/maxD*52));h+=`<div class="bar-col"><div class="bar" style="height:${ht}px" title="${d.trips} ${t('nav.trips')}, ${d.km} km"></div><div class="bar-label">${d.day}</div><div class="bar-label">${d.trips}</div></div>`}
+    for(const d of s.weekday){const ht=Math.max(4,Math.round(d.trips/maxD*52));h+=`<div class="bar-col"><div class="bar" style="height:${ht}px" title="${d.trips} ${t('nav.trips')}, ${d.km} ${distLabel()}"></div><div class="bar-label">${d.day}</div><div class="bar-label">${d.trips}</div></div>`}
     h+=`</div></div>`;
   }
 
@@ -731,9 +843,9 @@ async function loadStats() {
   const sc=s.speed_cats;
   const totalCat=sc.city_trips+sc.rural_trips+sc.highway_trips||1;
   h+=`<div class="card"><div class="section-title">${t('stats.speed_categories')}</div>`;
-  h+=`<div class="row"><span class="k">${t('stats.city')}</span><span>${sc.city_trips} (${Math.round(sc.city_trips/totalCat*100)}%) &middot; ${sc.city_km} km</span></div>`;
-  h+=`<div class="row"><span class="k">${t('stats.rural')}</span><span>${sc.rural_trips} (${Math.round(sc.rural_trips/totalCat*100)}%) &middot; ${sc.rural_km} km</span></div>`;
-  h+=`<div class="row"><span class="k">${t('stats.highway')}</span><span>${sc.highway_trips} (${Math.round(sc.highway_trips/totalCat*100)}%) &middot; ${sc.highway_km} km</span></div></div>`;
+  h+=`<div class="row"><span class="k">${t('stats.city')}</span><span>${sc.city_trips} (${Math.round(sc.city_trips/totalCat*100)}%) &middot; ${sc.city_km} ${distLabel()}</span></div>`;
+  h+=`<div class="row"><span class="k">${t('stats.rural')}</span><span>${sc.rural_trips} (${Math.round(sc.rural_trips/totalCat*100)}%) &middot; ${sc.rural_km} ${distLabel()}</span></div>`;
+  h+=`<div class="row"><span class="k">${t('stats.highway')}</span><span>${sc.highway_trips} (${Math.round(sc.highway_trips/totalCat*100)}%) &middot; ${sc.highway_km} ${distLabel()}</span></div></div>`;
 
   // Score distribution
   if(s.score_dist?.length){
@@ -748,22 +860,22 @@ async function loadStats() {
   // Averages + misc
   h+=`<div class="grid2" style="margin-bottom:16px">`;
   h+=`<div class="card"><div class="section-title">${t('stats.averages')}</div>`;
-  h+=`<div class="row"><span class="k">${t('stats.avg_trip_length')}</span><span>${s.avg_trip_km} km</span></div>`;
+  h+=`<div class="row"><span class="k">${t('stats.avg_trip_length')}</span><span>${s.avg_trip_km} ${distLabel()}</span></div>`;
   h+=`<div class="row"><span class="k">${t('stats.avg_trip_duration')}</span><span>${s.avg_trip_min} min</span></div>`;
   h+=`<div class="row"><span class="k">${t('stats.trips_per_day')}</span><span>${s.trips_per_day}</span></div>`;
   h+=`<div class="row"><span class="k">${t('stats.night_trips')}</span><span>${s.night_trips} (${s.night_pct}%)</span></div>`;
   h+=`<div class="row"><span class="k">${t('app.idle_time')}</span><span>${s.idle_hours} h</span></div>`;
-  h+=`<div class="row"><span class="k">${t('app.overspeed')}</span><span>${s.overspeed_km} km</span></div></div>`;
+  h+=`<div class="row"><span class="k">${t('app.overspeed')}</span><span>${s.overspeed_km} ${distLabel()}</span></div></div>`;
 
   // Records
   h+=`<div class="card"><div class="section-title">${t('stats.records')}</div>`;
   const rec=s.records||{};
-  if(rec.longest_trip)h+=`<div class="row"><span class="k">${t('stats.longest_trip')}</span><span>${(rec.longest_trip.value/1000).toFixed(1)} km <span class="meta">${rec.longest_trip.date?.slice(0,10)}</span></span></div>`;
-  if(rec.top_speed)h+=`<div class="row"><span class="k">${t('stats.max_speed')}</span><span>${rec.top_speed.value} km/h <span class="meta">${rec.top_speed.date?.slice(0,10)}</span></span></div>`;
-  if(rec.fastest_avg)h+=`<div class="row"><span class="k">${t('stats.fastest_avg')}</span><span>${Math.round(rec.fastest_avg.value)} km/h <span class="meta">${rec.fastest_avg.date?.slice(0,10)}</span></span></div>`;
+  if(rec.longest_trip)h+=`<div class="row"><span class="k">${t('stats.longest_trip')}</span><span>${(rec.longest_trip.value/1000).toFixed(1)} ${distLabel()} <span class="meta">${rec.longest_trip.date?.slice(0,10)}</span></span></div>`;
+  if(rec.top_speed)h+=`<div class="row"><span class="k">${t('stats.max_speed')}</span><span>${rec.top_speed.value} ${speedUnit()} <span class="meta">${rec.top_speed.date?.slice(0,10)}</span></span></div>`;
+  if(rec.fastest_avg)h+=`<div class="row"><span class="k">${t('stats.fastest_avg')}</span><span>${Math.round(rec.fastest_avg.value)} ${speedUnit()} <span class="meta">${rec.fastest_avg.date?.slice(0,10)}</span></span></div>`;
   if(rec.best_score)h+=`<div class="row"><span class="k">${t('stats.best_score')}</span><span>${rec.best_score.value} <span class="meta">${rec.best_score.date?.slice(0,10)}</span></span></div>`;
   if(rec.best_reku)h+=`<div class="row"><span class="k">${t('stats.best_reku')}</span><span>${rec.best_reku.value}% <span class="meta">${rec.best_reku.date?.slice(0,10)}</span></span></div>`;
-  if(s.best_day)h+=`<div class="row"><span class="k">${t('stats.most_km_day')}</span><span>${s.best_day.km} km (${s.best_day.trips} ${t('nav.trips').toLowerCase()}) <span class="meta">${s.best_day.date}</span></span></div>`;
+  if(s.best_day)h+=`<div class="row"><span class="k">${t('stats.most_km_day')}</span><span>${s.best_day.km} ${distLabel()} (${s.best_day.trips} ${t('nav.trips').toLowerCase()}) <span class="meta">${s.best_day.date}</span></span></div>`;
   h+=`</div></div>`;
 
   if(DEBUG&&s.est_avg_kwh_100km){h+=`<div class="card"><div class="stat-num">${s.est_avg_kwh_100km} <span style="font-size:14px;color:var(--muted)">kWh/100km</span></div><div class="stat-label">${t('stats.est_consumption')}</div></div>`}
@@ -827,7 +939,7 @@ async function reimportJson() {
     const text=await file.text();
     const data=JSON.parse(text);
     const trips=Array.isArray(data)?data:data.trips||[];
-    const res=await(await fetch('/api/reimport',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({trips})})).json();
+    const res=await(await fetch('/api/reimport',{method:'POST',headers:_postHeaders(),body:JSON.stringify({trips})})).json();
     if(res.error)st.textContent=t('app.error')+': '+res.error;
     else st.textContent=`${res.new} new, ${res.updated} updated (${res.total} total)`;
     loadDbInfo();

@@ -35,7 +35,11 @@
     "submit": "Sign In",
     "signing_in": "Signing in...",
     "failed": "Login failed",
-    "required": "Please sign in first"
+    "required": "Please sign in first",
+    "otp_label": "One-Time Password",
+    "otp_sent": "A verification code has been sent to your device",
+    "otp_required": "OTP verification required",
+    "otp_invalid": "Invalid OTP code"
   },
   "nav": {
     "vehicle": "Vehicle",
@@ -205,6 +209,23 @@
     "lock_desc": "Lock all doors",
     "unlock_desc": "Unlock all doors",
     "hazard_desc": "Flash hazard lights",
-    "horn_desc": "Honk horn"
+    "horn_desc": "Honk horn",
+    "hatch_lock": "Lock hatch",
+    "hatch_unlock": "Unlock hatch",
+    "headlight_on": "Headlights on",
+    "headlight_off": "Headlights off",
+    "hazard_on": "Hazards on",
+    "hazard_off": "Hazards off",
+    "horn": "Sound horn",
+    "buzzer": "Buzzer warning",
+    "engine_start": "Engine start",
+    "engine_stop": "Engine stop",
+    "find_vehicle": "Find vehicle",
+    "group_doors": "Doors",
+    "group_hatch": "Hatch",
+    "group_lights": "Lights",
+    "group_horn": "Horn",
+    "group_engine": "Engine",
+    "group_find": "Find"
   }
 }

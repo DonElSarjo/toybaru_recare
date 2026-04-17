@@ -3,18 +3,22 @@
 from __future__ import annotations
 
 import asyncio
+import hashlib
 import json
+import logging
 import os
 import secrets
 from datetime import date, timedelta
 from pathlib import Path
+from secrets import token_hex
 from typing import Any
 
-from fastapi import FastAPI, Request, Response, Cookie
+from fastapi import FastAPI, HTTPException, Request, Response, Cookie
 from fastapi.responses import HTMLResponse, JSONResponse, StreamingResponse
 
 from toybaru.client import ToybaruClient
 from toybaru.const import DATA_DIR, REGIONS, BRANDS
+from toybaru.exceptions import OtpRequiredError
 from toybaru.soc_tracker import log_snapshot, get_consumption_estimate, get_snapshot_history
 from toybaru.trip_store import (
     upsert_trips, get_trip_count, get_trips_from_db,
@@ -22,15 +26,20 @@ from toybaru.trip_store import (
 )
 from toybaru.trip_stats import get_detailed_stats, get_stats
 
+logger = logging.getLogger(__name__)
+
 TEMPLATES_DIR = Path(__file__).parent / "templates"
 LOCALES_DIR = Path(__file__).parent / "locales"
 CREDS_FILE = DATA_DIR / "credentials.json"
+META_FILE = DATA_DIR / "session_meta.json"
 SESSION_SECRET = os.environ.get("TOYBARU_SESSION_SECRET", secrets.token_hex(32))
 
 app = FastAPI(title="Toybaru ReCare")
 
 # Session store: token -> ToybaruClient
 _sessions: dict[str, ToybaruClient] = {}
+_csrf_tokens: dict[str, str] = {}
+_otp_pending: dict[str, dict] = {}
 
 
 def _get_session_client(session_token: str | None) -> ToybaruClient | None:
@@ -39,16 +48,46 @@ def _get_session_client(session_token: str | None) -> ToybaruClient | None:
     return _sessions.get(session_token)
 
 
+def _require_csrf(request: Request, session: str | None) -> None:
+    """Validate X-CSRF-Token header against session."""
+    if not session or session not in _csrf_tokens:
+        raise HTTPException(status_code=403, detail="Missing CSRF token")
+    expected = _csrf_tokens[session]
+    actual = request.headers.get("X-CSRF-Token", "")
+    if actual != expected:
+        raise HTTPException(status_code=403, detail="Invalid CSRF token")
+
+
 async def _require_client(session_token: str | None) -> ToybaruClient:
     client = _get_session_client(session_token)
     if client is None:
-        # Try loading from saved credentials (backward compat / Docker restart)
+        # Try loading from saved tokens + session_meta.json
+        if META_FILE.exists():
+            try:
+                meta = json.loads(META_FILE.read_text())
+                from toybaru.auth.controller import TOKEN_FILE
+                if TOKEN_FILE.exists():
+                    # We have tokens on disk — try to restore
+                    # We need username/password but meta doesn't store password
+                    # Just create client with dummy password — tokens will load from disk
+                    client = ToybaruClient(
+                        username=meta["username"],
+                        password="",
+                        region=meta.get("region", "subaru-eu"),
+                    )
+                    if client.auth.is_authenticated:
+                        token = session_token or secrets.token_hex(32)
+                        _sessions[token] = client
+                        return client
+            except Exception:
+                pass
+        # Legacy: try credentials.json
         if CREDS_FILE.exists():
             try:
                 creds = json.loads(CREDS_FILE.read_text())
                 client = ToybaruClient(
                     username=creds["username"],
-                    password=creds["password"],
+                    password=creds.get("password", ""),
                     region=creds.get("region", "subaru-eu"),
                 )
                 await client.login()
@@ -57,7 +96,7 @@ async def _require_client(session_token: str | None) -> ToybaruClient:
                 return client
             except Exception:
                 pass
-        raise RuntimeError("Not authenticated")
+        raise HTTPException(status_code=401, detail="Not authenticated")
     return client
 
 
@@ -65,7 +104,8 @@ async def safe_call(coro):
     try:
         return await coro
     except Exception as e:
-        return {"error": str(e)}
+        logger.exception("API call failed")
+        return {"error": "An error occurred"}
 
 
 # --- Pages ---
@@ -125,18 +165,34 @@ async def api_login(request: Request, response: Response):
         client = ToybaruClient(username=username, password=password, region=region)
         uuid = await client.login()
         vehicles = await client.get_vehicles()
+    except OtpRequiredError:
+        # OTP required — save state for second phase
+        otp_session = secrets.token_hex(16)
+        _otp_pending[otp_session] = {
+            "client": client,
+            "username": username,
+            "region": region,
+        }
+        return JSONResponse({
+            "needs_otp": True,
+            "otp_session": otp_session,
+        })
     except Exception as e:
-        return JSONResponse({"error": str(e)}, status_code=401)
+        logger.exception("Login failed")
+        return JSONResponse({"error": "Authentication failed"}, status_code=401)
 
     # Create session
     token = secrets.token_hex(32)
     _sessions[token] = client
 
-    # Save credentials for server restart persistence
+    # Generate CSRF token
+    csrf = secrets.token_hex(16)
+    _csrf_tokens[token] = csrf
+
+    # Save only username+region (NO password)
     DATA_DIR.mkdir(parents=True, exist_ok=True)
-    CREDS_FILE.write_text(json.dumps({
+    META_FILE.write_text(json.dumps({
         "username": username,
-        "password": password,
         "region": region,
     }))
 
@@ -144,6 +200,49 @@ async def api_login(request: Request, response: Response):
     return {
         "uuid": uuid,
         "vehicles": [v.model_dump() for v in vehicles],
+        "csrf_token": csrf,
+    }
+
+
+@app.post("/api/login/otp")
+async def api_login_otp(request: Request, response: Response):
+    """Second phase of OTP login flow."""
+    body = await request.json()
+    otp_session = body.get("otp_session", "")
+    code = body.get("code", "")
+
+    if not otp_session or not code:
+        return JSONResponse({"error": "Missing otp_session or code"}, status_code=400)
+
+    pending = _otp_pending.pop(otp_session, None)
+    if not pending:
+        return JSONResponse({"error": "OTP session expired or invalid"}, status_code=400)
+
+    client = pending["client"]
+    try:
+        uuid = await client.submit_otp(code)
+        vehicles = await client.get_vehicles()
+    except Exception as e:
+        logger.exception("OTP verification failed")
+        return JSONResponse({"error": "OTP verification failed"}, status_code=401)
+
+    token = secrets.token_hex(32)
+    _sessions[token] = client
+
+    csrf = secrets.token_hex(16)
+    _csrf_tokens[token] = csrf
+
+    DATA_DIR.mkdir(parents=True, exist_ok=True)
+    META_FILE.write_text(json.dumps({
+        "username": pending["username"],
+        "region": pending["region"],
+    }))
+
+    response.set_cookie("session", token, httponly=True, samesite="strict", max_age=86400 * 30)
+    return {
+        "uuid": uuid,
+        "vehicles": [v.model_dump() for v in vehicles],
+        "csrf_token": csrf,
     }
 
 
@@ -151,9 +250,10 @@ async def api_login(request: Request, response: Response):
 async def api_auth_status(session: str | None = Cookie(None)):
     client = _get_session_client(session)
     if client:
-        return {"authenticated": True}
+        csrf = _csrf_tokens.get(session, "")
+        return {"authenticated": True, "csrf_token": csrf}
     # Try saved creds
-    if CREDS_FILE.exists():
+    if META_FILE.exists() or CREDS_FILE.exists():
         try:
             client = await _require_client(session)
             return {"authenticated": True}
@@ -166,7 +266,14 @@ async def api_auth_status(session: str | None = Cookie(None)):
 async def api_logout(response: Response, session: str | None = Cookie(None)):
     if session and session in _sessions:
         del _sessions[session]
+    if session and session in _csrf_tokens:
+        del _csrf_tokens[session]
     response.delete_cookie("session")
+    from toybaru.auth.controller import TOKEN_FILE
+    if TOKEN_FILE.exists():
+        TOKEN_FILE.unlink()
+    if META_FILE.exists():
+        META_FILE.unlink()
     if CREDS_FILE.exists():
         CREDS_FILE.unlink()
     return {"ok": True}
@@ -208,6 +315,7 @@ async def api_all(vin: str, session: str | None = Cookie(None)):
         "location": location,
         "telemetry": telemetry,
         "consumption": get_consumption_estimate(),
+        "capabilities": {"trips": not client.api._is_na},
     }
 
 
@@ -218,23 +326,34 @@ async def api_battery(vin: str, session: str | None = Cookie(None)):
 
 
 @app.post("/api/refresh/{vin}")
-async def api_refresh(vin: str, session: str | None = Cookie(None)):
+async def api_refresh(vin: str, request: Request, session: str | None = Cookie(None)):
+    _require_csrf(request, session)
     client = await _require_client(session)
     return await safe_call(client.refresh_status(vin))
 
 
 @app.post("/api/command/{vin}/{command}")
-async def api_command(vin: str, command: str, session: str | None = Cookie(None)):
-    """Send remote command (door-lock, door-unlock)."""
-    allowed = {"door-lock", "door-unlock"}
+async def api_command(vin: str, command: str, request: Request, session: str | None = Cookie(None)):
+    """Send remote command."""
+    allowed = {
+        "door-lock", "door-unlock",
+        "trunk-lock", "trunk-unlock",
+        "headlight-on", "headlight-off",
+        "sound-horn", "buzzer-warning",
+        "find-vehicle",
+        "hazard-on", "hazard-off",
+        "engine-start", "engine-stop",
+    }
     if command not in allowed:
         return JSONResponse({"error": f"Unknown command: {command}"}, status_code=400)
+    _require_csrf(request, session)
     client = await _require_client(session)
     return await safe_call(client.send_command(vin, command))
 
 
 @app.post("/api/sync/{vin}")
-async def api_sync(vin: str, session: str | None = Cookie(None)):
+async def api_sync(vin: str, request: Request, session: str | None = Cookie(None)):
+    _require_csrf(request, session)
     client = await _require_client(session)
     latest = get_latest_trip_timestamp()
     from_date = latest[:10] if latest else "2020-01-01"
@@ -249,7 +368,8 @@ async def api_sync(vin: str, session: str | None = Cookie(None)):
                 route=True, summary=True, limit=5, offset=offset,
             )
         except Exception as e:
-            return {"error": str(e), "new": total_new, "updated": total_updated}
+            logger.exception("Sync fetch error")
+            return {"error": "Failed to sync trips", "new": total_new, "updated": total_updated}
 
         payload = data.get("payload", data)
         trips = payload.get("trips", [])
@@ -281,22 +401,26 @@ async def api_trips(vin: str, days: int = 30, session: str | None = Cookie(None)
 # --- Local DB ---
 
 @app.get("/api/db/trips")
-async def api_db_trips(limit: int = 50, offset: int = 0, from_date: str | None = None, to_date: str | None = None, vin: str | None = None):
+async def api_db_trips(limit: int = 50, offset: int = 0, from_date: str | None = None, to_date: str | None = None, vin: str | None = None, session: str | None = Cookie(None)):
+    await _require_client(session)
     return get_trips_from_db(limit=limit, offset=offset, from_date=from_date, to_date=to_date, vin=vin)
 
 
 @app.get("/api/db/stats")
-async def api_db_stats(vin: str | None = None, from_date: str | None = None, to_date: str | None = None):
+async def api_db_stats(vin: str | None = None, from_date: str | None = None, to_date: str | None = None, session: str | None = Cookie(None)):
+    await _require_client(session)
     return get_detailed_stats(vin=vin, from_date=from_date, to_date=to_date)
 
 
 @app.get("/api/db/count")
-async def api_db_count():
+async def api_db_count(session: str | None = Cookie(None)):
+    await _require_client(session)
     return {"count": get_trip_count()}
 
 
 @app.get("/api/db/trip/{trip_id}")
-async def api_db_trip(trip_id: str):
+async def api_db_trip(trip_id: str, session: str | None = Cookie(None)):
+    await _require_client(session)
     import sqlite3
     from toybaru.trip_store import _get_db
     conn = _get_db()
@@ -334,7 +458,8 @@ async def api_import(vin: str, from_date: str = "2020-01-01", to_date: str | Non
                     route=True, summary=True, limit=5, offset=offset,
                 )
             except Exception as e:
-                yield f"data: {json.dumps({'type': 'error', 'message': str(e)})}\n\n"
+                logger.exception("Import fetch error")
+                yield f"data: {json.dumps({'type': 'error', 'message': 'Failed to fetch trips'})}\n\n"
                 break
 
             payload = data.get("payload", data)
@@ -368,8 +493,9 @@ async def api_import(vin: str, from_date: str = "2020-01-01", to_date: str | Non
 # --- Export ---
 
 @app.get("/api/export/trips.csv")
-async def export_trips_csv(vin: str | None = None):
+async def export_trips_csv(vin: str | None = None, session: str | None = Cookie(None)):
     """Export all trips as CSV download."""
+    await _require_client(session)
     import csv
     import io
     from toybaru.database import get_db as _open_db
@@ -402,8 +528,9 @@ async def export_trips_csv(vin: str | None = None):
 
 
 @app.get("/api/export/snapshots.csv")
-async def export_snapshots_csv(vin: str | None = None):
+async def export_snapshots_csv(vin: str | None = None, session: str | None = Cookie(None)):
     """Export all snapshots as CSV download."""
+    await _require_client(session)
     import csv
     import io
     from toybaru.database import get_db as _open_db
@@ -435,8 +562,9 @@ async def export_snapshots_csv(vin: str | None = None):
 
 
 @app.get("/api/export/trips.json")
-async def export_trips_json(vin: str | None = None):
+async def export_trips_json(vin: str | None = None, session: str | None = Cookie(None)):
     """Export all trips as JSON download (including behaviours and route)."""
+    await _require_client(session)
     from toybaru.database import get_db as _open_db
     import sqlite3
 
@@ -469,8 +597,10 @@ async def export_trips_json(vin: str | None = None):
 # --- Re-Import ---
 
 @app.post("/api/reimport")
-async def api_reimport(request: Request):
+async def api_reimport(request: Request, session: str | None = Cookie(None)):
     """Re-import trips from a previously exported JSON file."""
+    _require_csrf(request, session)
+    await _require_client(session)
     body = await request.json()
     trips = body.get("trips", [])
     if not trips:
@@ -532,7 +662,8 @@ async def api_reimport(request: Request):
 # --- Route SVG ---
 
 @app.get("/api/route-svg/{trip_id}")
-async def api_route_svg(trip_id: str, width: int = 800, height: int = 500):
+async def api_route_svg(trip_id: str, width: int = 800, height: int = 500, session: str | None = Cookie(None)):
+    await _require_client(session)
     import sqlite3
     from toybaru.database import get_db as _open_db
 
