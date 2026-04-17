@@ -23,7 +23,14 @@
     "slope": "Neigung",
     "regen_desc": "Bremsenergie wird zurueckgewonnen",
     "eco_drive_desc": "Sparsamer Fahrmodus",
-    "power_drive_desc": "Hoher Verbrauch"
+    "power_drive_desc": "Hoher Verbrauch",
+    "auto_sync": "Auto-Sync",
+    "sync_off": "Aus",
+    "sync_1min": "1 Min",
+    "sync_5min": "5 Min",
+    "sync_15min": "15 Min",
+    "sync_30min": "30 Min",
+    "sync_60min": "60 Min"
   },
   "login": {
     "title": "Anmelden",

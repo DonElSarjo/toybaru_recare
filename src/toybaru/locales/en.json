@@ -23,7 +23,14 @@
     "slope": "Slope",
     "regen_desc": "Regenerating brake energy",
     "eco_drive_desc": "Efficient driving",
-    "power_drive_desc": "High consumption"
+    "power_drive_desc": "High consumption",
+    "auto_sync": "Auto-sync",
+    "sync_off": "Off",
+    "sync_1min": "1 min",
+    "sync_5min": "5 min",
+    "sync_15min": "15 min",
+    "sync_30min": "30 min",
+    "sync_60min": "60 min"
   },
   "login": {
     "title": "Sign In",

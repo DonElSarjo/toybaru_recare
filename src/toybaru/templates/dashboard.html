@@ -73,6 +73,34 @@ td{padding:10px 12px;border-bottom:1px solid #1c2028;transition:background .1s}
 .login-card label{display:block;font-size:12px;color:var(--muted);margin-bottom:4px;margin-top:12px}
 .login-card .error{margin-top:12px}
 .lang-select{background:var(--surface);color:var(--text);border:1px solid var(--border);padding:3px 6px;border-radius:6px;font-size:12px}
+.sync-select{background:var(--surface);color:var(--text);border:1px solid var(--border);padding:3px 6px;border-radius:6px;font-size:12px}
+.theme-toggle{background:none;border:1px solid var(--border);border-radius:6px;cursor:pointer;font-size:1.1em;padding:2px 8px;color:var(--text)}
+.theme-toggle:hover{border-color:var(--muted)}
+/* Dark mode overrides */
+body.dark{background:#1a1a2e;color:#e0e0e0}
+body.dark .card,body.dark .login-card{background:#16213e;border-color:#0f3460;box-shadow:0 2px 8px rgba(0,0,0,0.4)}
+body.dark input,body.dark select,body.dark textarea{background:#1a1a2e;color:#e0e0e0;border-color:#0f3460}
+body.dark .btn{background:#0f3460;color:#e0e0e0;border-color:#0f3460}
+body.dark .btn:hover{background:#1a4080}
+body.dark .btn-primary{background:var(--primary);color:#fff;border-color:var(--primary)}
+body.dark .tab{color:#999}
+body.dark .tab.active{color:#e0e0e0;border-bottom-color:#4da6ff}
+body.dark table{border-color:#0f3460}
+body.dark th{background:#0f3460;color:#e0e0e0}
+body.dark td{border-color:#0f3460}
+body.dark .clickable-row:hover td{background:#1a2744}
+body.dark .tag{opacity:.9}
+body.dark h1,body.dark h2,body.dark h3{color:#e0e0e0}
+body.dark a{color:#4da6ff}
+body.dark .error{color:#ff6b6b}
+body.dark .topbar{background:#16213e;border-color:#0f3460}
+body.dark .tabs{border-color:#0f3460}
+body.dark .bar-col .bar{opacity:.9}
+body.dark .overlay-panel{background:#1a1a2e;border-color:#0f3460}
+body.dark .overlay-close{background:#16213e;border-color:#0f3460;color:#999}
+body.dark .overlay-close:hover{color:#e0e0e0;border-color:#4da6ff}
+body.dark .log-area{background:#111;border-color:#0f3460}
+body.dark .theme-toggle{border-color:#0f3460}
 </style>
 </head>
 <body>
@@ -111,6 +139,15 @@ td{padding:10px 12px;border-bottom:1px solid #1c2028;transition:background .1s}
   <select id="vinSelect" style="width:auto"></select>
   <span class="meta" id="lastUpdate"></span>
   <select class="lang-select" onchange="setLang(this.value)" id="langSelect" style="width:auto"></select>
+  <select class="sync-select" onchange="setAutoSync(parseInt(this.value))" style="width:auto">
+    <option value="0">⟳ Off</option>
+    <option value="1">⟳ 1 min</option>
+    <option value="5">⟳ 5 min</option>
+    <option value="15">⟳ 15 min</option>
+    <option value="30">⟳ 30 min</option>
+    <option value="60">⟳ 60 min</option>
+  </select>
+  <button onclick="toggleTheme()" id="themeBtn" class="theme-toggle" title="Toggle dark/light mode">&#x1F319;</button>
   <button class="btn btn-sm" onclick="doLogout()" id="logoutBtn"></button>
 </div>
 <div class="tabs" id="tabBar"></div>
@@ -229,6 +266,39 @@ function setLang(l) {
   loadI18n();
 }
 
+// --- Auto-sync ---
+let _syncInterval = null;
+
+function setAutoSync(minutes) {
+  localStorage.setItem('toybaru_autosync', String(minutes));
+  if (_syncInterval) { clearInterval(_syncInterval); _syncInterval = null; }
+  if (minutes > 0) {
+    _syncInterval = setInterval(() => loadOverview(), minutes * 60000);
+  }
+  document.querySelectorAll('.sync-select').forEach(s => s.value = String(minutes));
+}
+
+function initAutoSync() {
+  const saved = localStorage.getItem('toybaru_autosync') || '0';
+  document.querySelectorAll('.sync-select').forEach(s => s.value = saved);
+  setAutoSync(parseInt(saved));
+}
+
+// --- Theme ---
+function toggleTheme() {
+  const isDark = document.body.classList.toggle('dark');
+  localStorage.setItem('toybaru_theme', isDark ? 'dark' : 'light');
+  document.getElementById('themeBtn').textContent = isDark ? '\u2600\uFE0F' : '\uD83C\uDF19';
+}
+
+function initTheme() {
+  const saved = localStorage.getItem('toybaru_theme') || 'dark';
+  if (saved === 'dark') {
+    document.body.classList.add('dark');
+    document.getElementById('themeBtn').textContent = '\u2600\uFE0F';
+  }
+}
+
 function updateLangSelects() {
   document.querySelectorAll('.lang-select').forEach(sel => {
     sel.innerHTML = '';
@@ -242,6 +312,16 @@ function updateLangSelects() {
 
 function applyI18n() {
   updateLangSelects();
+  // Update sync select labels
+  document.querySelectorAll('.sync-select').forEach(sel => {
+    const opts = sel.options;
+    opts[0].textContent = '⟳ ' + t('app.sync_off');
+    opts[1].textContent = '⟳ ' + t('app.sync_1min');
+    opts[2].textContent = '⟳ ' + t('app.sync_5min');
+    opts[3].textContent = '⟳ ' + t('app.sync_15min');
+    opts[4].textContent = '⟳ ' + t('app.sync_30min');
+    opts[5].textContent = '⟳ ' + t('app.sync_60min');
+  });
   // Login
   document.getElementById('loginSubtitle').textContent = t('login.subtitle');
   document.getElementById('loginEmailLabel').textContent = t('login.email');
@@ -367,6 +447,7 @@ async function checkAuth() {
     document.getElementById('appView').style.display = 'block';
     await loadVehicles();
     loadOverview();
+    initAutoSync();
   } else {
     document.getElementById('loginView').style.display = 'flex';
     document.getElementById('appView').style.display = 'none';
@@ -1090,6 +1171,7 @@ async function init() {
   availableLangs = await (await fetch('/api/languages')).json();
   // If stored lang not available, fall back
   if (!availableLangs.find(l => l.code === lang)) lang = availableLangs[0]?.code || 'en';
+  initTheme();
   await loadI18n();
   await loadBrands();
   await checkAuth();
