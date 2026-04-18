@@ -7,41 +7,45 @@
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text);font-size:14px;line-height:1.5;
---bg:#FFFFFF;--surface:#F5F5F5;--text:#212121;--muted:#666666;--border:#E0E0E0;--primary:#EB0A1E;--primary-hover:#C50818;--link:#EB0A1E;--shadow:rgba(0,0,0,0.08);--topbar-bg:#F5F5F5;--topbar-border:#E0E0E0;--topbar-text:#212121;--tab-active-bg:#FFFFFF;--tab-active-border:#EB0A1E;--tab-text:#666;--tab-active-text:#EB0A1E;--input-bg:#FFFFFF;--table-header:#F5F5F5;--table-hover:#FAFAFA;--error:#D32F2F;--success:#4CAF50;--green:#4CAF50;--yellow:#FFA000;--red:#D32F2F;--blue:#58a6ff;--overlay-bg:rgba(0,0,0,0.5);--log-bg:#F0F0F0}
-body.dark.toyota{--bg:#121212;--surface:#1E1E1E;--text:#FFFFFF;--muted:#B0B0B0;--border:#2C2C2C;--primary:#EB0A1E;--primary-hover:#FF2233;--link:#FF4444;--shadow:rgba(0,0,0,0.4);--topbar-bg:#1E1E1E;--topbar-border:#2C2C2C;--topbar-text:#FFFFFF;--tab-active-bg:#2A2A2A;--tab-active-border:#EB0A1E;--tab-text:#888;--tab-active-text:#FF4444;--input-bg:#1E1E1E;--table-header:#2A2A2A;--table-hover:#252525;--error:#FF6B6B;--success:#66BB6A;--green:#66BB6A;--yellow:#FFB74D;--red:#FF6B6B;--blue:#64B5F6;--overlay-bg:rgba(0,0,0,0.6);--log-bg:#111}
-body.subaru{--bg:#F0F2F5;--surface:#FFFFFF;--text:#1A1A2E;--muted:#555555;--border:#D0D5DD;--primary:#003366;--primary-hover:#002244;--link:#003366;--shadow:rgba(0,51,102,0.08);--topbar-bg:#003366;--topbar-border:#002244;--topbar-text:#FFFFFF;--tab-active-bg:#FFFFFF;--tab-active-border:#003366;--tab-text:#666;--tab-active-text:#003366;--input-bg:#FFFFFF;--table-header:#E8ECF0;--table-hover:#F5F7FA;--error:#D32F2F;--success:#4CAF50;--green:#4CAF50;--yellow:#FFA000;--red:#D32F2F;--blue:#336699;--overlay-bg:rgba(0,0,0,0.5);--log-bg:#E8ECF0}
-body.dark.subaru{--bg:#0A1628;--surface:#0F2035;--text:#E5E8EB;--muted:#8899AA;--border:#1A3050;--primary:#336699;--primary-hover:#4477AA;--link:#5599CC;--shadow:rgba(0,0,0,0.4);--topbar-bg:#0F2035;--topbar-border:#1A3050;--topbar-text:#E5E8EB;--tab-active-bg:#152A44;--tab-active-border:#336699;--tab-text:#667788;--tab-active-text:#5599CC;--input-bg:#0F2035;--table-header:#152A44;--table-hover:#12253B;--error:#FF6B6B;--success:#66BB6A;--green:#66BB6A;--yellow:#FFB74D;--red:#FF6B6B;--blue:#5599CC;--overlay-bg:rgba(0,0,0,0.6);--log-bg:#081020}
+--bg:#FFFFFF;--surface:#F5F5F5;--text:#212121;--muted:#666666;--border:#E0E0E0;--primary:#EB0A1E;--primary-hover:#C50818;--accent:#EB0A1E;--link:#EB0A1E;--shadow:rgba(0,0,0,0.06);--topbar-bg:#F5F5F5;--topbar-border:#E0E0E0;--topbar-text:#212121;--tab-active-bg:#FFFFFF;--tab-active-border:#EB0A1E;--tab-text:#666;--tab-active-text:#EB0A1E;--input-bg:#FFFFFF;--table-header:#F5F5F5;--table-hover:#FAFAFA;--error:#D32F2F;--success:#4CAF50;--green:#4CAF50;--yellow:#FFA000;--red:#D32F2F;--blue:#58a6ff;--overlay-bg:rgba(0,0,0,0.5);--log-bg:#F0F0F0}
+body.dark.toyota{--bg:#121212;--surface:#1E1E1E;--text:#FFFFFF;--muted:#B0B0B0;--border:#2C2C2C;--primary:#EB0A1E;--primary-hover:#FF2233;--accent:#FF4444;--link:#FF4444;--shadow:rgba(0,0,0,0.3);--topbar-bg:#1E1E1E;--topbar-border:#2C2C2C;--topbar-text:#FFFFFF;--tab-active-bg:#2A2A2A;--tab-active-border:#EB0A1E;--tab-text:#888;--tab-active-text:#FF4444;--input-bg:#1E1E1E;--table-header:#2A2A2A;--table-hover:#252525;--error:#FF6B6B;--success:#66BB6A;--green:#66BB6A;--yellow:#FFB74D;--red:#FF6B6B;--blue:#64B5F6;--overlay-bg:rgba(0,0,0,0.6);--log-bg:#111}
+body.subaru{--bg:#F0F2F5;--surface:#FFFFFF;--text:#1A1A2E;--muted:#555555;--border:#D0D5DD;--primary:#003366;--primary-hover:#002244;--accent:#003366;--link:#003366;--shadow:rgba(0,51,102,0.06);--topbar-bg:#003366;--topbar-border:#002244;--topbar-text:#FFFFFF;--tab-active-bg:#FFFFFF;--tab-active-border:#003366;--tab-text:#666;--tab-active-text:#003366;--input-bg:#FFFFFF;--table-header:#E8ECF0;--table-hover:#F5F7FA;--error:#D32F2F;--success:#4CAF50;--green:#4CAF50;--yellow:#FFA000;--red:#D32F2F;--blue:#336699;--overlay-bg:rgba(0,0,0,0.5);--log-bg:#E8ECF0}
+body.dark.subaru{--bg:#0A1628;--surface:#0F2035;--text:#E5E8EB;--muted:#8899AA;--border:#1A3050;--primary:#336699;--primary-hover:#4477AA;--accent:#5599CC;--link:#5599CC;--shadow:rgba(0,0,0,0.3);--topbar-bg:#0F2035;--topbar-border:#1A3050;--topbar-text:#E5E8EB;--tab-active-bg:#152A44;--tab-active-border:#336699;--tab-text:#667788;--tab-active-text:#5599CC;--input-bg:#0F2035;--table-header:#152A44;--table-hover:#12253B;--error:#FF6B6B;--success:#66BB6A;--green:#66BB6A;--yellow:#FFB74D;--red:#FF6B6B;--blue:#5599CC;--overlay-bg:rgba(0,0,0,0.6);--log-bg:#081020}
 .shell{display:flex;flex-direction:column;height:100vh}
 .topbar{display:flex;align-items:center;gap:12px;padding:8px 20px;border-bottom:1px solid var(--topbar-border);flex-shrink:0;background:var(--topbar-bg);color:var(--topbar-text)}
 .topbar h1{font-size:15px;font-weight:600;margin-right:auto}
 .tabs{display:flex;gap:0;border-bottom:1px solid var(--border);padding:0 20px;flex-shrink:0;background:var(--bg)}
 .tab{padding:8px 16px;font-size:13px;color:var(--tab-text);cursor:pointer;border-bottom:2px solid transparent;transition:color .15s}
 .tab:hover{color:var(--text)}.tab.active{color:var(--tab-active-text);border-bottom-color:var(--tab-active-border)}
-.page{display:none;flex:1;overflow-y:auto;padding:20px}.page.active{display:block}
+.page{display:none;flex:1;overflow-y:auto;padding:20px;max-width:1440px;margin:0 auto;width:100%}.page.active{display:block}
 select,input[type=date],input[type=text],input[type=email],input[type=password]{background:var(--input-bg);color:var(--text);border:1px solid var(--border);padding:6px 10px;border-radius:6px;font-size:13px;width:100%}
-.btn{background:var(--surface);color:var(--text);border:1px solid var(--border);padding:5px 14px;border-radius:6px;font-size:13px;cursor:pointer;display:inline-flex;align-items:center;gap:6px}
+.btn{background:var(--surface);color:var(--text);border:1px solid var(--border);padding:5px 14px;border-radius:6px;font-size:13px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;transition:border-color .15s}
 .btn:hover{border-color:var(--muted)}.btn:disabled{opacity:.4;cursor:default}
 .btn-primary{background:var(--primary);color:#fff;border-color:var(--primary)}.btn-primary:hover{opacity:.85}
+.btn-destructive{background:color-mix(in srgb,var(--red) 10%,var(--surface));color:var(--red);border-color:color-mix(in srgb,var(--red) 40%,transparent)}.btn-destructive:hover{background:color-mix(in srgb,var(--red) 18%,var(--surface))}
 .btn-sm{padding:3px 8px;font-size:11px}
 .meta{color:var(--muted);font-size:12px}
-.row{display:flex;justify-content:space-between;padding:4px 0;font-size:13px}.row .k{color:var(--muted)}
-.section-title{font-size:12px;font-weight:600;color:var(--muted);margin-bottom:8px}
-.card{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:16px;margin-bottom:12px;box-shadow:0 2px 8px var(--shadow)}
-.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
-.grid4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:12px}
+.row{display:flex;justify-content:space-between;padding:6px 0;font-size:13px}.row .k{color:var(--muted)}
+.section-title{font-size:13px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;color:var(--muted);margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:20px;box-shadow:0 1px 2px rgba(0,0,0,.03),0 4px 16px var(--shadow)}
+.card+.card{margin-top:16px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px}
+.grid4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:16px}
+.grid2>.card,.grid3>.card,.grid4>.card{margin-top:0}
 .error{color:var(--error);font-size:13px}
 a{color:var(--link)}
 h1,h2,h3{color:var(--text)}
-.tag{font-size:11px;padding:1px 6px;border-radius:4px;border:1px solid}
-.tag-ok{color:var(--green);border-color:var(--green)}.tag-warn{color:var(--red);border-color:var(--red)}
-.bat-pct{font-size:28px;font-weight:600;line-height:1.2}
-.bat-bar{width:100%;height:6px;background:var(--border);border-radius:3px;margin:6px 0 10px}
-.bat-fill{height:100%;border-radius:3px;transition:width .4s}
+.tag{font-size:11px;padding:2px 8px;border-radius:6px;border:1px solid;font-weight:500}
+.tag-ok{color:var(--green);border-color:color-mix(in srgb,var(--green) 40%,transparent);background:color-mix(in srgb,var(--green) 8%,transparent)}
+.tag-warn{color:var(--red);border-color:color-mix(in srgb,var(--red) 40%,transparent);background:color-mix(in srgb,var(--red) 8%,transparent)}
+.bat-pct{font-size:36px;font-weight:700;line-height:1.1;font-variant-numeric:tabular-nums}
+.bat-bar{width:100%;height:8px;background:var(--border);border-radius:4px;margin:8px 0 12px}
+.bat-fill{height:100%;border-radius:4px;transition:width .4s}
 .vehicle-hero{display:flex;align-items:center;gap:20px;padding:16px}
-.vehicle-hero img{max-width:200px;max-height:140px;object-fit:contain;border-radius:8px}
+.vehicle-hero img{max-width:200px;max-height:140px;object-fit:contain;border-radius:12px}
 .vehicle-hero-info{flex:1}
-.vehicle-hero-name{font-size:20px;font-weight:700;color:var(--fg)}
+.vehicle-hero-name{font-size:20px;font-weight:700;color:var(--text)}
 .vehicle-hero-detail{font-size:13px;color:var(--muted);margin-top:4px}
 .cap-badge{display:inline-block;font-size:11px;padding:2px 8px;border-radius:12px;background:var(--accent);color:#fff;font-weight:500;white-space:nowrap}
 .sbar{display:flex;height:6px;border-radius:3px;overflow:hidden}
@@ -54,22 +58,22 @@ th{text-align:left;color:var(--muted);font-weight:500;padding:8px 12px;font-size
 td{padding:10px 12px;border-bottom:1px solid var(--border);transition:background .1s}
 .clickable-row{cursor:pointer}.clickable-row:hover td{background:var(--table-hover)}
 .num{text-align:right;font-variant-numeric:tabular-nums}
-.trips-wrap{background:var(--surface);border:1px solid var(--border);border-radius:8px;overflow:hidden;max-height:calc(100vh - 200px);overflow-y:auto}
+.trips-wrap{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;max-height:calc(100vh - 200px);overflow-y:auto}
 .trip-date{font-weight:500;white-space:nowrap}
 .trip-score{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:6px;font-size:12px;font-weight:600}
 .score-good{background:color-mix(in srgb,var(--green) 15%,var(--surface));color:var(--green)}.score-mid{background:color-mix(in srgb,var(--yellow) 15%,var(--surface));color:var(--yellow)}.score-bad{background:color-mix(in srgb,var(--red) 15%,var(--surface));color:var(--red)}
 .trip-pct{font-size:12px;color:var(--muted)}.trip-pct b{color:var(--text);font-weight:500}
 .sbar{height:4px;border-radius:2px}
 .tip{position:relative;cursor:help;border-bottom:1px dotted var(--muted)}
-.tip .tip-text{display:none;position:absolute;bottom:calc(100% + 6px);left:50%;transform:translateX(-50%);background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:8px 12px;font-size:12px;color:var(--text);width:240px;z-index:50;line-height:1.4;font-weight:400;white-space:normal;box-shadow:0 2px 8px rgba(0,0,0,.3)}
+.tip .tip-text{display:none;position:absolute;bottom:calc(100% + 6px);left:50%;transform:translateX(-50%);background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:8px 12px;font-size:12px;color:var(--text);width:240px;z-index:50;line-height:1.4;font-weight:400;white-space:normal;box-shadow:0 4px 16px rgba(0,0,0,.15)}
 .tip:hover .tip-text{display:block}
 .progress-bar{width:100%;height:8px;background:var(--border);border-radius:4px;overflow:hidden}
 .progress-fill{height:100%;background:var(--primary);border-radius:4px;transition:width .3s}
-.log-area{background:var(--log-bg);border:1px solid var(--border);border-radius:6px;font-family:'SF Mono',Menlo,monospace;font-size:11px;padding:8px 12px;max-height:300px;overflow-y:auto;white-space:pre-wrap;color:var(--muted);display:none;margin-top:8px}.log-area.open{display:block}
-.stat-num{font-size:24px;font-weight:600;line-height:1.2}.stat-label{font-size:12px;color:var(--muted);margin-top:2px}.stat-box{padding:12px}
+.log-area{background:var(--log-bg);border:1px solid var(--border);border-radius:8px;font-family:'SF Mono',Menlo,monospace;font-size:11px;padding:8px 12px;max-height:300px;overflow-y:auto;white-space:pre-wrap;color:var(--muted);display:none;margin-top:8px}.log-area.open{display:block}
+.stat-num{font-size:28px;font-weight:700;line-height:1.1;font-variant-numeric:tabular-nums}.stat-label{font-size:12px;color:var(--muted);margin-top:2px}.stat-box{padding:12px}
 .overlay{display:none;position:fixed;inset:0;background:var(--overlay-bg);z-index:100}.overlay.open{display:flex;align-items:center;justify-content:center}
 .overlay-wrap{position:relative;width:90%;max-width:900px}
-.overlay-panel{background:var(--bg);border:1px solid var(--border);border-radius:8px;max-height:85vh;overflow-y:auto;padding:24px}
+.overlay-panel{background:var(--bg);border:1px solid var(--border);border-radius:14px;max-height:85vh;overflow-y:auto;padding:24px}
 .overlay-close{position:absolute;top:-14px;right:-14px;width:28px;height:28px;background:var(--surface);border:1px solid var(--border);color:var(--muted);font-size:16px;line-height:26px;text-align:center;cursor:pointer;border-radius:50%;z-index:110;padding:0}
 .overlay-close:hover{color:var(--text);border-color:var(--muted);background:var(--border)}
 .bar-chart{display:flex;align-items:flex-end;gap:3px;height:80px;margin:8px 0}
@@ -78,7 +82,7 @@ td{padding:10px 12px;border-bottom:1px solid var(--border);transition:background
 .bar-col .bar-label{font-size:9px;color:var(--muted)}
 /* Login */
 .login-wrap{display:flex;align-items:center;justify-content:center;height:100vh}
-.login-card{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:32px;width:360px;box-shadow:0 2px 8px var(--shadow)}
+.login-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:32px;width:360px;box-shadow:0 1px 2px rgba(0,0,0,.03),0 8px 32px var(--shadow)}
 .login-card h1{font-size:18px;font-weight:600;margin-bottom:4px}
 .login-card p{color:var(--muted);font-size:13px;margin-bottom:20px}
 .login-card label{display:block;font-size:12px;color:var(--muted);margin-bottom:4px;margin-top:12px}
@@ -96,6 +100,22 @@ body.subaru .topbar .lang-select,body.subaru .topbar .sync-select{background:rgb
 body.subaru .topbar .theme-toggle{border-color:rgba(255,255,255,0.25);color:#FFFFFF}
 body.dark.subaru .topbar select,body.dark.subaru .topbar button{color:var(--topbar-text)}
 body.dark.subaru .topbar .lang-select,body.dark.subaru .topbar .sync-select{background:var(--input-bg);border-color:var(--border);color:var(--text)}
+/* Responsive */
+@media(max-width:960px){
+  .grid2,.grid3,.grid4{grid-template-columns:1fr}
+  .topbar{flex-wrap:wrap;padding:10px 16px;gap:8px}
+  .tabs{padding:0 16px;overflow-x:auto;-webkit-overflow-scrolling:touch}
+  .page{padding:16px}
+  .overlay-wrap{width:95%;max-width:none}
+}
+@media(max-width:640px){
+  .vehicle-hero{flex-direction:column;align-items:flex-start;gap:12px;padding:12px}
+  .vehicle-hero img{max-width:100%;max-height:160px}
+  .bat-pct{font-size:28px}
+  .stat-num{font-size:20px}
+  iframe{height:180px!important}
+  .topbar h1{font-size:14px}
+}
 </style>
 </head>
 <body class="toyota">
@@ -147,8 +167,8 @@ body.dark.subaru .topbar .lang-select,body.dark.subaru .topbar .sync-select{back
 </div>
 <div class="tabs" id="tabBar"></div>
 
-<div class="page active" id="page-vehicle">
-  <div class="card" id="vehicleHeroCard" style="display:none"></div>
+<div class="page active" id="page-vehicle" style="display:flex;flex-direction:column;gap:16px">
+  <div class="card" id="vehicleHeroCard" style="display:none;margin:0"></div>
   <div class="grid2">
     <div class="card" id="statusCard"></div>
     <div class="card" id="tireCard"></div>
@@ -156,9 +176,9 @@ body.dark.subaru .topbar .lang-select,body.dark.subaru .topbar .sync-select{back
     <div class="card" id="efficiencyCard"></div>
     <div class="card" id="remoteCard"></div>
   </div>
-  <div class="card" id="batteryCard" style="margin-top:12px"></div>
-  <div class="card" id="lastTripCard" style="margin-top:12px"></div>
-  <div style="margin-top:8px;text-align:right"><button class="btn" onclick="loadOverview()" id="refreshOverviewBtn"></button></div>
+  <div class="card" id="batteryCard" style="margin:0"></div>
+  <div class="card" id="lastTripCard" style="margin:0"></div>
+  <div style="text-align:right"><button class="btn" onclick="loadOverview()" id="refreshOverviewBtn"></button></div>
 </div>
 
 <div class="page" id="page-trips">
@@ -642,33 +662,40 @@ function renderBattery(d, allCtx) {
   if(!d||d.error){el.innerHTML=`<div class="section-title">${t('battery.title')}</div><div class="error" id="batErr"></div>`;document.getElementById('batErr').textContent=d?.error||'N/A';return}
   const pct=d.batteryLevel,range=d.evRange?.value,rangeAc=d.evRangeWithAc?.value,unit=d.evRange?.unit||'km';
   const cs=d.chargingStatus||'?',csMap={none:t('battery.not_charging'),charging:t('battery.charging'),connected:t('battery.connected')};
-  const color=pct>80?'var(--yellow)':pct>=10?'var(--green)':'var(--red)';
+  const color=pct>20?'var(--green)':pct>=10?'var(--yellow)':'var(--red)';
 
   // Current status section
   let html=`<div class="section-title" style="display:flex;justify-content:space-between;align-items:center">${t('battery.title')} <button class="btn btn-sm" onclick="refreshBattery()" id="batRefreshBtn">${t('battery.refresh_btn')}</button></div>`;
-  html+=`<div style="display:flex;gap:24px;flex-wrap:wrap;align-items:flex-start">`;
-  // Left: big percentage + bar
-  html+=`<div style="flex:0 0 auto">`;
-  html+=`<div class="bat-pct" style="color:${color}">${pct!=null?pct+'%':'?'}</div>`;
-  html+=`<div class="bat-bar"><div class="bat-fill" style="width:${pct||0}%;background:${color}"></div></div>`;
+  html+=`<div style="display:flex;gap:24px;flex-wrap:wrap;align-items:center">`;
+  // Left: big percentage + ring gauge
+  html+=`<div style="flex:0 0 auto;text-align:center">`;
+  const circR=54,circC=2*Math.PI*circR,circOff=circC*(1-(pct||0)/100);
+  html+=`<svg viewBox="0 0 130 130" width="130" height="130" style="display:block;margin:0 auto">`;
+  html+=`<circle cx="65" cy="65" r="${circR}" fill="none" stroke="var(--border)" stroke-width="10"/>`;
+  html+=`<circle cx="65" cy="65" r="${circR}" fill="none" stroke="${color}" stroke-width="10" stroke-linecap="round" stroke-dasharray="${circC}" stroke-dashoffset="${circOff}" transform="rotate(-90 65 65)" style="transition:stroke-dashoffset .6s"/>`;
+  html+=`<text x="65" y="60" text-anchor="middle" fill="${color}" font-size="28" font-weight="700">${pct!=null?pct+'%':'?'}</text>`;
+  html+=`<text x="65" y="80" text-anchor="middle" fill="var(--muted)" font-size="11">${range!=null?Math.round(range)+' '+unit:''}</text>`;
+  html+=`</svg>`;
   html+=`</div>`;
-  // Right: details
-  html+=`<div style="flex:1;min-width:200px">`;
-  html+=`<div class="row"><span class="k">${t('battery.range')}</span><span>${range!=null?Math.round(range)+' '+unit:'?'}</span></div>`;
-  html+=`<div class="row"><span class="k">${t('battery.range_ac')}</span><span>${rangeAc!=null?Math.round(rangeAc)+' '+unit:'?'}</span></div>`;
-  html+=`<div class="row"><span class="k">${t('battery.status')}</span><span>${csMap[cs]||cs}</span></div>`;
+  // Right: stats grid
+  html+=`<div style="flex:1;min-width:200px;display:grid;grid-template-columns:1fr 1fr;gap:8px">`;
+  html+=`<div style="background:color-mix(in srgb,var(--border) 20%,var(--bg));border-radius:8px;padding:10px"><div style="font-size:18px;font-weight:700">${range!=null?Math.round(range):'?'}<span style="font-size:12px;font-weight:400;color:var(--muted)"> ${unit}</span></div><div class="stat-label">${t('battery.range')}</div></div>`;
+  html+=`<div style="background:color-mix(in srgb,var(--border) 20%,var(--bg));border-radius:8px;padding:10px"><div style="font-size:18px;font-weight:700">${rangeAc!=null?Math.round(rangeAc):'?'}<span style="font-size:12px;font-weight:400;color:var(--muted)"> ${unit}</span></div><div class="stat-label">${t('battery.range_ac')}</div></div>`;
+  html+=`<div style="background:color-mix(in srgb,var(--border) 20%,var(--bg));border-radius:8px;padding:10px;grid-column:1/-1"><div style="font-size:14px;font-weight:600">${csMap[cs]||cs}</div><div class="stat-label">${t('battery.status')}</div></div>`;
+  html+=`</div></div>`;
   if(cs==='charging'&&d.remainingChargeTime){
     const kw=((100-(pct||0))/100*71.4/(d.remainingChargeTime/60));
     const lvl=kw>=20?'DC Fast (L3)':kw>=2?'Level 2':'Level 1';
     const lvlColor=kw>=20?'var(--green)':kw>=2?'var(--accent)':'var(--yellow)';
     const ct=d.chargeType!=null?` (type ${d.chargeType})`:'';
+    html+=`<div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border)">`;
     html+=`<div class="row"><span class="k">${t('battery.full_in')}</span><span>${Math.floor(d.remainingChargeTime/60)}h ${d.remainingChargeTime%60}min</span></div>`;
     html+=`<div class="row"><span class="k">${t('battery.full_at')}</span><span>${new Date(Date.now()+d.remainingChargeTime*60000).toLocaleTimeString(LC,{hour:'2-digit',minute:'2-digit'})}</span></div>`;
     html+=`<div class="row"><span class="k">${t('battery.charge_rate')}</span><span>${kw.toFixed(1)} kW</span></div>`;
     html+=`<div class="row"><span class="k">Charger</span><span style="color:${lvlColor};font-weight:600">${lvl}${ct}</span></div>`;
+    html+=`</div>`;
   }
-  if(d.lastUpdateTimestamp)html+=`<div class="row"><span class="k">${t('battery.last_update')}</span><span>${fmtDate(d.lastUpdateTimestamp)}</span></div>`;
-  html+=`</div></div>`;
+  if(d.lastUpdateTimestamp)html+=`<div class="row" style="margin-top:8px"><span class="k">${t('battery.last_update')}</span><span class="meta">${fmtDate(d.lastUpdateTimestamp)}</span></div>`;
 
   // Charge cycle stats
   const cycles=d.plugInHistory;
@@ -774,33 +801,48 @@ async function refreshBattery() {
 function renderStatus(d, tel) {
   const el=document.getElementById('statusCard');
   if(!d||d.error){el.innerHTML=`<div class="section-title">${t('status.title')}</div><div class="error" id="statusErr"></div>`;document.getElementById('statusErr').textContent=d?.error||'N/A';return}
-  el.textContent='';
-  const titleDiv=document.createElement('div');titleDiv.className='section-title';titleDiv.textContent=t('status.title');el.appendChild(titleDiv);
-  // Skip categories handled by the Tires & Windows card
+
+  let h=`<div class="section-title">${t('status.title')}</div>`;
+
+  // KPI tiles row
+  const cnt=d.cautionOverallCount||0;
+  const odo=d.telemetry?.odo;
+  const svc=tel?.nextService;
+  h+=`<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:12px;margin-bottom:16px">`;
+  // Warnings tile
+  h+=`<div style="background:${cnt>0?'color-mix(in srgb,var(--red) 8%,var(--bg))':'color-mix(in srgb,var(--green) 8%,var(--bg))'};border-radius:10px;padding:12px;text-align:center">`;
+  h+=`<div class="stat-num" style="color:${cnt>0?'var(--red)':'var(--green)'}">${cnt}</div>`;
+  h+=`<div class="stat-label">Warnings</div></div>`;
+  // Odometer tile
+  if(odo?.value!=null){
+    h+=`<div style="background:color-mix(in srgb,var(--primary) 6%,var(--bg));border-radius:10px;padding:12px;text-align:center">`;
+    h+=`<div class="stat-num" style="font-size:20px">${odo.value.toLocaleString(LC)}</div>`;
+    h+=`<div class="stat-label">${normUnit(odo.unit)||distLabel()}</div></div>`;
+  }
+  // Next Service tile
+  if(svc?.value!=null){
+    h+=`<div style="background:color-mix(in srgb,var(--blue) 8%,var(--bg));border-radius:10px;padding:12px;text-align:center">`;
+    h+=`<div class="stat-num" style="font-size:20px">${svc.value.toLocaleString(LC)}</div>`;
+    h+=`<div class="stat-label">Next Service (${normUnit(svc.unit)||distLabel()})</div></div>`;
+  }
+  h+=`</div>`;
+
+  // Remaining status rows (skip categories handled by Vehicle Status card)
   const skipCats=new Set(['Driver Side','Passenger Side','Other']);
-  let hasContent=false;
+  let hasRows=false;
   for(const cat of d.vehicleStatus||[]){
     if(skipCats.has(cat.category))continue;
-    hasContent=true;
-    const catDiv=document.createElement('div');catDiv.style.cssText='font-size:11px;color:var(--muted);margin-top:6px';catDiv.textContent=ts(cat.category);el.appendChild(catDiv);
+    hasRows=true;
+    h+=`<div style="font-size:11px;color:var(--muted);margin-top:6px">${_escHtml(ts(cat.category))}</div>`;
     for(const sec of cat.sections||[]){
-      const rowDiv=document.createElement('div');rowDiv.className='row';
-      const kSpan=document.createElement('span');kSpan.className='k';kSpan.textContent=ts(sec.section);rowDiv.appendChild(kSpan);
-      const vSpan=document.createElement('span');
-      for(const v of (sec.values||[])){const tag=document.createElement('span');const bad=/open|unlocked/i.test(v.value);tag.className='tag '+(bad?'tag-warn':'tag-ok');tag.textContent=ts(v.value);vSpan.appendChild(tag);vSpan.appendChild(document.createTextNode(' '))}
-      rowDiv.appendChild(vSpan);el.appendChild(rowDiv);
+      h+=`<div class="row"><span class="k">${_escHtml(ts(sec.section))}</span><span>`;
+      for(const v of (sec.values||[])){const bad=/open|unlocked/i.test(v.value);h+=`<span class="tag ${bad?'tag-warn':'tag-ok'}">${_escHtml(ts(v.value))}</span> `}
+      h+=`</span></div>`;
     }
   }
-  if(d.cautionOverallCount!=null){
-    const r=document.createElement('div');r.className='row';r.style.marginTop=hasContent?'8px':'0';
-    const cnt=d.cautionOverallCount;
-    r.innerHTML=`<span class="k">Vehicle Warnings</span><span class="tag ${cnt>0?'tag-warn':'tag-ok'}">${cnt>0?cnt+' warning(s)':'None'}</span>`;
-    el.appendChild(r);hasContent=true;
-  }
-  if(d.telemetry?.odo?.value!=null){const r=document.createElement('div');r.className='row';r.style.marginTop='8px';r.innerHTML=`<span class="k">${t('status.odometer')}</span><span>${d.telemetry.odo.value.toLocaleString(LC)} ${normUnit(d.telemetry.odo.unit)||distLabel()}</span>`;el.appendChild(r);hasContent=true}
-  if(tel?.nextService?.value!=null){const r=document.createElement('div');r.className='row';r.innerHTML=`<span class="k">Next Service</span><span>${tel.nextService.value.toLocaleString(LC)} ${normUnit(tel.nextService.unit)||distLabel()}</span>`;el.appendChild(r);hasContent=true}
-  if(d.occurrenceDate){const r=document.createElement('div');r.className='row';r.innerHTML=`<span class="k">${t('status.last_update')}</span><span>${fmtDate(d.occurrenceDate)}</span>`;el.appendChild(r);hasContent=true}
-  if(!hasContent){el.innerHTML=`<div class="section-title">${t('status.title')}</div><div class="meta">No additional status data</div>`}
+  if(d.occurrenceDate)h+=`<div class="row" style="margin-top:8px"><span class="k">${t('status.last_update')}</span><span class="meta">${fmtDate(d.occurrenceDate)}</span></div>`;
+  if(!hasRows&&!odo&&!svc&&cnt===0)h+=`<div class="meta">No additional status data</div>`;
+  el.innerHTML=h;
 }
 
 function renderTirePressure(tel, status) {
@@ -841,6 +883,18 @@ function renderTirePressure(tel, status) {
   const carBody=`<rect x="12" y="8" width="56" height="84" rx="12" fill="var(--surface)" stroke="var(--border)" stroke-width="1.5"/>`;
 
   let h=`<div class="section-title">🚗 Vehicle Status</div>`;
+
+  // Summary strip
+  const tireOk=[fl,fr,rl,rr].filter(t=>t&&!t.displayLowTirePressureWarning&&t.value>=30&&t.value<=50).length;
+  const tireTotal=[fl,fr,rl,rr].filter(Boolean).length;
+  const doorsOpen=Object.entries(doorInfo).filter(([k,v])=>/Door/i.test(k)&&(v.open||v.unlocked)).length;
+  const winsOpen=[tel.driverWindow,tel.passengerWindow,tel.rlWindow,tel.rrWindow].filter(v=>v===1).length;
+  const summaryParts=[];
+  if(tireTotal)summaryParts.push(`<span style="color:${tireOk===tireTotal?'var(--green)':'var(--yellow)'}">${tireOk}/${tireTotal} tires OK</span>`);
+  summaryParts.push(`<span style="color:${doorsOpen?'var(--yellow)':'var(--green)'}">${doorsOpen} door${doorsOpen!==1?'s':''} open</span>`);
+  summaryParts.push(`<span style="color:${winsOpen?'var(--yellow)':'var(--green)'}">${winsOpen} window${winsOpen!==1?'s':''} open</span>`);
+  h+=`<div style="display:flex;gap:12px;flex-wrap:wrap;font-size:12px;font-weight:500;margin-bottom:12px;padding:8px 12px;background:color-mix(in srgb,var(--border) 30%,var(--bg));border-radius:8px">${summaryParts.join(' <span style="color:var(--border)">·</span> ')}</div>`;
+
   h+=`<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:8px 0">`;
 
   // --- Tires section ---
@@ -975,11 +1029,17 @@ function renderLocation(d) {
   const el=document.getElementById('locationCard');
   if(!d||d.error){el.innerHTML=`<div class="section-title">${t('location.title')}</div><div class="error" id="locErr"></div>`;document.getElementById('locErr').textContent=d?.error||'N/A';return}
   const loc=d.vehicleLocation||d,lat=loc.latitude,lon=loc.longitude,ts2=loc.locationAcquisitionDatetime||d.lastTimestamp;
-  let h=`<div class="section-title">${t('location.title')}</div>`;
+  let h=`<div class="section-title" style="display:flex;justify-content:space-between;align-items:center">${t('location.title')}`;
+  if(ts2){
+    const ago=Math.round((Date.now()-new Date(ts2).getTime())/60000);
+    const agoLabel=ago<1?'just now':ago<60?ago+'m ago':Math.round(ago/60)+'h ago';
+    const stale=ago>60;
+    h+=`<span style="font-size:11px;font-weight:500;padding:2px 8px;border-radius:8px;background:${stale?'color-mix(in srgb,var(--yellow) 12%,var(--bg))':'color-mix(in srgb,var(--green) 10%,var(--bg))'};color:${stale?'var(--yellow)':'var(--green)'}">⏱ ${agoLabel}</span>`;
+  }
+  h+=`</div>`;
   if(lat&&lon){
-    h+=`<div class="row"><span class="k">${t('location.position')}</span><span>${lat.toFixed(5)}, ${lon.toFixed(5)}</span></div>`;
-    if(ts2)h+=`<div class="row"><span class="k">${t('location.last_update')}</span><span>${fmtDate(ts2)}</span></div>`;
-    h+=`<iframe style="width:100%;height:200px;border-radius:6px;border:1px solid var(--border);margin-top:8px" loading="lazy" src="https://www.openstreetmap.org/export/embed.html?bbox=${lon-.004},${lat-.002},${lon+.004},${lat+.002}&layer=mapnik&marker=${lat},${lon}"></iframe>`;
+    h+=`<iframe style="width:100%;height:260px;border-radius:10px;border:1px solid var(--border);margin-bottom:8px" loading="lazy" src="https://www.openstreetmap.org/export/embed.html?bbox=${lon-.004},${lat-.002},${lon+.004},${lat+.002}&layer=mapnik&marker=${lat},${lon}"></iframe>`;
+    h+=`<div class="meta" style="text-align:center">${lat.toFixed(5)}, ${lon.toFixed(5)}</div>`;
   }else h+=`<div class="meta">${t('location.unavailable')}</div>`;
   el.innerHTML=h;
 }
@@ -1022,45 +1082,58 @@ function renderRemote(remoteCaps, climateSettings) {
     'find-vehicle': rc.vehicleFinderCapable,
   };
 
-  function grp(label, btns) {
-    let g=`<div style="margin-bottom:8px"><div class="meta" style="margin-bottom:4px">${label}</div><div style="display:flex;gap:6px;flex-wrap:wrap">`;
-    for (const b of btns) {
-      const supported = capMap[b.cmd];
-      const disabled = supported === false;
-      const style = disabled ? 'opacity:0.35;cursor:not-allowed' : '';
-      const disAttr = disabled ? 'disabled' : '';
-      const tip = disabled ? b.tip + ' (not supported)' : b.tip;
-      g+=`<button class="btn btn-sm" data-cmd="${_escAttr(b.cmd)}" title="${_escAttr(tip)}" ${disAttr} style="${style}">${b.icon} ${_escAttr(b.label)}</button>`;
-    }
-    g+=`</div></div>`;
-    return g;
+  function cmdBtn(b, variant) {
+    const supported = capMap[b.cmd];
+    const disabled = supported === false;
+    const disAttr = disabled ? 'disabled' : '';
+    const tip = disabled ? b.tip + ' (not supported)' : b.tip;
+    let cls='btn btn-sm';
+    if(variant==='destructive')cls+=' btn-destructive';
+    else if(variant==='primary')cls+=' btn-primary';
+    const extraStyle = disabled ? 'opacity:0.35;cursor:not-allowed;' : '';
+    return `<button class="${cls}" data-cmd="${_escAttr(b.cmd)}" title="${_escAttr(tip)}" ${disAttr} style="${extraStyle}">${b.icon} ${_escAttr(b.label)}</button>`;
   }
 
-  h+=grp(t('remote.group_doors'), [
-    {cmd:'door-lock', icon:'&#128274;', label:t('remote.lock'), tip:t('remote.lock_desc')},
-    {cmd:'door-unlock', icon:'&#128275;', label:t('remote.unlock'), tip:t('remote.unlock_desc')},
-  ]);
-  h+=grp(t('remote.group_hatch'), [
-    {cmd:'trunk-lock', icon:'&#128274;', label:t('remote.hatch_lock'), tip:t('remote.hatch_lock')},
-    {cmd:'trunk-unlock', icon:'&#128275;', label:t('remote.hatch_unlock'), tip:t('remote.hatch_unlock')},
-  ]);
-  h+=grp(t('remote.group_lights'), [
-    {cmd:'headlight-on', icon:'&#128161;', label:t('remote.headlight_on'), tip:t('remote.headlight_on')},
-    {cmd:'headlight-off', icon:'&#128262;', label:t('remote.headlight_off'), tip:t('remote.headlight_off')},
-    {cmd:'hazard-on', icon:'&#9888;', label:t('remote.hazard_on'), tip:t('remote.hazard_on')},
-    {cmd:'hazard-off', icon:'&#10060;', label:t('remote.hazard_off'), tip:t('remote.hazard_off')},
-  ]);
-  h+=grp(t('remote.group_horn'), [
-    {cmd:'sound-horn', icon:'&#128227;', label:t('remote.horn'), tip:t('remote.horn')},
-    {cmd:'buzzer-warning', icon:'&#128276;', label:t('remote.buzzer'), tip:t('remote.buzzer')},
-  ]);
-  h+=grp(t('remote.group_engine'), [
-    {cmd:'engine-start', icon:'&#9654;', label:t('remote.engine_start'), tip:t('remote.engine_start')},
-    {cmd:'engine-stop', icon:'&#9632;', label:t('remote.engine_stop'), tip:t('remote.engine_stop')},
-  ]);
-  h+=grp(t('remote.group_find'), [
-    {cmd:'find-vehicle', icon:'&#128269;', label:t('remote.find_vehicle'), tip:t('remote.find_vehicle')},
-  ]);
+  // Primary actions — most common day-to-day
+  h+=`<div style="margin-bottom:14px">`;
+  h+=`<div class="meta" style="margin-bottom:6px;font-weight:600">${t('remote.group_doors')}</div>`;
+  h+=`<div style="display:flex;gap:6px;flex-wrap:wrap">`;
+  h+=cmdBtn({cmd:'door-lock', icon:'&#128274;', label:t('remote.lock'), tip:t('remote.lock_desc')}, 'primary');
+  h+=cmdBtn({cmd:'door-unlock', icon:'&#128275;', label:t('remote.unlock'), tip:t('remote.unlock_desc')});
+  h+=`</div></div>`;
+
+  h+=`<div style="margin-bottom:14px">`;
+  h+=`<div class="meta" style="margin-bottom:6px;font-weight:600">${t('remote.group_hatch')}</div>`;
+  h+=`<div style="display:flex;gap:6px;flex-wrap:wrap">`;
+  h+=cmdBtn({cmd:'trunk-lock', icon:'&#128274;', label:t('remote.hatch_lock'), tip:t('remote.hatch_lock')});
+  h+=cmdBtn({cmd:'trunk-unlock', icon:'&#128275;', label:t('remote.hatch_unlock'), tip:t('remote.hatch_unlock')});
+  h+=`</div></div>`;
+
+  // Secondary — lights, find, engine
+  h+=`<div style="margin-bottom:14px;padding-top:10px;border-top:1px solid var(--border)">`;
+  h+=`<div class="meta" style="margin-bottom:6px;font-weight:600">${t('remote.group_lights')} / ${t('remote.group_find')}</div>`;
+  h+=`<div style="display:flex;gap:6px;flex-wrap:wrap">`;
+  h+=cmdBtn({cmd:'headlight-on', icon:'&#128161;', label:t('remote.headlight_on'), tip:t('remote.headlight_on')});
+  h+=cmdBtn({cmd:'headlight-off', icon:'&#128262;', label:t('remote.headlight_off'), tip:t('remote.headlight_off')});
+  h+=cmdBtn({cmd:'find-vehicle', icon:'&#128269;', label:t('remote.find_vehicle'), tip:t('remote.find_vehicle')});
+  h+=`</div></div>`;
+
+  h+=`<div style="margin-bottom:14px">`;
+  h+=`<div class="meta" style="margin-bottom:6px;font-weight:600">${t('remote.group_engine')}</div>`;
+  h+=`<div style="display:flex;gap:6px;flex-wrap:wrap">`;
+  h+=cmdBtn({cmd:'engine-start', icon:'&#9654;', label:t('remote.engine_start'), tip:t('remote.engine_start')});
+  h+=cmdBtn({cmd:'engine-stop', icon:'&#9632;', label:t('remote.engine_stop'), tip:t('remote.engine_stop')});
+  h+=`</div></div>`;
+
+  // Destructive — hazards, horn (attention-getting, use with caution)
+  h+=`<div style="margin-bottom:8px;padding-top:10px;border-top:1px solid var(--border)">`;
+  h+=`<div class="meta" style="margin-bottom:6px;font-weight:600;color:var(--yellow)">⚠ ${t('remote.group_horn')} / Alerts</div>`;
+  h+=`<div style="display:flex;gap:6px;flex-wrap:wrap">`;
+  h+=cmdBtn({cmd:'hazard-on', icon:'&#9888;', label:t('remote.hazard_on'), tip:t('remote.hazard_on')}, 'destructive');
+  h+=cmdBtn({cmd:'hazard-off', icon:'&#10060;', label:t('remote.hazard_off'), tip:t('remote.hazard_off')});
+  h+=cmdBtn({cmd:'sound-horn', icon:'&#128227;', label:t('remote.horn'), tip:t('remote.horn')}, 'destructive');
+  h+=cmdBtn({cmd:'buzzer-warning', icon:'&#128276;', label:t('remote.buzzer'), tip:t('remote.buzzer')});
+  h+=`</div></div>`;
 
   // Climate settings from /v1/global/remote/climate-settings
   if (cs) {
