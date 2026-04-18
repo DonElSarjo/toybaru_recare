@@ -568,7 +568,7 @@ async function loadOverview() {
   }
   renderVehicleHero(allData.vehicle, allData.battery?.solar);
   renderBattery(allData.battery, allData);
-  renderStatus(allData.status);
+  renderStatus(allData.status, allData.telemetry);
   renderTirePressure(allData.telemetry, allData.status);
   renderLocation(allData.location);
   renderEfficiency(allData);
@@ -766,7 +766,7 @@ async function refreshBattery() {
   btn.disabled=false;btn.textContent=t('battery.refresh_btn');btn.style.opacity='1';
 }
 
-function renderStatus(d) {
+function renderStatus(d, tel) {
   const el=document.getElementById('statusCard');
   if(!d||d.error){el.innerHTML=`<div class="section-title">${t('status.title')}</div><div class="error" id="statusErr"></div>`;document.getElementById('statusErr').textContent=d?.error||'N/A';return}
   el.textContent='';
@@ -793,6 +793,7 @@ function renderStatus(d) {
     el.appendChild(r);hasContent=true;
   }
   if(d.telemetry?.odo?.value!=null){const r=document.createElement('div');r.className='row';r.style.marginTop='8px';r.innerHTML=`<span class="k">${t('status.odometer')}</span><span>${d.telemetry.odo.value.toLocaleString(LC)} ${normUnit(d.telemetry.odo.unit)||distLabel()}</span>`;el.appendChild(r);hasContent=true}
+  if(tel?.nextService?.value!=null){const r=document.createElement('div');r.className='row';r.innerHTML=`<span class="k">Next Service</span><span>${tel.nextService.value.toLocaleString(LC)} ${normUnit(tel.nextService.unit)||distLabel()}</span>`;el.appendChild(r);hasContent=true}
   if(d.occurrenceDate){const r=document.createElement('div');r.className='row';r.innerHTML=`<span class="k">${t('status.last_update')}</span><span>${fmtDate(d.occurrenceDate)}</span>`;el.appendChild(r);hasContent=true}
   if(!hasContent){el.innerHTML=`<div class="section-title">${t('status.title')}</div><div class="meta">No additional status data</div>`}
 }
@@ -962,9 +963,6 @@ function renderTirePressure(tel, status) {
 
   h+=`</div>`; // close grid
 
-  if(tel.nextService?.value!=null){
-    h+=`<div class="row" style="margin-top:8px"><span class="k">Next Service</span><span>${tel.nextService.value.toLocaleString(LC)} ${normUnit(tel.nextService.unit)||distLabel()}</span></div>`;
-  }
   el.innerHTML=h;
 }
 
