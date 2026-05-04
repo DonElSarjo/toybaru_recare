@@ -1,6 +1,8 @@
 # Toybaru ReCare
 
-A self-hosted dashboard for the Subaru Solterra and Toyota bZ4X that gives you full access to your own driving data -- the data that Subaru and Toyota collect but never show you. Supports both **EU** (Subaru) and **NA** (Toyota) regions, including OTP/2FA authentication.
+A self-hosted dashboard for the Subaru Solterra and Toyota bZ4X that gives you access to your own driving data -- the data that Subaru and Toyota collect but never show you.
+
+Primary target is **EU (Subaru Solterra on SubaruConnect)**. NA (Toyota bZ4X on Toyota Connected Services) is supported for login and the parts of the API that work, but is best-effort -- see the notes below.
 
 ## Why this exists
 
@@ -48,9 +50,10 @@ So I built a dashboard around it. Import your trips, store them locally (so Suba
 - HVAC climate preset settings displayed in Remote Controls (temperature, blower, defoggers)
 - Door/window/hatch lock status with open/closed indicators
 - Last known GPS position on a map
-- Remote controls: lock/unlock doors, lock/unlock hatch, headlights on/off, hazard lights on/off, sound horn, buzzer warning, engine start/stop, find vehicle
-- Automatic unit detection (miles/km) based on your region
-- Date/time format adapts to region (MM/DD/YYYY 12h AM/PM for NA, DD/MM/YYYY 24h for EU)
+- Top-down vehicle illustration on the start page, tinted to match your car's actual paint colour
+- Remote controls (still in testing -- see notes): lock/unlock doors, lock/unlock hatch, headlights on/off, hazard lights on/off, sound horn, buzzer warning, engine start/stop, find vehicle
+- Unit labels follow the upstream account setting (km/h vs mph, °C vs °F). The dashboard never converts values -- it only shows the unit string the API reports.
+- Date/time format adapts to region (DD/MM/YYYY 24h for EU; MM/DD/YYYY 12h AM/PM for NA)
 - Last trip summary with key metrics (EU only -- see note below)
 
 **Battery Health**
@@ -128,10 +131,11 @@ So I built a dashboard around it. Import your trips, store them locally (so Suba
 - Solar panel status detection (equipped vs N/A)
 - Charge cycle tracking via plugInHistory counter
 - Trips, Statistics, and Data tabs automatically hidden for NA users (Toyota NA does not provide trip or charging history data)
-- Unit display adapts to region (miles for NA, km for EU)
+- Unit display follows the API's per-field unit (e.g. miles/mph for a NA account, km/km/h for an EU account) -- no client-side conversion
 
 **Multi-language**
-- Ships with German (de) and English (en)
+- 9 locales: German (`de`), English UK (`en`), English US (`en-US`), Spanish ES (`es-ES`), Spanish MX (`es-MX`), French FR (`fr-FR`), French CA (`fr-CA`), Japanese (`ja-JP`), Dutch (`nl-NL`)
+- Each locale ships its own metric/imperial unit words (e.g. `Kilometer`/`Meilen` in German, `km/u` in Dutch). Translation strings reference them via `{distLong}`, `{speed}`, `{cityThr}` placeholders -- the dashboard substitutes the right one based on the API account's unit setting.
 - Add more languages by dropping a JSON file into the locales directory
 - Language switcher dropdown, preference saved in browser
 
@@ -247,14 +251,16 @@ Use `en.json` as a template. The language will appear automatically in the dropd
 
 After the initial import, use the **Fetch new trips** button on the Trips tab to pull only the latest data.
 
+See [CHANGELOG.md](CHANGELOG.md) for release notes.
+
 ## Important notes
 
-- **Tested on a 2023 Subaru Solterra (EU/Germany) and a 2026 Toyota bZ4X XLE FWD PLUS (NA/US).** Other regions may work but are untested. Feedback welcome.
+- **Tested on a 2023 Subaru Solterra (EU / Germany) and a 2026 Toyota bZ4X XLE FWD PLUS (NA / US).** EU is the primary target. Other regions may work but are untested.
+- **Remote commands are still in testing.** They are wired up end-to-end and will return success when the cloud accepts the command, but they are fire-and-forget: the car has to wake up to actually execute them (15-60s). Availability varies by model and region. Treat a success response as "cloud accepted", not "car did it".
 - **Toyota NA uses OTP via email for authentication.** The codes arrive from `donotreply@toyotaconnectedservices.com` (Toyota) or `noreply@subaruconnectedservices.io` (Subaru) and may land in your spam folder.
 - **Toyota NA does not provide trip or charging history data.** Neither trip logs nor charging session history are available through Toyota's North America API. The Trips, Statistics, and Data tabs are automatically hidden for NA users. Only vehicle status, battery, location, and remote controls are available.
 - **Subaru deletes trip data after approximately 12 months.** This is why local storage matters. Import your data regularly.
 - **The API does not provide kWh consumption per trip.** The endpoints for energy data exist but return 403 (Forbidden) for the Subaru API client.
-- **Remote commands are fire-and-forget.** The car needs to wake up to process them, which can take 15-60 seconds. Not all commands may be supported by your vehicle -- available commands vary by model and region.
 - **No official API documentation exists.** This project is based on reverse-engineering the mobile apps and community research (see Credits).
 
 ## Running tests
@@ -286,12 +292,13 @@ This project was built with assistance from AI. All code was reviewed by the aut
 
 ## Credits
 
-- [evcc](https://github.com/evcc-io/evcc) -- The Subaru EU authentication flow and API endpoints were discovered through their Go implementation
+- [angryhussord/toybaru_recare](https://github.com/angryhussord/toybaru_recare) -- auth code (login, OAuth/PKCE, ForgeRock token exchange, session handling) was taken from here
+- [evcc](https://github.com/evcc-io/evcc) -- original reverse-engineering of the Subaru EU login flow
+- [toyotactl](https://github.com/spotlightishere/toyotactl) -- Toyota NA ForgeRock OTP/2FA flow, devicePrint payload, token-exchange sequence
 - [pytoyoda](https://github.com/pytoyoda/pytoyoda) -- Toyota Connected Europe API reference and data models
-- [toyotactl](https://github.com/spotlightishere/toyotactl) -- Rust implementation of Toyota NA authentication that was essential for cracking the ForgeRock OTP/2FA flow, devicePrint format, and token exchange
-- [ha-toyota-na](https://github.com/widewing/ha-toyota-na) -- Home Assistant integration for Toyota NA that provided the correct API gateway URL, API key, and endpoint paths for the North America region
-- [toyota-na](https://pypi.org/project/toyota-na/) -- Python package for Toyota NA that confirmed remote command payloads, vehicle telemetry endpoints, and the GENERATION header format
-- [SolterraWidget](https://github.com/RossGGG/SolterraWidget) -- Scriptable iOS widget for Solterra that helped verify North America API endpoints and authentication flow
-- [myToyota](https://github.com/Noyax-37/myToyota) -- PHP implementation of Toyota EU API that documented climate control endpoints (climate-settings, climate-control, ac-reservation)
-- [tojota](https://github.com/calmjm/tojota) -- Python Toyota MyT API tool whose example data helped decode plugInHistory and plugStatus codes
-- OpenStreetMap contributors -- Map tiles
+- [ha-toyota-na](https://github.com/widewing/ha-toyota-na) -- API gateway URL, API key, and endpoint paths for Toyota NA
+- [toyota-na](https://pypi.org/project/toyota-na/) -- remote command payloads, telemetry endpoints, GENERATION header format
+- [SolterraWidget](https://github.com/RossGGG/SolterraWidget) -- NA endpoint and auth-flow verification
+- [myToyota](https://github.com/Noyax-37/myToyota) -- climate-settings, climate-control, ac-reservation endpoints
+- [tojota](https://github.com/calmjm/tojota) -- plugInHistory and plugStatus decoding
+- OpenStreetMap contributors -- map tiles

@@ -1,0 +1,4420 @@
+{
+  "timestamp": "2026-04-17T07:55:40.479519+00:00",
+  "endpoints": [
+    {
+      "path": "v1/vehicle/guid",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v2/vehicle/guid",
+      "method": "GET",
+      "status": 200,
+      "desc": "Vehicle list v2",
+      "type": "list[1]",
+      "item_keys": [
+        "alerts",
+        "asiCode",
+        "brand",
+        "capabilities",
+        "carlineName",
+        "color",
+        "commercialRental",
+        "contractId",
+        "ctsLinks",
+        "dataConsent",
+        "dateOfFirstUse",
+        "dcm",
+        "dcmActive",
+        "dcms",
+        "displayModelDescription",
+        "displaySubscriptions",
+        "electricalPlatformCode",
+        "emergencyContact",
+        "evVehicle",
+        "extendedCapabilities",
+        "externalSubscriptions",
+        "familySharing",
+        "faqUrl",
+        "features",
+        "fleetInd",
+        "fuelType",
+        "generation",
+        "headUnit",
+        "hwType",
+        "image"
+      ]
+    },
+    {
+      "path": "v3/vehicle/guid",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v4/vehicle/guid",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v4/account",
+      "method": "GET",
+      "status": 200,
+      "desc": "Account info",
+      "type": "object",
+      "fields": {
+        "customer": {
+          "type": "object",
+          "keys": [
+            "accountStatus",
+            "additionalAttributes",
+            "countryOfResidence",
+            "createDate",
+            "createSource",
+            "customerType",
+            "emails",
+            "firstName",
+            "forgerockId",
+            "guid",
+            "initiatedBrand",
+            "isCpMigrated",
+            "isDealer",
+            "isPmAccepted",
+            "lastName",
+            "lastUpdateDate",
+            "lastUpdateSource",
+            "phoneNumbers",
+            "preferredLanguage",
+            "signupType"
+          ]
+        }
+      }
+    },
+    {
+      "path": "v1/vehicle-association/vehicle",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v1/global/remote/status",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 429: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v1/global/remote/engine-status",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v1/vehicle/electric/status",
+      "method": "GET",
+      "status": 200,
+      "desc": "Electric status (evcc)",
+      "type": "object",
+      "fields": {
+        "batteryLevel": {
+          "type": "int",
+          "sample": "57"
+        },
+        "chargingStatus": {
+          "type": "str",
+          "sample": "charging"
+        },
+        "evRange": {
+          "type": "object",
+          "keys": [
+            "unit",
+            "value"
+          ]
+        },
+        "evRangeWithAc": {
+          "type": "object",
+          "keys": [
+            "unit",
+            "value"
+          ]
+        },
+        "totalRangeWithAc": {
+          "type": "object",
+          "keys": [
+            "unit",
+            "value"
+          ]
+        },
+        "remainingChargeTime": {
+          "type": "int",
+          "sample": "670"
+        },
+        "lastUpdateTimestamp": {
+          "type": "str",
+          "sample": "2026-04-17T07:46:31Z"
+        },
+        "dcmTimestamp": {
+          "type": "str",
+          "sample": "2026-04-17T07:46:27Z"
+        }
+      }
+    },
+    {
+      "path": "v1/global/remote/electric/status",
+      "method": "GET",
+      "status": 200,
+      "desc": "Electric status (old)",
+      "type": "object",
+      "fields": {
+        "batteryLevel": {
+          "type": "int",
+          "sample": "57"
+        },
+        "chargingStatus": {
+          "type": "str",
+          "sample": "charging"
+        },
+        "evRange": {
+          "type": "object",
+          "keys": [
+            "unit",
+            "value"
+          ]
+        },
+        "evRangeWithAc": {
+          "type": "object",
+          "keys": [
+            "unit",
+            "value"
+          ]
+        },
+        "remainingChargeTime": {
+          "type": "int",
+          "sample": "670"
+        },
+        "lastUpdateTimestamp": {
+          "type": "str",
+          "sample": "2026-04-17T07:46:27Z"
+        }
+      }
+    },
+    {
+      "path": "v1/global/remote/electric/realtime-status",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v1/location",
+      "method": "GET",
+      "status": 200,
+      "desc": "Location",
+      "type": "object",
+      "fields": {
+        "vin": {
+          "type": "str",
+          "sample": "JF1AABAA9PA006121"
+        },
+        "lastTimestamp": {
+          "type": "str",
+          "sample": "2026-04-17T07:11:01Z"
+        },
+        "vehicleLocation": {
+          "type": "object",
+          "keys": [
+            "displayName",
+            "latitude",
+            "locationAcquisitionDatetime",
+            "longitude"
+          ]
+        }
+      }
+    },
+    {
+      "path": "v2/location",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v3/location",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v1/telemetry",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v2/telemetry",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v3/telemetry",
+      "method": "GET",
+      "status": 200,
+      "desc": "Telemetry v3",
+      "type": "object",
+      "fields": {
+        "fuelType": {
+          "type": "str",
+          "sample": "E"
+        },
+        "odometer": {
+          "type": "object",
+          "keys": [
+            "unit",
+            "value"
+          ]
+        },
+        "batteryLevel": {
+          "type": "int",
+          "sample": "57"
+        },
+        "distanceToEmpty": {
+          "type": "object",
+          "keys": [
+            "unit",
+            "value"
+          ]
+        },
+        "timestamp": {
+          "type": "str",
+          "sample": "2026-04-17T07:46:27Z"
+        },
+        "chargingStatus": {
+          "type": "str",
+          "sample": "charging"
+        }
+      }
+    },
+    {
+      "path": "v1/vehiclehealth/status",
+      "method": "GET",
+      "status": 200,
+      "desc": "Vehicle health",
+      "type": "object",
+      "fields": {
+        "quantityOfEngOilIcon": {
+          "type": "list[0]"
+        },
+        "warning": {
+          "type": "list[0]"
+        },
+        "vin": {
+          "type": "str",
+          "sample": "JF1AABAA9PA006121"
+        },
+        "wnglastUpdTime": {
+          "type": "str",
+          "sample": "2026-04-17T07:55:45.810Z"
+        }
+      }
+    },
+    {
+      "path": "v2/vehiclehealth/status",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v1/notification/history",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v2/notification/history",
+      "method": "GET",
+      "status": 200,
+      "desc": "Notifications v2",
+      "type": "list[1]",
+      "item_keys": [
+        "notifications"
+      ]
+    },
+    {
+      "path": "v3/notification/history",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v1/servicehistory/vehicle/summary",
+      "method": "GET",
+      "status": 200,
+      "desc": "Service history",
+      "type": "object",
+      "fields": {
+        "serviceHistories": {
+          "type": "list[0]"
+        }
+      }
+    },
+    {
+      "path": "v1/global/remote/climate-status",
+      "method": "GET",
+      "status": 200,
+      "desc": "Climate status",
+      "type": "object",
+      "fields": {
+        "type": {
+          "type": "str",
+          "sample": "full"
+        },
+        "status": {
+          "type": "int",
+          "sample": "0"
+        }
+      }
+    },
+    {
+      "path": "v1/global/remote/climate-settings",
+      "method": "GET",
+      "status": 200,
+      "desc": "Climate settings",
+      "type": "object",
+      "fields": {
+        "temperature": {
+          "type": "float",
+          "sample": "18.0"
+        },
+        "temperatureUnit": {
+          "type": "str",
+          "sample": "C"
+        },
+        "minTemp": {
+          "type": "float",
+          "sample": "18.0"
+        },
+        "maxTemp": {
+          "type": "float",
+          "sample": "29.0"
+        },
+        "tempInterval": {
+          "type": "float",
+          "sample": "1.0"
+        },
+        "acOperations": {
+          "type": "list[3]",
+          "item_keys": [
+            "acParameters",
+            "available",
+            "categoryDisplayName",
+            "categoryName"
+          ]
+        },
+        "settingsOn": {
+          "type": "bool",
+          "sample": "True"
+        }
+      }
+    },
+    {
+      "path": "v1/global/remote/refresh-climate-status",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v1/electricPulse",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v2/electricPulse",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v3/electricPulse",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v1/vehicle/electricPulse",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v1/drivePulse",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v2/drivePulse",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v1/vehicle/drivePulse",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v1/vehicle/energy",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v2/vehicle/energy",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v1/consumption",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v1/charging/history",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v1/vehicle/charging",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v1/vehicle/electric/charging-history",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v1/global/remote/electric/command",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v1/vehicle/diagnostic",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v1/vehicle/diagnostics",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v2/vehicle/diagnostic",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v1/trips/a75f3707-b27c-4503-a2b5-7559942b1a75",
+      "method": "GET",
+      "status": 200,
+      "desc": "trip (base)",
+      "type": "object",
+      "fields": {
+        "id": {
+          "type": "str",
+          "sample": "a75f3707-b27c-4503-a2b5-7559942b1a75"
+        },
+        "processedIn": {
+          "type": "int",
+          "sample": "10"
+        },
+        "summary": {
+          "type": "object",
+          "keys": [
+            "averageSpeed",
+            "duration",
+            "endLat",
+            "endLon",
+            "endTs",
+            "fuelConsumption",
+            "length",
+            "nightTrip",
+            "startLat",
+            "startLon",
+            "startTs"
+          ]
+        },
+        "scores": {
+          "type": "object",
+          "keys": [
+            "acceleration",
+            "advice",
+            "braking",
+            "constantSpeed",
+            "global"
+          ]
+        },
+        "behaviours": {
+          "type": "list[5]",
+          "item_keys": [
+            "coachingMsg",
+            "context",
+            "diagnosticMsg",
+            "good",
+            "lat",
+            "location",
+            "lon",
+            "priority",
+            "severity",
+            "ts",
+            "type"
+          ]
+        },
+        "hdc": {
+          "type": "object",
+          "keys": [
+            "chargeDist",
+            "chargeTime",
+            "ecoDist",
+            "ecoTime",
+            "evDistance",
+            "evTime",
+            "powerDist",
+            "powerTime"
+          ]
+        },
+        "category": {
+          "type": "int",
+          "sample": "0"
+        },
+        "route": {
+          "type": "list[1776]",
+          "item_keys": [
+            "highway",
+            "indexInPoints",
+            "isEv",
+            "lat",
+            "lon",
+            "mode",
+            "overspeed"
+          ]
+        },
+        "createdOn": {
+          "type": "str",
+          "sample": "2026-04-17T07:10:11Z"
+        }
+      }
+    },
+    {
+      "path": "v1/trips/a75f3707-b27c-4503-a2b5-7559942b1a75/energy",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v1/trips/a75f3707-b27c-4503-a2b5-7559942b1a75/statistics",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v1/trips/a75f3707-b27c-4503-a2b5-7559942b1a75/summary",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v1/trips/a75f3707-b27c-4503-a2b5-7559942b1a75/route",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v1/trips/a75f3707-b27c-4503-a2b5-7559942b1a75/behaviours",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v1/trips/a75f3707-b27c-4503-a2b5-7559942b1a75/scores",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v1/trips/a75f3707-b27c-4503-a2b5-7559942b1a75/hdc",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v1/trips/a75f3707-b27c-4503-a2b5-7559942b1a75/details",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v1/trips/a75f3707-b27c-4503-a2b5-7559942b1a75/analysis",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    }
+  ],
+  "trips_params": [
+    {
+      "desc": "route=false summary=false",
+      "status": 200,
+      "trip_count": 1,
+      "summary_count": 0,
+      "top_keys": [
+        "behaviours",
+        "category",
+        "hdc",
+        "id",
+        "processedIn",
+        "scores",
+        "summary"
+      ],
+      "summary_keys": [
+        "averageSpeed",
+        "duration",
+        "endLat",
+        "endLon",
+        "endTs",
+        "fuelConsumption",
+        "length",
+        "nightTrip",
+        "startLat",
+        "startLon",
+        "startTs"
+      ],
+      "summary_values": {
+        "length": 38953,
+        "duration": 2414,
+        "averageSpeed": 58.09,
+        "fuelConsumption": 0.0,
+        "startLat": 54.159,
+        "startLon": 10.4331,
+        "startTs": "2026-04-17T06:29:47Z",
+        "endLat": 54.3343,
+        "endLon": 10.1202,
+        "endTs": "2026-04-17T07:10:01Z",
+        "nightTrip": false
+      },
+      "scores_keys": [
+        "acceleration",
+        "advice",
+        "braking",
+        "constantSpeed",
+        "global"
+      ],
+      "hdc_keys": [
+        "chargeDist",
+        "chargeTime",
+        "ecoDist",
+        "ecoTime",
+        "evDistance",
+        "evTime",
+        "powerDist",
+        "powerTime"
+      ],
+      "route_count": 0,
+      "behaviour_count": 5,
+      "behaviour_keys": [
+        "coachingMsg",
+        "context",
+        "diagnosticMsg",
+        "good",
+        "lat",
+        "lon",
+        "priority",
+        "severity",
+        "ts",
+        "type"
+      ],
+      "pagination": {
+        "limit": 1,
+        "offset": 0,
+        "previousOffset": null,
+        "nextOffset": null,
+        "currentPage": 1,
+        "totalCount": 1,
+        "pageCount": 1
+      }
+    },
+    {
+      "desc": "route=true summary=false",
+      "status": 200,
+      "trip_count": 1,
+      "summary_count": 0,
+      "top_keys": [
+        "behaviours",
+        "category",
+        "hdc",
+        "id",
+        "processedIn",
+        "route",
+        "scores",
+        "summary"
+      ],
+      "summary_keys": [
+        "averageSpeed",
+        "duration",
+        "endLat",
+        "endLon",
+        "endTs",
+        "fuelConsumption",
+        "length",
+        "nightTrip",
+        "startLat",
+        "startLon",
+        "startTs"
+      ],
+      "summary_values": {
+        "length": 38953,
+        "duration": 2414,
+        "averageSpeed": 58.09,
+        "fuelConsumption": 0.0,
+        "startLat": 54.159,
+        "startLon": 10.4331,
+        "startTs": "2026-04-17T06:29:47Z",
+        "endLat": 54.3343,
+        "endLon": 10.1202,
+        "endTs": "2026-04-17T07:10:01Z",
+        "nightTrip": false
+      },
+      "scores_keys": [
+        "acceleration",
+        "advice",
+        "braking",
+        "constantSpeed",
+        "global"
+      ],
+      "hdc_keys": [
+        "chargeDist",
+        "chargeTime",
+        "ecoDist",
+        "ecoTime",
+        "evDistance",
+        "evTime",
+        "powerDist",
+        "powerTime"
+      ],
+      "route_count": 1776,
+      "route_keys": [
+        "highway",
+        "indexInPoints",
+        "isEv",
+        "lat",
+        "lon",
+        "mode",
+        "overspeed"
+      ],
+      "behaviour_count": 5,
+      "behaviour_keys": [
+        "coachingMsg",
+        "context",
+        "diagnosticMsg",
+        "good",
+        "lat",
+        "lon",
+        "priority",
+        "severity",
+        "ts",
+        "type"
+      ],
+      "pagination": {
+        "limit": 1,
+        "offset": 0,
+        "previousOffset": null,
+        "nextOffset": null,
+        "currentPage": 1,
+        "totalCount": 1,
+        "pageCount": 1
+      }
+    },
+    {
+      "desc": "route=false summary=true",
+      "status": 200,
+      "trip_count": 1,
+      "summary_count": 1,
+      "top_keys": [
+        "behaviours",
+        "category",
+        "hdc",
+        "id",
+        "processedIn",
+        "scores",
+        "summary"
+      ],
+      "summary_keys": [
+        "averageSpeed",
+        "duration",
+        "endLat",
+        "endLon",
+        "endTs",
+        "fuelConsumption",
+        "length",
+        "nightTrip",
+        "startLat",
+        "startLon",
+        "startTs"
+      ],
+      "summary_values": {
+        "length": 38953,
+        "duration": 2414,
+        "averageSpeed": 58.09,
+        "fuelConsumption": 0.0,
+        "startLat": 54.159,
+        "startLon": 10.4331,
+        "startTs": "2026-04-17T06:29:47Z",
+        "endLat": 54.3343,
+        "endLon": 10.1202,
+        "endTs": "2026-04-17T07:10:01Z",
+        "nightTrip": false
+      },
+      "scores_keys": [
+        "acceleration",
+        "advice",
+        "braking",
+        "constantSpeed",
+        "global"
+      ],
+      "hdc_keys": [
+        "chargeDist",
+        "chargeTime",
+        "ecoDist",
+        "ecoTime",
+        "evDistance",
+        "evTime",
+        "powerDist",
+        "powerTime"
+      ],
+      "route_count": 0,
+      "behaviour_count": 5,
+      "behaviour_keys": [
+        "coachingMsg",
+        "context",
+        "diagnosticMsg",
+        "good",
+        "lat",
+        "lon",
+        "priority",
+        "severity",
+        "ts",
+        "type"
+      ],
+      "pagination": {
+        "limit": 1,
+        "offset": 0,
+        "previousOffset": null,
+        "nextOffset": null,
+        "currentPage": 1,
+        "totalCount": 1,
+        "pageCount": 1
+      }
+    },
+    {
+      "desc": "route=true summary=true",
+      "status": 200,
+      "trip_count": 1,
+      "summary_count": 1,
+      "top_keys": [
+        "behaviours",
+        "category",
+        "hdc",
+        "id",
+        "processedIn",
+        "route",
+        "scores",
+        "summary"
+      ],
+      "summary_keys": [
+        "averageSpeed",
+        "duration",
+        "endLat",
+        "endLon",
+        "endTs",
+        "fuelConsumption",
+        "length",
+        "nightTrip",
+        "startLat",
+        "startLon",
+        "startTs"
+      ],
+      "summary_values": {
+        "length": 38953,
+        "duration": 2414,
+        "averageSpeed": 58.09,
+        "fuelConsumption": 0.0,
+        "startLat": 54.159,
+        "startLon": 10.4331,
+        "startTs": "2026-04-17T06:29:47Z",
+        "endLat": 54.3343,
+        "endLon": 10.1202,
+        "endTs": "2026-04-17T07:10:01Z",
+        "nightTrip": false
+      },
+      "scores_keys": [
+        "acceleration",
+        "advice",
+        "braking",
+        "constantSpeed",
+        "global"
+      ],
+      "hdc_keys": [
+        "chargeDist",
+        "chargeTime",
+        "ecoDist",
+        "ecoTime",
+        "evDistance",
+        "evTime",
+        "powerDist",
+        "powerTime"
+      ],
+      "route_count": 1776,
+      "route_keys": [
+        "highway",
+        "indexInPoints",
+        "isEv",
+        "lat",
+        "lon",
+        "mode",
+        "overspeed"
+      ],
+      "behaviour_count": 5,
+      "behaviour_keys": [
+        "coachingMsg",
+        "context",
+        "diagnosticMsg",
+        "good",
+        "lat",
+        "lon",
+        "priority",
+        "severity",
+        "ts",
+        "type"
+      ],
+      "pagination": {
+        "limit": 1,
+        "offset": 0,
+        "previousOffset": null,
+        "nextOffset": null,
+        "currentPage": 1,
+        "totalCount": 1,
+        "pageCount": 1
+      }
+    },
+    {
+      "desc": "electricPulse=true",
+      "status": 200,
+      "trip_count": 1,
+      "summary_count": 1,
+      "top_keys": [
+        "behaviours",
+        "category",
+        "hdc",
+        "id",
+        "processedIn",
+        "route",
+        "scores",
+        "summary"
+      ],
+      "summary_keys": [
+        "averageSpeed",
+        "duration",
+        "endLat",
+        "endLon",
+        "endTs",
+        "fuelConsumption",
+        "length",
+        "nightTrip",
+        "startLat",
+        "startLon",
+        "startTs"
+      ],
+      "summary_values": {
+        "length": 38953,
+        "duration": 2414,
+        "averageSpeed": 58.09,
+        "fuelConsumption": 0.0,
+        "startLat": 54.159,
+        "startLon": 10.4331,
+        "startTs": "2026-04-17T06:29:47Z",
+        "endLat": 54.3343,
+        "endLon": 10.1202,
+        "endTs": "2026-04-17T07:10:01Z",
+        "nightTrip": false
+      },
+      "scores_keys": [
+        "acceleration",
+        "advice",
+        "braking",
+        "constantSpeed",
+        "global"
+      ],
+      "hdc_keys": [
+        "chargeDist",
+        "chargeTime",
+        "ecoDist",
+        "ecoTime",
+        "evDistance",
+        "evTime",
+        "powerDist",
+        "powerTime"
+      ],
+      "route_count": 1776,
+      "route_keys": [
+        "highway",
+        "indexInPoints",
+        "isEv",
+        "lat",
+        "lon",
+        "mode",
+        "overspeed"
+      ],
+      "behaviour_count": 5,
+      "behaviour_keys": [
+        "coachingMsg",
+        "context",
+        "diagnosticMsg",
+        "good",
+        "lat",
+        "lon",
+        "priority",
+        "severity",
+        "ts",
+        "type"
+      ],
+      "pagination": {
+        "limit": 1,
+        "offset": 0,
+        "previousOffset": null,
+        "nextOffset": null,
+        "currentPage": 1,
+        "totalCount": 1,
+        "pageCount": 1
+      }
+    },
+    {
+      "desc": "include=all",
+      "status": 200,
+      "trip_count": 1,
+      "summary_count": 1,
+      "top_keys": [
+        "behaviours",
+        "category",
+        "hdc",
+        "id",
+        "processedIn",
+        "route",
+        "scores",
+        "summary"
+      ],
+      "summary_keys": [
+        "averageSpeed",
+        "duration",
+        "endLat",
+        "endLon",
+        "endTs",
+        "fuelConsumption",
+        "length",
+        "nightTrip",
+        "startLat",
+        "startLon",
+        "startTs"
+      ],
+      "summary_values": {
+        "length": 38953,
+        "duration": 2414,
+        "averageSpeed": 58.09,
+        "fuelConsumption": 0.0,
+        "startLat": 54.159,
+        "startLon": 10.4331,
+        "startTs": "2026-04-17T06:29:47Z",
+        "endLat": 54.3343,
+        "endLon": 10.1202,
+        "endTs": "2026-04-17T07:10:01Z",
+        "nightTrip": false
+      },
+      "scores_keys": [
+        "acceleration",
+        "advice",
+        "braking",
+        "constantSpeed",
+        "global"
+      ],
+      "hdc_keys": [
+        "chargeDist",
+        "chargeTime",
+        "ecoDist",
+        "ecoTime",
+        "evDistance",
+        "evTime",
+        "powerDist",
+        "powerTime"
+      ],
+      "route_count": 1776,
+      "route_keys": [
+        "highway",
+        "indexInPoints",
+        "isEv",
+        "lat",
+        "lon",
+        "mode",
+        "overspeed"
+      ],
+      "behaviour_count": 5,
+      "behaviour_keys": [
+        "coachingMsg",
+        "context",
+        "diagnosticMsg",
+        "good",
+        "lat",
+        "lon",
+        "priority",
+        "severity",
+        "ts",
+        "type"
+      ],
+      "pagination": {
+        "limit": 1,
+        "offset": 0,
+        "previousOffset": null,
+        "nextOffset": null,
+        "currentPage": 1,
+        "totalCount": 1,
+        "pageCount": 1
+      }
+    },
+    {
+      "desc": "detail=full",
+      "status": 200,
+      "trip_count": 1,
+      "summary_count": 1,
+      "top_keys": [
+        "behaviours",
+        "category",
+        "hdc",
+        "id",
+        "processedIn",
+        "route",
+        "scores",
+        "summary"
+      ],
+      "summary_keys": [
+        "averageSpeed",
+        "duration",
+        "endLat",
+        "endLon",
+        "endTs",
+        "fuelConsumption",
+        "length",
+        "nightTrip",
+        "startLat",
+        "startLon",
+        "startTs"
+      ],
+      "summary_values": {
+        "length": 38953,
+        "duration": 2414,
+        "averageSpeed": 58.09,
+        "fuelConsumption": 0.0,
+        "startLat": 54.159,
+        "startLon": 10.4331,
+        "startTs": "2026-04-17T06:29:47Z",
+        "endLat": 54.3343,
+        "endLon": 10.1202,
+        "endTs": "2026-04-17T07:10:01Z",
+        "nightTrip": false
+      },
+      "scores_keys": [
+        "acceleration",
+        "advice",
+        "braking",
+        "constantSpeed",
+        "global"
+      ],
+      "hdc_keys": [
+        "chargeDist",
+        "chargeTime",
+        "ecoDist",
+        "ecoTime",
+        "evDistance",
+        "evTime",
+        "powerDist",
+        "powerTime"
+      ],
+      "route_count": 1776,
+      "route_keys": [
+        "highway",
+        "indexInPoints",
+        "isEv",
+        "lat",
+        "lon",
+        "mode",
+        "overspeed"
+      ],
+      "behaviour_count": 5,
+      "behaviour_keys": [
+        "coachingMsg",
+        "context",
+        "diagnosticMsg",
+        "good",
+        "lat",
+        "lon",
+        "priority",
+        "severity",
+        "ts",
+        "type"
+      ],
+      "pagination": {
+        "limit": 1,
+        "offset": 0,
+        "previousOffset": null,
+        "nextOffset": null,
+        "currentPage": 1,
+        "totalCount": 1,
+        "pageCount": 1
+      }
+    },
+    {
+      "desc": "verbose=true",
+      "status": 200,
+      "trip_count": 1,
+      "summary_count": 1,
+      "top_keys": [
+        "behaviours",
+        "category",
+        "hdc",
+        "id",
+        "processedIn",
+        "route",
+        "scores",
+        "summary"
+      ],
+      "summary_keys": [
+        "averageSpeed",
+        "duration",
+        "endLat",
+        "endLon",
+        "endTs",
+        "fuelConsumption",
+        "length",
+        "nightTrip",
+        "startLat",
+        "startLon",
+        "startTs"
+      ],
+      "summary_values": {
+        "length": 38953,
+        "duration": 2414,
+        "averageSpeed": 58.09,
+        "fuelConsumption": 0.0,
+        "startLat": 54.159,
+        "startLon": 10.4331,
+        "startTs": "2026-04-17T06:29:47Z",
+        "endLat": 54.3343,
+        "endLon": 10.1202,
+        "endTs": "2026-04-17T07:10:01Z",
+        "nightTrip": false
+      },
+      "scores_keys": [
+        "acceleration",
+        "advice",
+        "braking",
+        "constantSpeed",
+        "global"
+      ],
+      "hdc_keys": [
+        "chargeDist",
+        "chargeTime",
+        "ecoDist",
+        "ecoTime",
+        "evDistance",
+        "evTime",
+        "powerDist",
+        "powerTime"
+      ],
+      "route_count": 1776,
+      "route_keys": [
+        "highway",
+        "indexInPoints",
+        "isEv",
+        "lat",
+        "lon",
+        "mode",
+        "overspeed"
+      ],
+      "behaviour_count": 5,
+      "behaviour_keys": [
+        "coachingMsg",
+        "context",
+        "diagnosticMsg",
+        "good",
+        "lat",
+        "lon",
+        "priority",
+        "severity",
+        "ts",
+        "type"
+      ],
+      "pagination": {
+        "limit": 1,
+        "offset": 0,
+        "previousOffset": null,
+        "nextOffset": null,
+        "currentPage": 1,
+        "totalCount": 1,
+        "pageCount": 1
+      }
+    },
+    {
+      "desc": "fields=maxSpeed,countries,overspeed",
+      "status": 200,
+      "trip_count": 1,
+      "summary_count": 1,
+      "top_keys": [
+        "behaviours",
+        "category",
+        "hdc",
+        "id",
+        "processedIn",
+        "route",
+        "scores",
+        "summary"
+      ],
+      "summary_keys": [
+        "averageSpeed",
+        "duration",
+        "endLat",
+        "endLon",
+        "endTs",
+        "fuelConsumption",
+        "length",
+        "nightTrip",
+        "startLat",
+        "startLon",
+        "startTs"
+      ],
+      "summary_values": {
+        "length": 38953,
+        "duration": 2414,
+        "averageSpeed": 58.09,
+        "fuelConsumption": 0.0,
+        "startLat": 54.159,
+        "startLon": 10.4331,
+        "startTs": "2026-04-17T06:29:47Z",
+        "endLat": 54.3343,
+        "endLon": 10.1202,
+        "endTs": "2026-04-17T07:10:01Z",
+        "nightTrip": false
+      },
+      "scores_keys": [
+        "acceleration",
+        "advice",
+        "braking",
+        "constantSpeed",
+        "global"
+      ],
+      "hdc_keys": [
+        "chargeDist",
+        "chargeTime",
+        "ecoDist",
+        "ecoTime",
+        "evDistance",
+        "evTime",
+        "powerDist",
+        "powerTime"
+      ],
+      "route_count": 1776,
+      "route_keys": [
+        "highway",
+        "indexInPoints",
+        "isEv",
+        "lat",
+        "lon",
+        "mode",
+        "overspeed"
+      ],
+      "behaviour_count": 5,
+      "behaviour_keys": [
+        "coachingMsg",
+        "context",
+        "diagnosticMsg",
+        "good",
+        "lat",
+        "lon",
+        "priority",
+        "severity",
+        "ts",
+        "type"
+      ],
+      "pagination": {
+        "limit": 1,
+        "offset": 0,
+        "previousOffset": null,
+        "nextOffset": null,
+        "currentPage": 1,
+        "totalCount": 1,
+        "pageCount": 1
+      }
+    },
+    {
+      "desc": "expand=all",
+      "status": 200,
+      "trip_count": 1,
+      "summary_count": 1,
+      "top_keys": [
+        "behaviours",
+        "category",
+        "hdc",
+        "id",
+        "processedIn",
+        "route",
+        "scores",
+        "summary"
+      ],
+      "summary_keys": [
+        "averageSpeed",
+        "duration",
+        "endLat",
+        "endLon",
+        "endTs",
+        "fuelConsumption",
+        "length",
+        "nightTrip",
+        "startLat",
+        "startLon",
+        "startTs"
+      ],
+      "summary_values": {
+        "length": 38953,
+        "duration": 2414,
+        "averageSpeed": 58.09,
+        "fuelConsumption": 0.0,
+        "startLat": 54.159,
+        "startLon": 10.4331,
+        "startTs": "2026-04-17T06:29:47Z",
+        "endLat": 54.3343,
+        "endLon": 10.1202,
+        "endTs": "2026-04-17T07:10:01Z",
+        "nightTrip": false
+      },
+      "scores_keys": [
+        "acceleration",
+        "advice",
+        "braking",
+        "constantSpeed",
+        "global"
+      ],
+      "hdc_keys": [
+        "chargeDist",
+        "chargeTime",
+        "ecoDist",
+        "ecoTime",
+        "evDistance",
+        "evTime",
+        "powerDist",
+        "powerTime"
+      ],
+      "route_count": 1776,
+      "route_keys": [
+        "highway",
+        "indexInPoints",
+        "isEv",
+        "lat",
+        "lon",
+        "mode",
+        "overspeed"
+      ],
+      "behaviour_count": 5,
+      "behaviour_keys": [
+        "coachingMsg",
+        "context",
+        "diagnosticMsg",
+        "good",
+        "lat",
+        "lon",
+        "priority",
+        "severity",
+        "ts",
+        "type"
+      ],
+      "pagination": {
+        "limit": 1,
+        "offset": 0,
+        "previousOffset": null,
+        "nextOffset": null,
+        "currentPage": 1,
+        "totalCount": 1,
+        "pageCount": 1
+      }
+    },
+    {
+      "desc": "version=2",
+      "status": 200,
+      "trip_count": 1,
+      "summary_count": 1,
+      "top_keys": [
+        "behaviours",
+        "category",
+        "hdc",
+        "id",
+        "processedIn",
+        "route",
+        "scores",
+        "summary"
+      ],
+      "summary_keys": [
+        "averageSpeed",
+        "duration",
+        "endLat",
+        "endLon",
+        "endTs",
+        "fuelConsumption",
+        "length",
+        "nightTrip",
+        "startLat",
+        "startLon",
+        "startTs"
+      ],
+      "summary_values": {
+        "length": 38953,
+        "duration": 2414,
+        "averageSpeed": 58.09,
+        "fuelConsumption": 0.0,
+        "startLat": 54.159,
+        "startLon": 10.4331,
+        "startTs": "2026-04-17T06:29:47Z",
+        "endLat": 54.3343,
+        "endLon": 10.1202,
+        "endTs": "2026-04-17T07:10:01Z",
+        "nightTrip": false
+      },
+      "scores_keys": [
+        "acceleration",
+        "advice",
+        "braking",
+        "constantSpeed",
+        "global"
+      ],
+      "hdc_keys": [
+        "chargeDist",
+        "chargeTime",
+        "ecoDist",
+        "ecoTime",
+        "evDistance",
+        "evTime",
+        "powerDist",
+        "powerTime"
+      ],
+      "route_count": 1776,
+      "route_keys": [
+        "highway",
+        "indexInPoints",
+        "isEv",
+        "lat",
+        "lon",
+        "mode",
+        "overspeed"
+      ],
+      "behaviour_count": 5,
+      "behaviour_keys": [
+        "coachingMsg",
+        "context",
+        "diagnosticMsg",
+        "good",
+        "lat",
+        "lon",
+        "priority",
+        "severity",
+        "ts",
+        "type"
+      ],
+      "pagination": {
+        "limit": 1,
+        "offset": 0,
+        "previousOffset": null,
+        "nextOffset": null,
+        "currentPage": 1,
+        "totalCount": 1,
+        "pageCount": 1
+      }
+    },
+    {
+      "desc": "OLD trip Oct 2025",
+      "status": 200,
+      "trip_count": 1,
+      "summary_count": 1,
+      "top_keys": [
+        "behaviours",
+        "category",
+        "hdc",
+        "id",
+        "processedIn",
+        "route",
+        "scores",
+        "summary"
+      ],
+      "summary_keys": [
+        "averageSpeed",
+        "duration",
+        "endLat",
+        "endLon",
+        "endTs",
+        "fuelConsumption",
+        "length",
+        "nightTrip",
+        "startLat",
+        "startLon",
+        "startTs"
+      ],
+      "summary_values": {
+        "length": 1881,
+        "duration": 264,
+        "averageSpeed": 25.65,
+        "fuelConsumption": 0.0,
+        "startLat": 54.1596,
+        "startLon": 10.4127,
+        "startTs": "2025-10-02T16:43:42Z",
+        "endLat": 54.1592,
+        "endLon": 10.4332,
+        "endTs": "2025-10-02T16:48:06Z",
+        "nightTrip": false
+      },
+      "scores_keys": [
+        "acceleration",
+        "advice",
+        "braking",
+        "global"
+      ],
+      "hdc_keys": [
+        "chargeDist",
+        "chargeTime",
+        "ecoDist",
+        "ecoTime",
+        "evDistance",
+        "evTime",
+        "powerDist",
+        "powerTime"
+      ],
+      "route_count": 139,
+      "route_keys": [
+        "highway",
+        "indexInPoints",
+        "isEv",
+        "lat",
+        "lon",
+        "mode",
+        "overspeed"
+      ],
+      "behaviour_count": 3,
+      "behaviour_keys": [
+        "coachingMsg",
+        "context",
+        "diagnosticMsg",
+        "good",
+        "lat",
+        "lon",
+        "priority",
+        "severity",
+        "ts",
+        "type"
+      ],
+      "pagination": {
+        "limit": 1,
+        "offset": 0,
+        "previousOffset": null,
+        "nextOffset": 1,
+        "currentPage": 1,
+        "totalCount": 8,
+        "pageCount": 8
+      }
+    }
+  ],
+  "bruteforce": [
+    {
+      "path": "v1/vehicle",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v1/vehicles",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v1/electric",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v1/trips",
+      "method": "GET",
+      "status": 200,
+      "desc": "",
+      "type": "object",
+      "fields": {
+        "trips": {
+          "type": "list[5]",
+          "item_keys": [
+            "behaviours",
+            "category",
+            "hdc",
+            "id",
+            "processedIn",
+            "scores",
+            "summary"
+          ]
+        },
+        "_metadata": {
+          "type": "object",
+          "keys": [
+            "pagination",
+            "sortedBy"
+          ]
+        }
+      }
+    },
+    {
+      "path": "v1/telemetry",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v1/location",
+      "method": "GET",
+      "status": 200,
+      "desc": "",
+      "type": "object",
+      "fields": {
+        "vin": {
+          "type": "str",
+          "sample": "JF1AABAA9PA006121"
+        },
+        "lastTimestamp": {
+          "type": "str",
+          "sample": "2026-04-17T07:11:01Z"
+        },
+        "vehicleLocation": {
+          "type": "object",
+          "keys": [
+            "displayName",
+            "latitude",
+            "locationAcquisitionDatetime",
+            "longitude"
+          ]
+        }
+      }
+    },
+    {
+      "path": "v1/status",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v1/command",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v1/commands",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v1/climate",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v1/notification",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v1/notifications",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v1/service",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v1/services",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v1/pulse",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v1/energy",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v1/consumption",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v1/charging",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v1/diagnostic",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v1/diagnostics",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v1/alert",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v1/alerts",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v1/settings",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v1/profile",
+      "method": "GET",
+      "status": 500,
+      "error": "API error 500: {\"message\": \"Internal server error\"}"
+    },
+    {
+      "path": "v1/user",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v1/users",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v1/eco",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v1/history",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v1/driving",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v1/score",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v1/scores",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v1/health",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v1/battery",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v1/fuel",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v1/range",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v1/odometer",
+      "method": "GET",
+      "status": 200,
+      "desc": "",
+      "type": "object",
+      "fields": {
+        "mileage": {
+          "type": "object",
+          "keys": [
+            "unit",
+            "value"
+          ]
+        },
+        "timestamp": {
+          "type": "str",
+          "sample": "2026-04-17T07:11:01Z"
+        },
+        "lastUpdateTimestamp": {
+          "type": "str",
+          "sample": "2026-04-17T07:11:06Z"
+        },
+        "isValidTimestamp": {
+          "type": "bool",
+          "sample": "True"
+        }
+      }
+    },
+    {
+      "path": "v1/door",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v1/doors",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v1/window",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v1/windows",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v1/lock",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v1/remote",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v1/global",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v1/account",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v1/subscription",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v1/subscriptions",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v1/map",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v1/route",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v1/routes",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v1/geofence",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v1/maintenance",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v1/recall",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v1/dealer",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v1/connected",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v1/telematics",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v1/ota",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v1/firmware",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v1/software",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v1/trip",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v1/parking",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v1/speed",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v1/overspeed",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v1/highway",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v2/vehicle",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v2/vehicles",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v2/electric",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v2/trips",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v2/telemetry",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v2/location",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v2/status",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v2/command",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v2/commands",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v2/climate",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v2/notification",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v2/notifications",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v2/service",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v2/services",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v2/pulse",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v2/energy",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v2/consumption",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v2/charging",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v2/diagnostic",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v2/diagnostics",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v2/alert",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v2/alerts",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v2/settings",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v2/profile",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v2/user",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v2/users",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v2/eco",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v2/history",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v2/driving",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v2/score",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v2/scores",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v2/health",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v2/battery",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v2/fuel",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v2/range",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v2/odometer",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v2/door",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v2/doors",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v2/window",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v2/windows",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v2/lock",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v2/remote",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v2/global",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v2/account",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v2/subscription",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v2/subscriptions",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v2/map",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v2/route",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v2/routes",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v2/geofence",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v2/maintenance",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v2/recall",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v2/dealer",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v2/connected",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v2/telematics",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v2/ota",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v2/firmware",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v2/software",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v2/trip",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v2/parking",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v2/speed",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v2/overspeed",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v2/highway",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v3/vehicle",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v3/vehicles",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v3/electric",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v3/trips",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v3/telemetry",
+      "method": "GET",
+      "status": 200,
+      "desc": "",
+      "type": "object",
+      "fields": {
+        "fuelType": {
+          "type": "str",
+          "sample": "E"
+        },
+        "odometer": {
+          "type": "object",
+          "keys": [
+            "unit",
+            "value"
+          ]
+        },
+        "batteryLevel": {
+          "type": "int",
+          "sample": "57"
+        },
+        "distanceToEmpty": {
+          "type": "object",
+          "keys": [
+            "unit",
+            "value"
+          ]
+        },
+        "timestamp": {
+          "type": "str",
+          "sample": "2026-04-17T07:46:27Z"
+        },
+        "chargingStatus": {
+          "type": "str",
+          "sample": "charging"
+        }
+      }
+    },
+    {
+      "path": "v3/location",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v3/status",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v3/command",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v3/commands",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v3/climate",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v3/notification",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v3/notifications",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v3/service",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v3/services",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v3/pulse",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v3/energy",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v3/consumption",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v3/charging",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v3/diagnostic",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v3/diagnostics",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v3/alert",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v3/alerts",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v3/settings",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v3/profile",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v3/user",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v3/users",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v3/eco",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v3/history",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v3/driving",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v3/score",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v3/scores",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v3/health",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v3/battery",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v3/fuel",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v3/range",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v3/odometer",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v3/door",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v3/doors",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v3/window",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v3/windows",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v3/lock",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v3/remote",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v3/global",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v3/account",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v3/subscription",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v3/subscriptions",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v3/map",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v3/route",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v3/routes",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v3/geofence",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v3/maintenance",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v3/recall",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v3/dealer",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v3/connected",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v3/telematics",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v3/ota",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v3/firmware",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v3/software",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v3/trip",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v3/parking",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v3/speed",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v3/overspeed",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v3/highway",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v4/vehicle",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v4/vehicles",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v4/electric",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v4/trips",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v4/telemetry",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v4/location",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v4/status",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v4/command",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v4/commands",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v4/climate",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v4/notification",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v4/notifications",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v4/service",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v4/services",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v4/pulse",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v4/energy",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v4/consumption",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v4/charging",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v4/diagnostic",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v4/diagnostics",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v4/alert",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v4/alerts",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v4/settings",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v4/profile",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v4/user",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v4/users",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v4/eco",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v4/history",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v4/driving",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v4/score",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v4/scores",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v4/health",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v4/battery",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v4/fuel",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v4/range",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v4/odometer",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v4/door",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v4/doors",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v4/window",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v4/windows",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v4/lock",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v4/remote",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v4/global",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v4/account",
+      "method": "GET",
+      "status": 200,
+      "desc": "",
+      "type": "object",
+      "fields": {
+        "customer": {
+          "type": "object",
+          "keys": [
+            "accountStatus",
+            "additionalAttributes",
+            "countryOfResidence",
+            "createDate",
+            "createSource",
+            "customerType",
+            "emails",
+            "firstName",
+            "forgerockId",
+            "guid",
+            "initiatedBrand",
+            "isCpMigrated",
+            "isDealer",
+            "isPmAccepted",
+            "lastName",
+            "lastUpdateDate",
+            "lastUpdateSource",
+            "phoneNumbers",
+            "preferredLanguage",
+            "signupType"
+          ]
+        }
+      }
+    },
+    {
+      "path": "v4/subscription",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v4/subscriptions",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v4/map",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v4/route",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v4/routes",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v4/geofence",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v4/maintenance",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v4/recall",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v4/dealer",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v4/connected",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v4/telematics",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v4/ota",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v4/firmware",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v4/software",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v4/trip",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v4/parking",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v4/speed",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v4/overspeed",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v4/highway",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v1/vehicle/status",
+      "method": "GET",
+      "status": 200,
+      "desc": "",
+      "type": "object",
+      "fields": {
+        "vin": {
+          "type": "str",
+          "sample": "JF1AABAA9PA006121"
+        },
+        "lastUpdateTimestamp": {
+          "type": "str",
+          "sample": "2026-04-17T07:43:17.000Z"
+        },
+        "overallStatus": {
+          "type": "str",
+          "sample": "ok"
+        },
+        "overallWarningCounts": {
+          "type": "int",
+          "sample": "0"
+        },
+        "leftHandDrive": {
+          "type": "bool",
+          "sample": "True"
+        },
+        "doors": {
+          "type": "object",
+          "keys": [
+            "driver",
+            "hood",
+            "passenger",
+            "rearBack",
+            "rearLeft",
+            "rearRight"
+          ]
+        },
+        "windows": {
+          "type": "object",
+          "keys": [
+            "driver",
+            "passenger",
+            "rearLeft",
+            "rearRight"
+          ]
+        },
+        "lights": {
+          "type": "object",
+          "keys": [
+            "hazard",
+            "head",
+            "tail"
+          ]
+        },
+        "rearSeatReminder": {
+          "type": "object",
+          "keys": [
+            "lastUpdateTimestamp",
+            "reason",
+            "warning"
+          ]
+        }
+      }
+    },
+    {
+      "path": "v1/vehicle/electric",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v1/vehicle/remote",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v1/vehicle/charging",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v1/vehicle/battery",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v1/vehicle/trips",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v1/vehicle/energy",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v1/vehicle/pulse",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v1/vehicle/diagnostic",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v1/vehicle/health",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v1/vehicle/climate",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v1/vehicle/settings",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v1/vehicle/command",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v1/vehicle/location",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v1/vehicle/telemetry",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v1/vehicle/history",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v1/vehicle/overspeed",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v1/vehicle/speed",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v1/vehicle/fuel",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v1/vehicle/range",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v1/vehicle/score",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v1/vehicle/driving",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v1/vehicle/eco",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v1/vehicle/consumption",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v1/vehicle/notification",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v1/vehicle/service",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v1/global/status",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v1/global/electric",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v1/global/remote",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v1/global/charging",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v1/global/battery",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v1/global/trips",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v1/global/energy",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v1/global/pulse",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v1/global/diagnostic",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v1/global/health",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v1/global/climate",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v1/global/settings",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v1/global/command",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v1/global/location",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v1/global/telemetry",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v1/global/history",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v1/global/overspeed",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v1/global/speed",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v1/global/fuel",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v1/global/range",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v1/global/score",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v1/global/driving",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v1/global/eco",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v1/global/consumption",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v1/global/notification",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v1/global/service",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v1/global/remote/status",
+      "method": "GET",
+      "status": 200,
+      "desc": "",
+      "type": "object",
+      "fields": {
+        "vehicleStatus": {
+          "type": "list[3]",
+          "item_keys": [
+            "category",
+            "displayOrder",
+            "sections"
+          ]
+        },
+        "telemetry": {
+          "type": "object",
+          "keys": [
+            "fugage",
+            "odo",
+            "rage"
+          ]
+        },
+        "occurrenceDate": {
+          "type": "str",
+          "sample": "2026-04-17T07:43:17Z"
+        },
+        "cautionOverallCount": {
+          "type": "int",
+          "sample": "0"
+        },
+        "latitude": {
+          "type": "float",
+          "sample": "54.334274"
+        },
+        "longitude": {
+          "type": "float",
+          "sample": "10.120225"
+        },
+        "locationAcquisitionDatetime": {
+          "type": "str",
+          "sample": "2026-04-17T07:43:17Z"
+        }
+      }
+    },
+    {
+      "path": "v1/global/remote/electric",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v1/global/remote/remote",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v1/global/remote/charging",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v1/global/remote/battery",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v1/global/remote/trips",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v1/global/remote/energy",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v1/global/remote/pulse",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v1/global/remote/diagnostic",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v1/global/remote/health",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v1/global/remote/climate",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v1/global/remote/settings",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v1/global/remote/command",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v1/global/remote/location",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v1/global/remote/telemetry",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v1/global/remote/history",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v1/global/remote/overspeed",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v1/global/remote/speed",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v1/global/remote/fuel",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v1/global/remote/range",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v1/global/remote/score",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v1/global/remote/driving",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v1/global/remote/eco",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v1/global/remote/consumption",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v1/global/remote/notification",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v1/global/remote/service",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v1/electric/status",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v1/electric/electric",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v1/electric/remote",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v1/electric/charging",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v1/electric/battery",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v1/electric/trips",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v1/electric/energy",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v1/electric/pulse",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v1/electric/diagnostic",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v1/electric/health",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v1/electric/climate",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v1/electric/settings",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v1/electric/command",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v1/electric/location",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v1/electric/telemetry",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v1/electric/history",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v1/electric/overspeed",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v1/electric/speed",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v1/electric/fuel",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v1/electric/range",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v1/electric/score",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v1/electric/driving",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v1/electric/eco",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v1/electric/consumption",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v1/electric/notification",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v1/electric/service",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v2/vehicle/status",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v2/vehicle/electric",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v2/vehicle/remote",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v2/vehicle/charging",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v2/vehicle/battery",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v2/vehicle/trips",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v2/vehicle/energy",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v2/vehicle/pulse",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v2/vehicle/diagnostic",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v2/vehicle/health",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v2/vehicle/climate",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v2/vehicle/settings",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v2/vehicle/command",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v2/vehicle/location",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v2/vehicle/telemetry",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v2/vehicle/history",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v2/vehicle/overspeed",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v2/vehicle/speed",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v2/vehicle/fuel",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v2/vehicle/range",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v2/vehicle/score",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v2/vehicle/driving",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v2/vehicle/eco",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v2/vehicle/consumption",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v2/vehicle/notification",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v2/vehicle/service",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v3/vehicle/status",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v3/vehicle/electric",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v3/vehicle/remote",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v3/vehicle/charging",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v3/vehicle/battery",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v3/vehicle/trips",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v3/vehicle/energy",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v3/vehicle/pulse",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v3/vehicle/diagnostic",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v3/vehicle/health",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v3/vehicle/climate",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v3/vehicle/settings",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v3/vehicle/command",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v3/vehicle/location",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v3/vehicle/telemetry",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v3/vehicle/history",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v3/vehicle/overspeed",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v3/vehicle/speed",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v3/vehicle/fuel",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v3/vehicle/range",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v3/vehicle/score",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v3/vehicle/driving",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v3/vehicle/eco",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v3/vehicle/consumption",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v3/vehicle/notification",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    },
+    {
+      "path": "v3/vehicle/service",
+      "method": "GET",
+      "status": 403,
+      "error": "API error 403: {\n \"status\": {\n   \"messages\": [\n     {\n       \"responseCode\": \"APIGW-403\",\n       \"description\": \"Unauthorized\",\n       \"detailedDescri"
+    }
+  ]
+}

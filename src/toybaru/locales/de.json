@@ -3,6 +3,16 @@
     "locale": "de-DE",
     "label": "Deutsch"
   },
+  "units": {
+    "dist":        { "metric": "km",         "imperial": "mi"  },
+    "distLong":    { "metric": "Kilometer",  "imperial": "Meilen" },
+    "speed":       { "metric": "km/h",       "imperial": "mph" },
+    "temp":        { "metric": "°C",         "imperial": "°F"  },
+    "consumption": { "metric": "kWh/100km",  "imperial": "kWh/100mi" },
+    "cityThr":     { "metric": "<40 km/h",   "imperial": "<25 mph" },
+    "ruralThr":    { "metric": "40-80 km/h", "imperial": "25-50 mph" },
+    "highwayThr":  { "metric": ">80 km/h",   "imperial": ">50 mph" }
+  },
   "app": {
     "name": "Toybaru ReCare",
     "logout": "Abmelden",
@@ -14,7 +24,7 @@
     "close": "Schliessen",
     "language": "Sprache",
     "days": "Tage",
-    "last_trip": "🛣️ Letzte Fahrt",
+    "last_trip": "Letzte Fahrt",
     "details": "Details",
     "idle_time": "Leerlauf",
     "overspeed": "Ueberschreitung",
@@ -56,7 +66,7 @@
     "remote": "Fernsteuerung"
   },
   "battery": {
-    "title": "🔋 Batterie",
+    "title": "Batterie",
     "soc": "Ladezustand",
     "range": "Reichweite",
     "range_ac": "Reichweite (mit Klima)",
@@ -81,7 +91,7 @@
     "history_error": "Verlauf nicht verfuegbar"
   },
   "status": {
-    "title": "📊 Übersicht",
+    "title": "Übersicht",
     "odometer": "Kilometerstand",
     "last_update": "Stand",
     "closed": "Zu",
@@ -106,13 +116,13 @@
     "no_additional": "Keine weiteren Statusdaten"
   },
   "location": {
-    "title": "📍 Standort",
+    "title": "Standort",
     "position": "Position",
     "last_update": "Stand",
     "unavailable": "Nicht verfuegbar"
   },
   "efficiency": {
-    "title": "⚡ Effizienz",
+    "title": "Effizienz",
     "current": "Momentan (aus Reichweite)",
     "eco": "Eco",
     "eco_desc": "Sparsamer Fahrmodus. Moderate Beschleunigung und Geschwindigkeit. Ideal fuer maximale Reichweite.",
@@ -132,7 +142,7 @@
     "date": "Datum",
     "distance": "Distanz",
     "duration": "Dauer",
-    "speed": "&#8709; / max km/h",
+    "speed": "&#8709; / max {speed}",
     "no_trips": "Keine Fahrten im Zeitraum",
     "no_db": "Keine Fahrten in der Datenbank. Zuerst unter Daten Import importieren.",
     "sync": "Neue Fahrten holen",
@@ -164,10 +174,10 @@
     "title": "Statistiken",
     "overview": "Uebersicht",
     "total_trips": "Fahrten gesamt",
-    "total_km": "Kilometer gesamt",
+    "total_km": "{distLong} gesamt",
     "total_hours": "Stunden gefahren",
-    "avg_speed": "&#8709; Geschwindigkeit (km/h)",
-    "max_speed": "Hoechstgeschwindigkeit (km/h)",
+    "avg_speed": "&#8709; Geschwindigkeit ({speed})",
+    "max_speed": "Hoechstgeschwindigkeit ({speed})",
     "avg_score": "&#8709; Fahrscore",
     "first_trip": "Erste Fahrt",
     "last_trip": "Letzte Fahrt",
@@ -179,16 +189,16 @@
     "avg_trip_length": "&#8709; Fahrtlaenge",
     "avg_trip_duration": "&#8709; Fahrtdauer",
     "trips_per_day": "Fahrten pro Tag",
-    "km_per_day": "km pro Tag",
+    "km_per_day": "{dist} pro Tag",
     "trends": "Trends",
-    "km_per_month": "km pro Monat",
+    "km_per_month": "{dist} pro Monat",
     "trips_by_weekday": "Fahrten nach Wochentag",
     "driving_style": "Fahrstil",
     "score_distribution": "Score-Verteilung",
     "speed_categories": "Geschwindigkeitsbereiche",
-    "city": "Stadt (<40 km/h)",
-    "rural": "Landstrasse (40-80 km/h)",
-    "highway": "Autobahn (>80 km/h)",
+    "city": "Stadt ({cityThr})",
+    "rural": "Landstrasse ({ruralThr})",
+    "highway": "Autobahn ({highwayThr})",
     "time_of_day": "Tageszeiten",
     "morning": "Morgens (6-12)",
     "afternoon": "Mittags (12-18)",
@@ -199,7 +209,7 @@
     "fastest_avg": "Schnellste Durchschnittsgeschw.",
     "best_score": "Bester Score",
     "best_reku": "Hoechste Rekuperation %",
-    "most_km_day": "Meiste km an einem Tag",
+    "most_km_day": "Meiste {dist} an einem Tag",
     "night_trips": "Nachtfahrten-Anteil",
     "est_consumption": "~&#8709; Verbrauch"
   },
@@ -219,7 +229,7 @@
     "error": "Fehler"
   },
   "remote": {
-    "title": "🎮 Fernsteuerung",
+    "title": "Fernsteuerung",
     "lock": "Verriegeln",
     "unlock": "Entriegeln",
     "sent": "Befehl gesendet",
@@ -257,7 +267,21 @@
     "on": "An",
     "off": "Aus",
     "available": "Verfuegbar",
-    "not_available": "Nicht verfuegbar"
+    "not_available": "Nicht verfuegbar",
+    "temp_range": "Bereich",
+    "temp_step": "Schritt",
+    "climate_start": "Klima starten",
+    "climate_stop": "Klima stoppen",
+    "climate_running": "Läuft",
+    "climate_off": "Aus",
+    "climate_more": "Alle Klima-Optionen",
+    "target_temp": "Soll",
+    "current_temp": "Innenraum-Temperatur",
+    "duration": "Dauer",
+    "started_at": "Gestartet",
+    "apply": "Übernehmen",
+    "revert": "Verwerfen",
+    "unsaved": "Ungespeicherte Änderungen"
   },
   "hero": {
     "solar_panel": "Solarpanel",
@@ -272,10 +296,12 @@
     "katashiki": "Katashiki-Code",
     "family_sharing": "Familienfreigabe",
     "enabled": "Aktiviert",
-    "disabled": "Deaktiviert"
+    "disabled": "Deaktiviert",
+    "features": "Aktivierte Funktionen ({n})",
+    "capabilities": "Hardware-Funktionen ({n})"
   },
   "vehicle_status": {
-    "title": "🚗 Fahrzeugstatus",
+    "title": "Fahrzeugstatus",
     "tires_ok": "Reifen OK",
     "doors_open": "Tueren offen",
     "windows_open": "Fenster offen",

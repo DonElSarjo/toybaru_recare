@@ -1,7 +1,7 @@
 {
   "vehicle_status": {
     "no_data": "Sin datos",
-    "title": "🚗 Estado del vehículo",
+    "title": "Estado del vehículo",
     "doors_open": "puertas abiertas",
     "tires_ok": "neumáticos bien",
     "no_window_data": "Sin datos de ventanas",
@@ -9,7 +9,7 @@
     "windows_open": "ventanas abiertas"
   },
   "efficiency": {
-    "title": "⚡ Eficiencia",
+    "title": "Eficiencia",
     "distribution_desc": "Barra de color: Verde=Eco, Azul=Regen, Rojo=Potencia",
     "distribution": "Distribución",
     "est_consumption_desc": "Estimado a partir de velocidad, regen% y potencia%. No es un valor medido.",
@@ -50,6 +50,16 @@
     "locale": "es-ES",
     "label": "Español"
   },
+  "units": {
+    "dist":        { "metric": "km",         "imperial": "mi"  },
+    "distLong":    { "metric": "kilómetros", "imperial": "millas" },
+    "speed":       { "metric": "km/h",       "imperial": "mph" },
+    "temp":        { "metric": "°C",         "imperial": "°F"  },
+    "consumption": { "metric": "kWh/100km",  "imperial": "kWh/100mi" },
+    "cityThr":     { "metric": "<40 km/h",   "imperial": "<25 mph" },
+    "ruralThr":    { "metric": "40-80 km/h", "imperial": "25-50 mph" },
+    "highwayThr":  { "metric": ">80 km/h",   "imperial": ">50 mph" }
+  },
   "status": {
     "driver_window": "Ventana DI",
     "passenger_window": "Ventana DD",
@@ -58,7 +68,7 @@
     "passenger_rear_door": "Trasera derecha",
     "right": "Derecho",
     "locked": "Bloqueado",
-    "title": "📊 Descripción general",
+    "title": "Descripción general",
     "left": "Izquierdo",
     "no_additional": "Sin datos de estado adicionales",
     "hood": "Capó",
@@ -85,7 +95,7 @@
     "score_accel": "Aceleración",
     "behaviour_rating": "Clasificación",
     "no_trips": "Sin viajes en este período",
-    "speed": "Promedio / máx km/h",
+    "speed": "Promedio / máx {speed}",
     "duration": "Duración",
     "accel_events": "aceleración fuerte.",
     "stats_nerds": "Estadísticas para Nerds",
@@ -142,12 +152,26 @@
     "front_defogger": "Desempañador frontal",
     "on": "Encendido",
     "hatch_unlock": "Desbloquear compuerta",
-    "title": "🎮 Control remoto",
+    "title": "Control remoto",
     "group_horn": "Bocina",
     "off": "Apagado",
     "buzzer": "Advertencia de zumbador",
     "rear_defogger": "Desempañador trasero",
-    "climate_unavailable": "Clima remoto actualmente no disponible"
+    "climate_unavailable": "Clima remoto actualmente no disponible",
+    "temp_range": "Rango",
+    "temp_step": "paso",
+    "climate_start": "Iniciar climatización",
+    "climate_stop": "Detener climatización",
+    "climate_running": "Activo",
+    "climate_off": "Apagado",
+    "climate_more": "Todas las opciones",
+    "target_temp": "Objetivo",
+    "current_temp": "Temperatura cabina",
+    "duration": "Duración",
+    "started_at": "Iniciado",
+    "apply": "Aplicar",
+    "revert": "Descartar",
+    "unsaved": "Cambios sin guardar"
   },
   "login": {
     "title": "Iniciar sesión",
@@ -177,7 +201,7 @@
     "language": "Idioma",
     "refresh": "Actualizar",
     "logout": "Cerrar sesión",
-    "last_trip": "🛣️ Último viaje",
+    "last_trip": "Último viaje",
     "idle_time": "Tiempo en reposo",
     "sync_60min": "60 min",
     "overspeed_long": "Velocidad superior al límite",
@@ -195,7 +219,7 @@
     "sync_5min": "5 min"
   },
   "location": {
-    "title": "📍 Ubicación",
+    "title": "Ubicación",
     "position": "Posición",
     "last_update": "A partir de",
     "unavailable": "No disponible"
@@ -206,7 +230,7 @@
     "last_update": "Última actualización",
     "range": "Autonomía",
     "full_at": "Lleno a",
-    "title": "🔋 Batería",
+    "title": "Batería",
     "history_loading": "Cargando historial...",
     "history_error": "Historial no disponible",
     "refresh_btn": "Actualizar",
@@ -228,18 +252,18 @@
   "stats": {
     "first_trip": "Primer viaje",
     "trends": "Tendencias",
-    "avg_speed": "Velocidad promedio (km/h)",
+    "avg_speed": "Velocidad promedio ({speed})",
     "overview": "Descripción general",
     "averages": "Promedios",
-    "rural": "Rural (40-80 km/h)",
+    "rural": "Rural ({ruralThr})",
     "night": "Madrugada (22-6)",
     "fastest_avg": "Velocidad promedio más rápida",
     "time_of_day": "Hora del día",
     "speed_categories": "Categorías de velocidad",
     "power_share": "Porcentaje Potencia",
-    "km_per_month": "km por mes",
+    "km_per_month": "{dist} por mes",
     "evening": "Noche (18-22)",
-    "most_km_day": "Más km en un día",
+    "most_km_day": "Más {dist} en un día",
     "trips_per_day": "Viajes por día",
     "best_reku": "Mejor % regen",
     "score_distribution": "Distribución de puntuaciones",
@@ -247,14 +271,14 @@
     "trips_by_weekday": "Viajes por día de la semana",
     "total_hours": "Horas conducidas",
     "eco_share": "Porcentaje Eco",
-    "km_per_day": "km por día",
+    "km_per_day": "{dist} por día",
     "driving_style": "Estilo de conducción",
     "total_trips": "Total de viajes",
     "last_trip": "Último viaje",
     "avg_trip_length": "Longitud promedio de viaje",
-    "total_km": "Total de kilómetros",
-    "city": "Ciudad (<40 km/h)",
-    "highway": "Autopista (>80 km/h)",
+    "total_km": "Total de {distLong}",
+    "city": "Ciudad ({cityThr})",
+    "highway": "Autopista ({highwayThr})",
     "best_score": "Mejor puntuación",
     "reku_share": "Porcentaje Regen",
     "avg_trip_duration": "Duración promedio de viaje",
@@ -265,7 +289,7 @@
     "est_consumption": "~Consumo promedio",
     "avg_score": "Puntuación promedio",
     "morning": "Mañana (6-12)",
-    "max_speed": "Velocidad máxima (km/h)",
+    "max_speed": "Velocidad máxima ({speed})",
     "efficiency_all": "Eficiencia (todos los viajes)"
   },
   "hero": {
@@ -281,6 +305,8 @@
     "vehicle_details": "Detalles del vehículo",
     "disabled": "Desactivado",
     "solar_na": "Panel solar: N/A",
-    "telematics": "Módulo de telemática"
+    "telematics": "Módulo de telemática",
+    "features": "Funciones activas ({n})",
+    "capabilities": "Capacidades hardware ({n})"
   }
 }

@@ -1,4 +1,10 @@
-"""HTTP API layer for Toyota/Subaru Connected Services."""
+"""HTTP API layer for Toyota/Lexus/Subaru Connected Services.
+
+Platform differences (Toyota EU, Toyota NA, Lexus EU, Lexus NA, Subaru EU,
+Subaru NA) are declared in `const.RegionConfig` and snapshotted into instance
+attributes in `Api.__init__`. All public methods are thin feature lookups via
+`_call(feature)` — no brand/region conditionals live here.
+"""
 
 from __future__ import annotations
 
@@ -12,22 +18,7 @@ import httpx
 
 from toybaru.auth.controller import AuthController
 from toybaru.http import make_client
-from toybaru.const import (
-    CLIENT_VERSION,
-    USER_AGENT,
-    VEHICLE_ACCOUNT_ENDPOINT,
-    VEHICLE_COMMAND_ENDPOINT,
-    VEHICLE_ELECTRIC_REALTIME_ENDPOINT,
-    VEHICLE_ELECTRIC_STATUS_ENDPOINT,
-    VEHICLE_LOCATION_ENDPOINT,
-    VEHICLE_NOTIFICATIONS_ENDPOINT,
-    VEHICLE_REFRESH_STATUS_ENDPOINT,
-    VEHICLE_SERVICE_HISTORY_ENDPOINT,
-    VEHICLE_STATUS_ENDPOINT,
-    VEHICLE_TELEMETRY_ENDPOINT,
-    VEHICLE_TRIPS_ENDPOINT,
-    VEHICLES_ENDPOINT,
-)
+from toybaru.const import CLIENT_VERSION, USER_AGENT
 from toybaru.exceptions import ApiError
 
 
@@ -38,9 +29,25 @@ class Api:
         self.auth = auth
         self.timeout = timeout
 
-    @property
-    def _is_na(self) -> bool:
-        return self.auth.region.region == "US"
+        region = auth.region
+        self.api_base_url = region.api_base_url
+        self.api_key = region.api_key
+        self.endpoints = dict(region.endpoints)
+        self.endpoint_headers = dict(region.endpoint_headers)
+        self._base_extra_headers = dict(region.request_headers)
+        self.vin_header_keys = tuple(region.vin_headers)
+        self.response_envelope = region.response_envelope or ""
+
+        self._post_processors = {
+            feat: getattr(self, f"_pp_{name}")
+            for feat, name in (region.post_processors or {}).items()
+        }
+        self._fallbacks = {
+            feat: getattr(self, f"_fb_{name}")
+            for feat, name in (region.fallbacks or {}).items()
+        }
+
+    # --- HTTP plumbing ---
 
     def _compute_client_ref(self, uuid: str) -> str:
         """Compute x-client-ref HMAC-SHA256."""
@@ -49,27 +56,28 @@ class Api:
 
     async def _headers(self, vin: str | None = None) -> dict[str, str]:
         token = await self.auth.ensure_token()
+        # Header set mirrors pytoyoda controller._generate_headers (pytoyoda
+        # controller.py:410-444). The duplicates (API_KEY / x-api-key, guid /
+        # x-guid) and lowercase `authorization` match the OneApp client; some
+        # endpoints check one casing, some the other.
         h = {
-            "Authorization": f"Bearer {token}",
+            "authorization": f"Bearer {token}",
+            "x-api-key": self.api_key,
+            "API_KEY": self.api_key,
             "x-guid": self.auth.uuid,
+            "guid": self.auth.uuid,
             "x-brand": self.auth.region.brand,
-            "X-Appbrand": self.auth.region.brand,
             "x-channel": "ONEAPP",
             "x-appversion": CLIENT_VERSION,
-            "x-api-key": self.auth.region.api_key,
             "x-client-ref": self._compute_client_ref(self.auth.uuid),
             "x-correlationid": str(uuid4()),
-            "User-Agent": USER_AGENT,
+            "user-agent": USER_AGENT,
             "Content-Type": "application/json",
-            "datetime": str(int(datetime.now(timezone.utc).timestamp() * 1000)),
+            **self._base_extra_headers,
         }
-        if self._is_na:
-            h["x-region"] = "US"
-            h["X-LOCALE"] = "en-US"
         if vin:
-            h["VIN"] = vin
-            if self._is_na:
-                h["vin"] = vin
+            for key in self.vin_header_keys:
+                h[key] = vin
         return h
 
     async def request(
@@ -81,11 +89,11 @@ class Api:
         params: dict[str, Any] | None = None,
         extra_headers: dict[str, str] | None = None,
     ) -> dict[str, Any]:
-        """Make an authenticated API request and return JSON."""
+        """Make an authenticated API request and return JSON (envelope-unwrapped)."""
         headers = await self._headers(vin)
         if extra_headers:
             headers.update(extra_headers)
-        url = f"{self.auth.region.api_base_url}{endpoint}"
+        url = f"{self.api_base_url}{endpoint}"
 
         async with make_client(timeout=self.timeout) as client:
             resp = await client.request(method, url, headers=headers, json=body, params=params)
@@ -97,9 +105,16 @@ class Api:
             return {}
 
         data = resp.json()
-        # NA API wraps responses in "payload"
+        if not isinstance(data, dict):
+            return data
+        # "payload" is the universal wrapper used by both EU and NA backends when
+        # they wrap responses. Unwrap unconditionally; platform-specific envelopes
+        # (other than "payload") can still override via response_envelope.
         if "payload" in data:
             return data["payload"]
+        envelope = self.response_envelope
+        if envelope and envelope in data:
+            return data[envelope]
         return data
 
     async def request_raw(
@@ -110,51 +125,66 @@ class Api:
         body: dict[str, Any] | None = None,
         params: dict[str, Any] | None = None,
     ) -> httpx.Response:
-        """Make an authenticated API request and return raw response."""
+        """Make an authenticated API request and return the raw response."""
         headers = await self._headers(vin)
-        url = f"{self.auth.region.api_base_url}{endpoint}"
+        url = f"{self.api_base_url}{endpoint}"
 
         async with make_client(timeout=self.timeout) as client:
             resp = await client.request(method, url, headers=headers, json=body, params=params)
 
         return resp
 
-    # --- High-level methods ---
+    async def _call(
+        self,
+        feature: str,
+        method: str = "GET",
+        vin: str | None = None,
+        body: dict[str, Any] | None = None,
+        params: dict[str, Any] | None = None,
+        query_suffix: str = "",
+    ) -> dict[str, Any]:
+        """Feature-driven API invocation.
+
+        Resolves endpoint, headers, and post-processing from the platform
+        profile. Returns `{"_unavailable": feature}` if the endpoint is not
+        supported and no fallback is registered.
+        """
+        endpoint = self.endpoints.get(feature)
+        if endpoint is None:
+            fallback = self._fallbacks.get(feature)
+            if fallback is not None:
+                return await fallback(vin=vin)
+            return {"_unavailable": feature}
+
+        extra_headers = self.endpoint_headers.get(feature)
+        url = f"{endpoint}{query_suffix}" if query_suffix else endpoint
+        data = await self.request(
+            method, url,
+            vin=vin, body=body, params=params,
+            extra_headers=extra_headers,
+        )
+        post = self._post_processors.get(feature)
+        return post(data) if post is not None else data
+
+    # --- High-level methods. Thin feature lookups, no conditionals. ---
 
     async def get_vehicles(self) -> dict[str, Any]:
-        return await self.request("GET", VEHICLES_ENDPOINT)
+        return await self._call("vehicles")
 
     async def get_vehicle_status(self, vin: str) -> dict[str, Any]:
-        return await self.request("GET", VEHICLE_STATUS_ENDPOINT, vin=vin)
+        return await self._call("vehicle_status", vin=vin)
 
     async def get_electric_status(self, vin: str) -> dict[str, Any]:
-        if self._is_na:
-            data = await self.request("GET", "/v2/electric/status", vin=vin)
-            return self._normalize_na_electric(data)
-        return await self.request("GET", VEHICLE_ELECTRIC_STATUS_ENDPOINT, vin=vin)
+        return await self._call("electric_status", vin=vin)
 
     async def refresh_electric_status(self, vin: str) -> dict[str, Any]:
-        return await self.request("POST", VEHICLE_ELECTRIC_REALTIME_ENDPOINT, vin=vin)
+        return await self._call("electric_realtime", method="POST", vin=vin)
 
     async def get_location(self, vin: str) -> dict[str, Any]:
-        if self._is_na:
-            # NA: extract location from vehicle status payload
-            status = await self.request("GET", VEHICLE_STATUS_ENDPOINT, vin=vin)
-            return {
-                "vehicleLocation": {
-                    "latitude": status.get("latitude"),
-                    "longitude": status.get("longitude"),
-                }
-            }
-        return await self.request("GET", VEHICLE_LOCATION_ENDPOINT, vin=vin)
+        return await self._call("location", vin=vin)
 
     async def get_telemetry(self, vin: str) -> dict[str, Any]:
-        if self._is_na:
-            return await self.request(
-                "GET", "/v2/telemetry", vin=vin,
-                extra_headers={"GENERATION": "17CYPLUS"},
-            )
-        return await self.request("GET", VEHICLE_TELEMETRY_ENDPOINT, vin=vin)
+        return await self._call("telemetry", vin=vin)
 
     async def get_trips(
         self,
@@ -166,62 +196,80 @@ class Api:
         limit: int = 50,
         offset: int = 0,
     ) -> dict[str, Any]:
-        if self._is_na:
-            return {"trips": [], "_note": "Trips not available for Toyota NA"}
-        # Params must be encoded directly in the URL path, not as httpx query params
-        endpoint = (
-            f"{VEHICLE_TRIPS_ENDPOINT}"
+        # Params must be in the URL path (not httpx query params) for the EU API.
+        qs = (
             f"?from={from_date}&to={to_date}"
             f"&route={str(route).lower()}&summary={str(summary).lower()}"
             f"&limit={limit}&offset={offset}"
         )
-        return await self.request("GET", endpoint, vin=vin)
+        return await self._call("trips", vin=vin, query_suffix=qs)
 
     async def get_notifications(self, vin: str) -> dict[str, Any]:
-        return await self.request("GET", VEHICLE_NOTIFICATIONS_ENDPOINT, vin=vin)
+        return await self._call("notifications", vin=vin)
 
     async def get_service_history(self, vin: str) -> dict[str, Any]:
-        return await self.request("GET", VEHICLE_SERVICE_HISTORY_ENDPOINT, vin=vin)
+        return await self._call("service_history", vin=vin)
 
     async def refresh_vehicle_status(self, vin: str) -> dict[str, Any]:
-        return await self.request(
-            "POST",
-            VEHICLE_REFRESH_STATUS_ENDPOINT,
+        return await self._call(
+            "refresh_status",
+            method="POST",
             vin=vin,
-            body={
-                "guid": self.auth.uuid,
-                "vin": vin,
-            },
+            body={"guid": self.auth.uuid, "vin": vin},
         )
 
     async def send_command(self, vin: str, command: str, extra: dict | None = None) -> dict[str, Any]:
-        if self._is_na:
-            return await self.request(
-                "POST", "/v1/global/remote/command", vin=vin,
-                body={"command": command},
-            )
         body = {"command": command}
         if extra:
             body.update(extra)
-        return await self.request("POST", VEHICLE_COMMAND_ENDPOINT, vin=vin, body=body)
+        return await self._call("command", method="POST", vin=vin, body=body)
 
     async def get_account(self) -> dict[str, Any]:
-        return await self.request("GET", VEHICLE_ACCOUNT_ENDPOINT)
+        return await self._call("account")
 
     async def get_climate_settings(self, vin: str) -> dict[str, Any]:
-        """Get remote climate settings (temperature, defrost, seat heat, etc.)."""
-        return await self.request("GET", "/v1/global/remote/climate-settings", vin=vin)
+        return await self._call("climate_settings", vin=vin)
 
-    async def get_telemetry(self, vin: str) -> dict[str, Any]:
-        """Get telemetry data including tire pressure, odometer, fuel, trips."""
-        return await self.request(
-            "GET", "/v2/telemetry", vin=vin,
-            extra_headers={"GENERATION": "17CYPLUS", "X-BRAND": "T"},
-        )
+    async def update_climate_settings(self, vin: str, settings: dict[str, Any]) -> dict[str, Any]:
+        """Persist new target temperature / seat heat / defog preferences back
+        to the vehicle's climate config. Same endpoint as GET, PUT method."""
+        return await self._call("climate_settings", method="PUT", vin=vin, body=settings)
+
+    async def get_climate_status(self, vin: str) -> dict[str, Any]:
+        return await self._call("climate_status", vin=vin)
+
+    async def refresh_climate_status(self, vin: str) -> dict[str, Any]:
+        return await self._call("refresh_climate_status", method="POST", vin=vin)
+
+    async def send_climate_control(self, vin: str, command: str, engine_start_time: int = 10) -> dict[str, Any]:
+        """Send a climate-control command. Callers pass friendly `start`/`stop`;
+        the Subaru/Toyota gateway expects `engine-start` / `engine-stop` on the
+        wire (response code ONE-GLOBAL-RS-10003 confirms those are the only
+        allowed values). `engine_start_time` minutes only applies to start.
+        """
+        wire_cmd = {"start": "engine-start", "stop": "engine-stop"}.get(command, command)
+        body: dict[str, Any] = {"command": wire_cmd}
+        if wire_cmd == "engine-start" and engine_start_time:
+            body["remoteHvac"] = {"engineStartTime": engine_start_time}
+        return await self._call("climate_control", method="POST", vin=vin, body=body)
+
+    # --- Post-processors and fallbacks (referenced by name from RegionConfig) ---
+
+    async def _fb_location_from_vehicle_status(self, vin: str | None = None) -> dict[str, Any]:
+        """Some platforms do not expose a dedicated location endpoint; extract
+        latitude/longitude from the vehicle status payload instead."""
+        status = await self._call("vehicle_status", vin=vin)
+        return {
+            "vehicleLocation": {
+                "latitude": status.get("latitude"),
+                "longitude": status.get("longitude"),
+            }
+        }
 
     @staticmethod
-    def _normalize_na_electric(data: dict[str, Any]) -> dict[str, Any]:
-        """Normalize NA electric status response to match EU format."""
+    def _pp_normalize_na_electric(data: dict[str, Any]) -> dict[str, Any]:
+        """Reshape the NA electric-status response (nested under vehicleInfo.chargeInfo)
+        into the EU-style flat dict that the rest of the app expects."""
         charge_info = data.get("vehicleInfo", {}).get("chargeInfo", {})
         if not charge_info:
             charge_info = data.get("chargeInfo", data)
@@ -229,7 +277,6 @@ class Api:
         plug = charge_info.get("plugStatus")
         connector = charge_info.get("connectorStatus")
         remaining = charge_info.get("remainingChargeTime")
-        # Determine charging status from plugStatus + context
         if plug == 4 or plug == 40:
             charging_status = "charging"
         elif plug == 12 or (plug is not None and connector in (None, 0)):

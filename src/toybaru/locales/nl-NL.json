@@ -3,6 +3,16 @@
     "locale": "nl-NL",
     "label": "Nederlands"
   },
+  "units": {
+    "dist":        { "metric": "km",         "imperial": "mi"  },
+    "distLong":    { "metric": "kilometers", "imperial": "mijlen" },
+    "speed":       { "metric": "km/u",       "imperial": "mph" },
+    "temp":        { "metric": "°C",         "imperial": "°F"  },
+    "consumption": { "metric": "kWh/100km",  "imperial": "kWh/100mi" },
+    "cityThr":     { "metric": "<40 km/u",   "imperial": "<25 mph" },
+    "ruralThr":    { "metric": "40-80 km/u", "imperial": "25-50 mph" },
+    "highwayThr":  { "metric": ">80 km/u",   "imperial": ">50 mph" }
+  },
   "app": {
     "name": "Toybaru ReCare",
     "logout": "Uitloggen",
@@ -14,7 +24,7 @@
     "close": "Sluiten",
     "language": "Taal",
     "days": "dagen",
-    "last_trip": "🛣️ Laatste rit",
+    "last_trip": "Laatste rit",
     "details": "Details",
     "idle_time": "Stilstandtijd",
     "overspeed": "Te snel",
@@ -56,7 +66,7 @@
     "remote": "Afstandsbediening"
   },
   "battery": {
-    "title": "🔋 Batterij",
+    "title": "Batterij",
     "soc": "Laadtoestand",
     "range": "Bereik",
     "range_ac": "Bereik (met airco)",
@@ -81,7 +91,7 @@
     "history_error": "Geschiedenis niet beschikbaar"
   },
   "status": {
-    "title": "📊 Overzicht",
+    "title": "Overzicht",
     "odometer": "Kilometerteller",
     "last_update": "Per",
     "closed": "Dicht",
@@ -106,13 +116,13 @@
     "no_additional": "Geen extra statusgegevens"
   },
   "location": {
-    "title": "📍 Locatie",
+    "title": "Locatie",
     "position": "Positie",
     "last_update": "Per",
     "unavailable": "Niet beschikbaar"
   },
   "efficiency": {
-    "title": "⚡ Efficiëntie",
+    "title": "Efficiëntie",
     "current": "Huidig (uit bereik)",
     "eco": "Eco",
     "eco_desc": "Energiezuinige rijmodus. Gematigde acceleratie en snelheid. Beste voor bereik.",
@@ -132,7 +142,7 @@
     "date": "Datum",
     "distance": "Afstand",
     "duration": "Duur",
-    "speed": "Gem / max km/u",
+    "speed": "Gem / max {speed}",
     "no_trips": "Geen ritten in deze periode",
     "no_db": "Geen ritten in database. Importeer eerst data.",
     "sync": "Nieuwe ritten ophalen",
@@ -164,10 +174,10 @@
     "title": "Statistieken",
     "overview": "Overzicht",
     "total_trips": "Totaal ritten",
-    "total_km": "Totaal kilometers",
+    "total_km": "Totaal {distLong}",
     "total_hours": "Uren gereden",
-    "avg_speed": "Gem. snelheid (km/u)",
-    "max_speed": "Topsnelheid (km/u)",
+    "avg_speed": "Gem. snelheid ({speed})",
+    "max_speed": "Topsnelheid ({speed})",
     "avg_score": "Gem. score",
     "first_trip": "Eerste rit",
     "last_trip": "Laatste rit",
@@ -179,16 +189,16 @@
     "avg_trip_length": "Gem. ritlengte",
     "avg_trip_duration": "Gem. ritduur",
     "trips_per_day": "Ritten per dag",
-    "km_per_day": "km per dag",
+    "km_per_day": "{dist} per dag",
     "trends": "Trends",
-    "km_per_month": "km per maand",
+    "km_per_month": "{dist} per maand",
     "trips_by_weekday": "Ritten per weekdag",
     "driving_style": "Rijstijl",
     "score_distribution": "Score verdeling",
     "speed_categories": "Snelheidscategorieën",
-    "city": "Stad (<40 km/u)",
-    "rural": "Landelijk (40-80 km/u)",
-    "highway": "Snelweg (>80 km/u)",
+    "city": "Stad ({cityThr})",
+    "rural": "Landelijk ({ruralThr})",
+    "highway": "Snelweg ({highwayThr})",
     "time_of_day": "Tijd van de dag",
     "morning": "Ochtend (6-12)",
     "afternoon": "Middag (12-18)",
@@ -199,7 +209,7 @@
     "fastest_avg": "Snelste gem. snelheid",
     "best_score": "Beste score",
     "best_reku": "Beste regen %",
-    "most_km_day": "Meeste km op een dag",
+    "most_km_day": "Meeste {dist} op een dag",
     "night_trips": "Nachtritten aandeel",
     "est_consumption": "~Gem. verbruik"
   },
@@ -219,7 +229,7 @@
     "error": "Fout"
   },
   "remote": {
-    "title": "🎮 Afstandsbediening",
+    "title": "Afstandsbediening",
     "lock": "Vergrendelen",
     "unlock": "Ontgrendelen",
     "sent": "Commando verzonden",
@@ -257,7 +267,21 @@
     "on": "Aan",
     "off": "Uit",
     "available": "Beschikbaar",
-    "not_available": "Niet beschikbaar"
+    "not_available": "Niet beschikbaar",
+    "temp_range": "Bereik",
+    "temp_step": "stap",
+    "climate_start": "Klimaat starten",
+    "climate_stop": "Klimaat stoppen",
+    "climate_running": "Actief",
+    "climate_off": "Uit",
+    "climate_more": "Alle opties",
+    "target_temp": "Doel",
+    "current_temp": "Cabine temperatuur",
+    "duration": "Duur",
+    "started_at": "Gestart",
+    "apply": "Toepassen",
+    "revert": "Ongedaan",
+    "unsaved": "Niet-opgeslagen wijzigingen"
   },
   "hero": {
     "solar_panel": "Zonnepaneel",
@@ -272,10 +296,12 @@
     "katashiki": "Katashiki-code",
     "family_sharing": "Gezinsdeling",
     "enabled": "Ingeschakeld",
-    "disabled": "Uitgeschakeld"
+    "disabled": "Uitgeschakeld",
+    "features": "Actieve functies ({n})",
+    "capabilities": "Hardware functies ({n})"
   },
   "vehicle_status": {
-    "title": "🚗 Voertuigstatus",
+    "title": "Voertuigstatus",
     "tires_ok": "banden OK",
     "doors_open": "deuren open",
     "windows_open": "ramen open",

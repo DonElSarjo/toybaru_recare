@@ -48,10 +48,8 @@ class ToybaruClient:
     async def get_vehicles(self) -> list[Vehicle]:
         """Get list of vehicles linked to the account."""
         data = await self.api.get_vehicles()
-        # EU returns list directly or in "payload"
-        vehicles_data = data if isinstance(data, list) else data.get("payload", data)
-        if isinstance(vehicles_data, list):
-            return [Vehicle.model_validate(v) for v in vehicles_data]
+        if isinstance(data, list):
+            return [Vehicle.model_validate(v) for v in data]
         return []
 
     async def get_vehicle_status(self, vin: str) -> dict[str, Any]:
@@ -107,9 +105,9 @@ class ToybaruClient:
         """Get account info."""
         return await self.api.get_account()
 
-    async def get_telemetry(self, vin: str) -> dict[str, Any]:
-        """Get telemetry data (tire pressure, odometer, trips, etc.)."""
-        return await self.api.get_telemetry(vin)
+    async def get_climate_settings(self, vin: str) -> dict[str, Any]:
+        """Get remote climate settings."""
+        return await self.api.get_climate_settings(vin)
 
     async def raw_request(
         self, method: str, endpoint: str, vin: str | None = None

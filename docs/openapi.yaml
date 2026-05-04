@@ -1,0 +1,1026 @@
+openapi: 3.0.3
+info:
+  title: Toyota Connected Europe API (Subaru Solterra)
+  description: |
+    Reverse-engineered API specification for the Toyota Connected Europe backend
+    used by Subaru Solterra (brand "S"), Toyota bZ4X (brand "T"), and Lexus (brand "L").
+
+    Base URL: https://ctpa-oneapi.tceu-ctp-prd.toyotaconnectedeurope.io
+
+    Authentication: OAuth2 via ForgeRock AM at b2c-login.toyota-europe.com
+
+    Note: This is not an official specification. Fields may change without notice.
+    Generated from live API probing on 2026-04-17.
+  version: "1.0.0"
+  contact:
+    name: Toybaru ReCare
+    url: https://github.com/DonElSarjo/toybaru_recare
+
+servers:
+  - url: https://ctpa-oneapi.tceu-ctp-prd.toyotaconnectedeurope.io
+    description: Toyota Connected Europe (Production)
+
+security:
+  - bearerAuth: []
+    apiKey: []
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+    apiKey:
+      type: apiKey
+      in: header
+      name: x-api-key
+
+  parameters:
+    vin:
+      name: VIN
+      in: header
+      required: true
+      schema:
+        type: string
+      description: Vehicle Identification Number
+
+  schemas:
+    UnitValue:
+      type: object
+      properties:
+        value:
+          type: number
+        unit:
+          type: string
+          enum: [km, mi]
+
+    DoorStatus:
+      type: object
+      properties:
+        lockStatus:
+          type: object
+          properties:
+            lastUpdateTimestamp:
+              type: string
+              format: date-time
+            status:
+              type: string
+              enum: [locked, unlocked]
+        openStatus:
+          type: object
+          properties:
+            lastUpdateTimestamp:
+              type: string
+              format: date-time
+            status:
+              type: string
+              enum: [close, open]
+
+    WindowStatus:
+      type: object
+      properties:
+        lastUpdateTimestamp:
+          type: string
+          format: date-time
+        status:
+          type: string
+          enum: [close, open]
+
+    LightStatus:
+      type: object
+      properties:
+        lastUpdateTimestamp:
+          type: string
+          format: date-time
+        status:
+          type: string
+          enum: ["on", "off"]
+
+    TripSummary:
+      type: object
+      description: |
+        Note: maxSpeed, durationIdle, countries, lengthOverspeed, durationOverspeed,
+        lengthHighway, durationHighway were removed from the API as of ~April 2026.
+      properties:
+        averageSpeed:
+          type: number
+        duration:
+          type: integer
+          description: Duration in seconds
+        length:
+          type: integer
+          description: Distance in meters
+        fuelConsumption:
+          type: number
+          description: Always 0.0 for EVs
+        startLat:
+          type: number
+        startLon:
+          type: number
+        startTs:
+          type: string
+          format: date-time
+        endLat:
+          type: number
+        endLon:
+          type: number
+        endTs:
+          type: string
+          format: date-time
+        nightTrip:
+          type: boolean
+
+    TripScores:
+      type: object
+      properties:
+        global:
+          type: integer
+          minimum: 0
+          maximum: 100
+        acceleration:
+          type: integer
+          minimum: 0
+          maximum: 100
+        braking:
+          type: integer
+          minimum: 0
+          maximum: 100
+        constantSpeed:
+          type: integer
+          minimum: 0
+          maximum: 100
+          nullable: true
+        advice:
+          type: integer
+
+    TripHDC:
+      type: object
+      description: Hybrid/EV Driving Composition
+      properties:
+        evTime:
+          type: integer
+          description: Total EV time in seconds
+        evDistance:
+          type: integer
+          description: Total EV distance in meters
+        chargeTime:
+          type: integer
+          description: Regeneration time in seconds
+        chargeDist:
+          type: integer
+          description: Regeneration distance in meters
+        ecoTime:
+          type: integer
+          description: Eco mode time in seconds
+        ecoDist:
+          type: integer
+          description: Eco mode distance in meters
+        powerTime:
+          type: integer
+          description: Power mode time in seconds
+        powerDist:
+          type: integer
+          description: Power mode distance in meters
+
+    RoutePoint:
+      type: object
+      properties:
+        lat:
+          type: number
+        lon:
+          type: number
+        overspeed:
+          type: boolean
+          description: Speed limit exceeded at this point
+        highway:
+          type: boolean
+        indexInPoints:
+          type: integer
+        mode:
+          type: integer
+          description: "0=Regeneration, 1=Eco, 2=Power"
+        isEv:
+          type: boolean
+
+    Behaviour:
+      type: object
+      properties:
+        lat:
+          type: number
+        lon:
+          type: number
+        ts:
+          type: string
+          format: date-time
+        type:
+          type: string
+          description: "A=Acceleration, B=Braking, C=Cornering"
+        good:
+          type: boolean
+          description: Whether the event was rated positively
+        diagnosticMsg:
+          type: integer
+        coachingMsg:
+          type: integer
+        coachingMsgParams:
+          type: array
+          items:
+            type: object
+            properties:
+              name:
+                type: string
+              unit:
+                type: string
+              value:
+                type: number
+        context:
+          type: object
+          properties:
+            slope:
+              type: number
+              description: Road gradient
+        priority:
+          type: boolean
+        severity:
+          type: number
+
+    Trip:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        category:
+          type: integer
+        processedIn:
+          type: integer
+          description: Processing time or version indicator
+        summary:
+          $ref: '#/components/schemas/TripSummary'
+        scores:
+          $ref: '#/components/schemas/TripScores'
+        hdc:
+          $ref: '#/components/schemas/TripHDC'
+        route:
+          type: array
+          items:
+            $ref: '#/components/schemas/RoutePoint'
+          description: Only present when route=true
+        behaviours:
+          type: array
+          items:
+            $ref: '#/components/schemas/Behaviour'
+
+    CommandType:
+      type: string
+      enum:
+        - door-lock
+        - door-unlock
+        - engine-start
+        - engine-stop
+        - hazard-on
+        - hazard-off
+        - sound-horn
+        - buzzer-warning
+        - find-vehicle
+        - trunk-lock
+        - trunk-unlock
+        - headlight-on
+        - headlight-off
+        - power-window-on
+        - power-window-off
+        - ventilation-on
+        - ac-settings-on
+
+paths:
+  /v2/vehicle/guid:
+    get:
+      tags: [Vehicle]
+      summary: List vehicles linked to account
+      description: Returns all vehicles associated with the authenticated user.
+      parameters:
+        - name: x-guid
+          in: header
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Vehicle list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  payload:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        vin:
+                          type: string
+                        nickName:
+                          type: string
+                        modelName:
+                          type: string
+                        modelYear:
+                          type: string
+                        brand:
+                          type: string
+                          enum: [T, L, S]
+                        fuelType:
+                          type: string
+                          enum: [E, B, I]
+                          description: "E=Electric, B=Hybrid, I=Plug-in Hybrid"
+                        color:
+                          type: string
+                        status:
+                          type: string
+                        evVehicle:
+                          type: boolean
+                        extendedCapabilities:
+                          type: object
+                          description: Feature flags for the vehicle
+                        features:
+                          type: object
+                          description: Enabled features
+
+  /v4/account:
+    get:
+      tags: [Account]
+      summary: Account information
+      responses:
+        '200':
+          description: Account details
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  customer:
+                    type: object
+                    properties:
+                      firstName:
+                        type: string
+                      lastName:
+                        type: string
+                      countryOfResidence:
+                        type: string
+                      preferredLanguage:
+                        type: string
+                      initiatedBrand:
+                        type: string
+
+  /v1/vehicle/status:
+    get:
+      tags: [Vehicle Status]
+      summary: Vehicle status (new structured format)
+      description: |
+        Returns structured door, window, and light status with per-item timestamps.
+        This is the newer alternative to /v1/global/remote/status.
+      parameters:
+        - $ref: '#/components/parameters/vin'
+      responses:
+        '200':
+          description: Vehicle status
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  vin:
+                    type: string
+                  lastUpdateTimestamp:
+                    type: string
+                    format: date-time
+                  overallStatus:
+                    type: string
+                    enum: [ok, warning]
+                  overallWarningCounts:
+                    type: integer
+                  leftHandDrive:
+                    type: boolean
+                  doors:
+                    type: object
+                    properties:
+                      driver:
+                        $ref: '#/components/schemas/DoorStatus'
+                      passenger:
+                        $ref: '#/components/schemas/DoorStatus'
+                      rearLeft:
+                        $ref: '#/components/schemas/DoorStatus'
+                      rearRight:
+                        $ref: '#/components/schemas/DoorStatus'
+                      rearBack:
+                        $ref: '#/components/schemas/DoorStatus'
+                      hood:
+                        type: object
+                        properties:
+                          openStatus:
+                            type: object
+                            properties:
+                              lastUpdateTimestamp:
+                                type: string
+                                format: date-time
+                              status:
+                                type: string
+                  windows:
+                    type: object
+                    properties:
+                      driver:
+                        $ref: '#/components/schemas/WindowStatus'
+                      passenger:
+                        $ref: '#/components/schemas/WindowStatus'
+                      rearLeft:
+                        $ref: '#/components/schemas/WindowStatus'
+                      rearRight:
+                        $ref: '#/components/schemas/WindowStatus'
+                  lights:
+                    type: object
+                    properties:
+                      hazard:
+                        $ref: '#/components/schemas/LightStatus'
+                      tail:
+                        $ref: '#/components/schemas/LightStatus'
+                      head:
+                        $ref: '#/components/schemas/LightStatus'
+                  rearSeatReminder:
+                    type: object
+                    properties:
+                      lastUpdateTimestamp:
+                        type: string
+                        format: date-time
+                      warning:
+                        type: boolean
+                      reason:
+                        type: string
+
+  /v1/global/remote/status:
+    get:
+      tags: [Vehicle Status]
+      summary: Vehicle status (legacy format)
+      description: |
+        Returns door/window status in categorized format with embedded telemetry and location.
+        Subject to rate limiting (429).
+      parameters:
+        - $ref: '#/components/parameters/vin'
+      responses:
+        '200':
+          description: Vehicle status with location
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  vehicleStatus:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        category:
+                          type: string
+                        displayOrder:
+                          type: integer
+                        sections:
+                          type: array
+                          items:
+                            type: object
+                            properties:
+                              section:
+                                type: string
+                              values:
+                                type: array
+                                items:
+                                  type: object
+                                  properties:
+                                    value:
+                                      type: string
+                                    status:
+                                      type: integer
+                  telemetry:
+                    type: object
+                    properties:
+                      odo:
+                        $ref: '#/components/schemas/UnitValue'
+                  occurrenceDate:
+                    type: string
+                    format: date-time
+                  cautionOverallCount:
+                    type: integer
+                  latitude:
+                    type: number
+                  longitude:
+                    type: number
+                  locationAcquisitionDatetime:
+                    type: string
+                    format: date-time
+
+  /v1/vehicle/electric/status:
+    get:
+      tags: [Electric Vehicle]
+      summary: EV battery and charging status (evcc-compatible)
+      parameters:
+        - $ref: '#/components/parameters/vin'
+      responses:
+        '200':
+          description: Electric status
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  batteryLevel:
+                    type: integer
+                    minimum: 0
+                    maximum: 100
+                  chargingStatus:
+                    type: string
+                    enum: [none, charging, connected]
+                  evRange:
+                    $ref: '#/components/schemas/UnitValue'
+                  evRangeWithAc:
+                    $ref: '#/components/schemas/UnitValue'
+                  totalRangeWithAc:
+                    $ref: '#/components/schemas/UnitValue'
+                  remainingChargeTime:
+                    type: integer
+                    nullable: true
+                    description: Minutes until fully charged
+                  lastUpdateTimestamp:
+                    type: string
+                    format: date-time
+                  dcmTimestamp:
+                    type: string
+                    format: date-time
+
+  /v1/global/remote/electric/status:
+    get:
+      tags: [Electric Vehicle]
+      summary: EV battery and charging status (legacy)
+      description: Similar to /v1/vehicle/electric/status but different field set.
+      parameters:
+        - $ref: '#/components/parameters/vin'
+      responses:
+        '200':
+          description: Electric status
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  batteryLevel:
+                    type: integer
+                  chargingStatus:
+                    type: string
+                  evRange:
+                    $ref: '#/components/schemas/UnitValue'
+                  evRangeWithAc:
+                    $ref: '#/components/schemas/UnitValue'
+                  remainingChargeTime:
+                    type: integer
+                    nullable: true
+                  lastUpdateTimestamp:
+                    type: string
+                    format: date-time
+
+  /v1/location:
+    get:
+      tags: [Location]
+      summary: Last known vehicle location
+      description: Only updates when car is parked.
+      parameters:
+        - $ref: '#/components/parameters/vin'
+      responses:
+        '200':
+          description: Vehicle location
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  vin:
+                    type: string
+                  lastTimestamp:
+                    type: string
+                    format: date-time
+                  vehicleLocation:
+                    type: object
+                    properties:
+                      displayName:
+                        type: string
+                      latitude:
+                        type: number
+                      longitude:
+                        type: number
+                      locationAcquisitionDatetime:
+                        type: string
+                        format: date-time
+
+  /v3/telemetry:
+    get:
+      tags: [Telemetry]
+      summary: Vehicle telemetry data
+      parameters:
+        - $ref: '#/components/parameters/vin'
+      responses:
+        '200':
+          description: Telemetry data
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  fuelType:
+                    type: string
+                    enum: [E, B, I]
+                  odometer:
+                    $ref: '#/components/schemas/UnitValue'
+                  batteryLevel:
+                    type: integer
+                    nullable: true
+                  distanceToEmpty:
+                    $ref: '#/components/schemas/UnitValue'
+                  timestamp:
+                    type: string
+                    format: date-time
+                  chargingStatus:
+                    type: string
+
+  /v1/odometer:
+    get:
+      tags: [Telemetry]
+      summary: Dedicated odometer reading
+      parameters:
+        - $ref: '#/components/parameters/vin'
+      responses:
+        '200':
+          description: Odometer data
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  mileage:
+                    $ref: '#/components/schemas/UnitValue'
+                  timestamp:
+                    type: string
+                    format: date-time
+                  lastUpdateTimestamp:
+                    type: string
+                    format: date-time
+                  isValidTimestamp:
+                    type: boolean
+
+  /v1/trips:
+    get:
+      tags: [Trips]
+      summary: Trip history
+      description: |
+        Returns trip data with optional route coordinates and monthly summaries.
+        Parameters must be URL-encoded in the path, not as query params.
+      parameters:
+        - $ref: '#/components/parameters/vin'
+        - name: from
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date
+        - name: to
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date
+        - name: route
+          in: query
+          schema:
+            type: boolean
+            default: false
+          description: Include route coordinates per trip
+        - name: summary
+          in: query
+          schema:
+            type: boolean
+            default: true
+          description: Include monthly/daily summary aggregates
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 5
+            maximum: 50
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            default: 0
+      responses:
+        '200':
+          description: Trip list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  payload:
+                    type: object
+                    properties:
+                      from:
+                        type: string
+                        format: date
+                      to:
+                        type: string
+                        format: date
+                      trips:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Trip'
+                      summary:
+                        type: array
+                        description: Monthly aggregates (only when summary=true)
+                        items:
+                          type: object
+                      _metadata:
+                        type: object
+                        properties:
+                          pagination:
+                            type: object
+                            properties:
+                              limit:
+                                type: integer
+                              offset:
+                                type: integer
+                              totalCount:
+                                type: integer
+                              nextOffset:
+                                type: integer
+                                nullable: true
+
+  /v1/trips/{tripId}:
+    get:
+      tags: [Trips]
+      summary: Single trip detail
+      parameters:
+        - $ref: '#/components/parameters/vin'
+        - name: tripId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Trip detail
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Trip'
+
+  /v1/vehiclehealth/status:
+    get:
+      tags: [Health]
+      summary: Vehicle health and warning lights
+      parameters:
+        - $ref: '#/components/parameters/vin'
+      responses:
+        '200':
+          description: Health status
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  quantityOfEngOilIcon:
+                    type: array
+                    items:
+                      type: object
+                  warning:
+                    type: array
+                    items:
+                      type: object
+                  vin:
+                    type: string
+                  wnglastUpdTime:
+                    type: string
+                    format: date-time
+
+  /v2/notification/history:
+    get:
+      tags: [Notifications]
+      summary: Notification history
+      parameters:
+        - $ref: '#/components/parameters/vin'
+      responses:
+        '200':
+          description: Notifications
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  notifications:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        messageId:
+                          type: string
+                        notificationDate:
+                          type: string
+                          format: date-time
+                        isRead:
+                          type: boolean
+                        message:
+                          type: string
+                        type:
+                          type: string
+                        category:
+                          type: string
+                        vin:
+                          type: string
+
+  /v1/servicehistory/vehicle/summary:
+    get:
+      tags: [Service]
+      summary: Service history
+      parameters:
+        - $ref: '#/components/parameters/vin'
+      responses:
+        '200':
+          description: Service records
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  serviceHistories:
+                    type: array
+                    items:
+                      type: object
+
+  /v1/global/remote/climate-status:
+    get:
+      tags: [Climate]
+      summary: Climate control status
+      parameters:
+        - $ref: '#/components/parameters/vin'
+      responses:
+        '200':
+          description: Climate status
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  type:
+                    type: string
+                  status:
+                    type: integer
+                    description: "0=off"
+
+  /v1/global/remote/climate-settings:
+    get:
+      tags: [Climate]
+      summary: Climate control settings
+      parameters:
+        - $ref: '#/components/parameters/vin'
+      responses:
+        '200':
+          description: Climate settings
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  temperature:
+                    type: number
+                  temperatureUnit:
+                    type: string
+                    enum: [C, F]
+                  minTemp:
+                    type: number
+                  maxTemp:
+                    type: number
+                  tempInterval:
+                    type: number
+                  acOperations:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        categoryName:
+                          type: string
+                        categoryDisplayName:
+                          type: string
+                        available:
+                          type: boolean
+                        acParameters:
+                          type: array
+                          items:
+                            type: object
+                            properties:
+                              name:
+                                type: string
+                              displayName:
+                                type: string
+                              available:
+                                type: boolean
+                              enabled:
+                                type: boolean
+                  settingsOn:
+                    type: boolean
+
+  /v1/global/remote/command:
+    post:
+      tags: [Remote Commands]
+      summary: Send remote command to vehicle
+      parameters:
+        - $ref: '#/components/parameters/vin'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - command
+              properties:
+                command:
+                  $ref: '#/components/schemas/CommandType'
+                beepCount:
+                  type: integer
+                  default: 0
+                doorLock:
+                  type: object
+                  properties:
+                    target:
+                      type: integer
+                      description: "1=trunk only"
+      responses:
+        '200':
+          description: Command accepted
+
+  /v1/global/remote/refresh-status:
+    post:
+      tags: [Remote Commands]
+      summary: Wake up vehicle and request fresh data
+      description: |
+        Triggers the car to send updated status data. Response is immediate,
+        but data update may take 15-60 seconds.
+      parameters:
+        - $ref: '#/components/parameters/vin'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                guid:
+                  type: string
+                vin:
+                  type: string
+      responses:
+        '200':
+          description: Refresh requested
+
+  # ---- Forbidden Endpoints (403 - Gateway Block for Subaru client) ----
+  # These exist but are not accessible with the Subaru API client credentials.
+  # Documented here for completeness.
+  #
+  # /v1/electricPulse - Energy consumption history
+  # /v1/drivePulse - Driving pulse data
+  # /v1/trips/{tripId}/energy - Per-trip energy consumption
+  # /v1/trips/{tripId}/statistics - Per-trip statistics
+  # /v1/trips/{tripId}/summary - Per-trip summary
+  # /v1/vehicle/diagnostic - Vehicle diagnostics
+  # /v1/charging/history - Charging session history
+  # /v1/global/remote/electric/realtime-status - POST to refresh EV data
+  # /v1/global/remote/electric/command - POST charging commands
+  # /v1/global/remote/refresh-climate-status - POST to refresh climate
+  # /v1/vehicle-association/vehicle - Vehicle association management
+
+tags:
+  - name: Vehicle
+    description: Vehicle information and listing
+  - name: Account
+    description: User account data
+  - name: Vehicle Status
+    description: Door, window, light status
+  - name: Electric Vehicle
+    description: Battery, charging, range
+  - name: Location
+    description: GPS position
+  - name: Telemetry
+    description: Odometer, fuel/energy data
+  - name: Trips
+    description: Trip history and route data
+  - name: Health
+    description: Vehicle health and warnings
+  - name: Notifications
+    description: Push notification history
+  - name: Service
+    description: Service and maintenance history
+  - name: Climate
+    description: Climate control
+  - name: Remote Commands
+    description: Remote vehicle control

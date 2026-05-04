@@ -3,6 +3,16 @@
     "locale": "es-MX",
     "label": "Español (México)"
   },
+  "units": {
+    "dist":        { "metric": "km",         "imperial": "mi"  },
+    "distLong":    { "metric": "kilómetros", "imperial": "millas" },
+    "speed":       { "metric": "km/h",       "imperial": "mph" },
+    "temp":        { "metric": "°C",         "imperial": "°F"  },
+    "consumption": { "metric": "kWh/100km",  "imperial": "kWh/100mi" },
+    "cityThr":     { "metric": "<40 km/h",   "imperial": "<25 mph" },
+    "ruralThr":    { "metric": "40-80 km/h", "imperial": "25-50 mph" },
+    "highwayThr":  { "metric": ">80 km/h",   "imperial": ">50 mph" }
+  },
   "app": {
     "name": "Toybaru ReCare",
     "logout": "Cerrar sesión",
@@ -56,7 +66,7 @@
     "remote": "Control remoto"
   },
   "battery": {
-    "title": "🔋 Batería",
+    "title": "Batería",
     "soc": "Estado de carga",
     "range": "Autonomía",
     "range_ac": "Autonomía (con A/C)",
@@ -81,7 +91,7 @@
     "history_error": "Historial no disponible"
   },
   "status": {
-    "title": "📊 Resumen",
+    "title": "Resumen",
     "odometer": "Odómetro",
     "last_update": "Al",
     "closed": "Cerrado",
@@ -106,13 +116,13 @@
     "no_additional": "Sin datos adicionales"
   },
   "location": {
-    "title": "📍 Ubicación",
+    "title": "Ubicación",
     "position": "Posición",
     "last_update": "Al",
     "unavailable": "No disponible"
   },
   "efficiency": {
-    "title": "⚡ Eficiencia",
+    "title": "Eficiencia",
     "current": "Actual (de autonomía)",
     "eco": "Eco",
     "eco_desc": "Modo de conducción eficiente. Aceleración y velocidad moderadas.",
@@ -132,7 +142,7 @@
     "date": "Fecha",
     "distance": "Distancia",
     "duration": "Duración",
-    "speed": "Prom / máx km/h",
+    "speed": "Prom / máx {speed}",
     "no_trips": "Sin viajes en este período",
     "no_db": "Sin viajes en la base de datos. Importa datos primero.",
     "sync": "Obtener nuevos viajes",
@@ -164,10 +174,10 @@
     "title": "Estadísticas",
     "overview": "Resumen",
     "total_trips": "Total de viajes",
-    "total_km": "Kilómetros totales",
+    "total_km": "{distLong} totales",
     "total_hours": "Horas conducidas",
-    "avg_speed": "Vel. promedio (km/h)",
-    "max_speed": "Vel. máxima (km/h)",
+    "avg_speed": "Vel. promedio ({speed})",
+    "max_speed": "Vel. máxima ({speed})",
     "avg_score": "Puntuación promedio",
     "first_trip": "Primer viaje",
     "last_trip": "Último viaje",
@@ -179,16 +189,16 @@
     "avg_trip_length": "Distancia promedio de viaje",
     "avg_trip_duration": "Duración promedio de viaje",
     "trips_per_day": "Viajes por día",
-    "km_per_day": "km por día",
+    "km_per_day": "{dist} por día",
     "trends": "Tendencias",
-    "km_per_month": "km por mes",
+    "km_per_month": "{dist} por mes",
     "trips_by_weekday": "Viajes por día de la semana",
     "driving_style": "Estilo de conducción",
     "score_distribution": "Distribución de puntuación",
     "speed_categories": "Categorías de velocidad",
-    "city": "Ciudad (<40 km/h)",
-    "rural": "Carretera (40-80 km/h)",
-    "highway": "Autopista (>80 km/h)",
+    "city": "Ciudad ({cityThr})",
+    "rural": "Carretera ({ruralThr})",
+    "highway": "Autopista ({highwayThr})",
     "time_of_day": "Hora del día",
     "morning": "Mañana (6-12)",
     "afternoon": "Tarde (12-18)",
@@ -199,7 +209,7 @@
     "fastest_avg": "Vel. promedio más rápida",
     "best_score": "Mejor puntuación",
     "best_reku": "Mejor regen %",
-    "most_km_day": "Más km en un día",
+    "most_km_day": "Más {dist} en un día",
     "night_trips": "Viajes nocturnos",
     "est_consumption": "~Consumo promedio"
   },
@@ -219,7 +229,7 @@
     "error": "Error"
   },
   "remote": {
-    "title": "🎮 Control Remoto",
+    "title": "Control Remoto",
     "lock": "Bloquear",
     "unlock": "Desbloquear",
     "sent": "Comando enviado",
@@ -257,7 +267,21 @@
     "on": "Encendido",
     "off": "Apagado",
     "available": "Disponible",
-    "not_available": "No disponible"
+    "not_available": "No disponible",
+    "temp_range": "Rango",
+    "temp_step": "paso",
+    "climate_start": "Iniciar climatización",
+    "climate_stop": "Detener climatización",
+    "climate_running": "Activo",
+    "climate_off": "Apagado",
+    "climate_more": "Todas las opciones",
+    "target_temp": "Objetivo",
+    "current_temp": "Temperatura cabina",
+    "duration": "Duración",
+    "started_at": "Iniciado",
+    "apply": "Aplicar",
+    "revert": "Descartar",
+    "unsaved": "Cambios sin guardar"
   },
   "hero": {
     "solar_panel": "Panel solar",
@@ -272,10 +296,12 @@
     "katashiki": "Código Katashiki",
     "family_sharing": "Uso compartido familiar",
     "enabled": "Activado",
-    "disabled": "Desactivado"
+    "disabled": "Desactivado",
+    "features": "Funciones activas ({n})",
+    "capabilities": "Capacidades hardware ({n})"
   },
   "vehicle_status": {
-    "title": "🚗 Estado del vehículo",
+    "title": "Estado del vehículo",
     "tires_ok": "llantas OK",
     "doors_open": "puertas abiertas",
     "windows_open": "ventanas abiertas",

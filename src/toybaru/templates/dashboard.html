@@ -4,131 +4,748 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Toybaru ReCare</title>
+<link rel="icon" type="image/png" sizes="32x32" href="/assets/icons/favicon-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/assets/icons/favicon-16.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/assets/icons/favicon-180.png">
+<link rel="shortcut icon" href="/favicon.ico">
 <style>
-*{margin:0;padding:0;box-sizing:border-box}
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text);font-size:14px;line-height:1.5;
---bg:#FFFFFF;--surface:#F5F5F5;--text:#212121;--muted:#666666;--border:#E0E0E0;--primary:#EB0A1E;--primary-hover:#C50818;--accent:#EB0A1E;--link:#EB0A1E;--shadow:rgba(0,0,0,0.06);--topbar-bg:#F5F5F5;--topbar-border:#E0E0E0;--topbar-text:#212121;--tab-active-bg:#FFFFFF;--tab-active-border:#EB0A1E;--tab-text:#666;--tab-active-text:#EB0A1E;--input-bg:#FFFFFF;--table-header:#F5F5F5;--table-hover:#FAFAFA;--error:#D32F2F;--success:#4CAF50;--green:#4CAF50;--yellow:#FFA000;--red:#D32F2F;--blue:#58a6ff;--overlay-bg:rgba(0,0,0,0.5);--log-bg:#F0F0F0}
-body.dark.toyota{--bg:#121212;--surface:#1E1E1E;--text:#FFFFFF;--muted:#B0B0B0;--border:#2C2C2C;--primary:#EB0A1E;--primary-hover:#FF2233;--accent:#FF4444;--link:#FF4444;--shadow:rgba(0,0,0,0.3);--topbar-bg:#1E1E1E;--topbar-border:#2C2C2C;--topbar-text:#FFFFFF;--tab-active-bg:#2A2A2A;--tab-active-border:#EB0A1E;--tab-text:#888;--tab-active-text:#FF4444;--input-bg:#1E1E1E;--table-header:#2A2A2A;--table-hover:#252525;--error:#FF6B6B;--success:#66BB6A;--green:#66BB6A;--yellow:#FFB74D;--red:#FF6B6B;--blue:#64B5F6;--overlay-bg:rgba(0,0,0,0.6);--log-bg:#111}
-body.subaru{--bg:#F0F2F5;--surface:#FFFFFF;--text:#1A1A2E;--muted:#555555;--border:#D0D5DD;--primary:#003366;--primary-hover:#002244;--accent:#003366;--link:#003366;--shadow:rgba(0,51,102,0.06);--topbar-bg:#003366;--topbar-border:#002244;--topbar-text:#FFFFFF;--tab-active-bg:#FFFFFF;--tab-active-border:#003366;--tab-text:#666;--tab-active-text:#003366;--input-bg:#FFFFFF;--table-header:#E8ECF0;--table-hover:#F5F7FA;--error:#D32F2F;--success:#4CAF50;--green:#4CAF50;--yellow:#FFA000;--red:#D32F2F;--blue:#336699;--overlay-bg:rgba(0,0,0,0.5);--log-bg:#E8ECF0}
-body.dark.subaru{--bg:#0A1628;--surface:#0F2035;--text:#E5E8EB;--muted:#8899AA;--border:#1A3050;--primary:#336699;--primary-hover:#4477AA;--accent:#5599CC;--link:#5599CC;--shadow:rgba(0,0,0,0.3);--topbar-bg:#0F2035;--topbar-border:#1A3050;--topbar-text:#E5E8EB;--tab-active-bg:#152A44;--tab-active-border:#336699;--tab-text:#667788;--tab-active-text:#5599CC;--input-bg:#0F2035;--table-header:#152A44;--table-hover:#12253B;--error:#FF6B6B;--success:#66BB6A;--green:#66BB6A;--yellow:#FFB74D;--red:#FF6B6B;--blue:#5599CC;--overlay-bg:rgba(0,0,0,0.6);--log-bg:#081020}
-.shell{display:flex;flex-direction:column;height:100vh}
-.topbar{display:flex;align-items:center;gap:12px;padding:8px 20px;border-bottom:1px solid var(--topbar-border);flex-shrink:0;background:var(--topbar-bg);color:var(--topbar-text)}
-.topbar h1{font-size:15px;font-weight:600;margin-right:auto}
-.tabs{display:flex;gap:0;border-bottom:1px solid var(--border);padding:0 20px;flex-shrink:0;background:var(--bg)}
-.tab{padding:8px 16px;font-size:13px;color:var(--tab-text);cursor:pointer;border-bottom:2px solid transparent;transition:color .15s}
-.tab:hover{color:var(--text)}.tab.active{color:var(--tab-active-text);border-bottom-color:var(--tab-active-border)}
-.page{display:none;flex:1;overflow-y:auto;padding:20px;max-width:1440px;margin:0 auto;width:100%}.page.active{display:block}
-select,input[type=date],input[type=text],input[type=email],input[type=password]{background:var(--input-bg);color:var(--text);border:1px solid var(--border);padding:6px 10px;border-radius:6px;font-size:13px;width:100%}
-.btn{background:var(--surface);color:var(--text);border:1px solid var(--border);padding:5px 14px;border-radius:6px;font-size:13px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;transition:border-color .15s}
-.btn:hover{border-color:var(--muted)}.btn:disabled{opacity:.4;cursor:default}
-.btn-primary{background:var(--primary);color:#fff;border-color:var(--primary)}.btn-primary:hover{opacity:.85}
-.btn-destructive{background:color-mix(in srgb,var(--red) 10%,var(--surface));color:var(--red);border-color:color-mix(in srgb,var(--red) 40%,transparent)}.btn-destructive:hover{background:color-mix(in srgb,var(--red) 18%,var(--surface))}
-.btn-sm{padding:3px 8px;font-size:11px}
-.meta{color:var(--muted);font-size:12px}
-.row{display:flex;justify-content:space-between;padding:6px 0;font-size:13px}.row .k{color:var(--muted)}
-.section-title{font-size:13px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;color:var(--muted);margin-bottom:12px;display:flex;align-items:center;gap:8px}
-.card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:20px;box-shadow:0 1px 2px rgba(0,0,0,.03),0 4px 16px var(--shadow)}
-.card+.card{margin-top:16px}
-.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
-.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px}
-.grid4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:16px}
-.grid2>.card,.grid3>.card,.grid4>.card{margin-top:0}
-.error{color:var(--error);font-size:13px}
-a{color:var(--link)}
-h1,h2,h3{color:var(--text)}
-.tag{font-size:11px;padding:2px 8px;border-radius:6px;border:1px solid;font-weight:500}
-.tag-ok{color:var(--green);border-color:color-mix(in srgb,var(--green) 40%,transparent);background:color-mix(in srgb,var(--green) 8%,transparent)}
-.tag-warn{color:var(--red);border-color:color-mix(in srgb,var(--red) 40%,transparent);background:color-mix(in srgb,var(--red) 8%,transparent)}
-.bat-pct{font-size:36px;font-weight:700;line-height:1.1;font-variant-numeric:tabular-nums}
-.bat-bar{width:100%;height:8px;background:var(--border);border-radius:4px;margin:8px 0 12px}
-.bat-fill{height:100%;border-radius:4px;transition:width .4s}
-.vehicle-hero{display:flex;align-items:center;gap:20px;padding:16px}
-.vehicle-hero img{max-width:200px;max-height:140px;object-fit:contain;border-radius:12px}
-.vehicle-hero-info{flex:1}
-.vehicle-hero-name{font-size:20px;font-weight:700;color:var(--text)}
-.vehicle-hero-detail{font-size:13px;color:var(--muted);margin-top:4px}
-.cap-badge{display:inline-block;font-size:11px;padding:2px 8px;border-radius:12px;background:var(--accent);color:#fff;font-weight:500;white-space:nowrap}
-.sbar{display:flex;height:6px;border-radius:3px;overflow:hidden}
-.sbar-eco{background:var(--green)}.sbar-reku{background:var(--blue)}.sbar-power{background:var(--red)}
-.sbar-legend{display:flex;gap:12px;font-size:11px;color:var(--muted);margin-top:4px}
-.sbar-legend span::before{content:'';display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:4px;vertical-align:middle}
-.leg-eco::before{background:var(--green)}.leg-reku::before{background:var(--blue)}.leg-power::before{background:var(--red)}
-table{width:100%;font-size:13px;border-collapse:separate;border-spacing:0}
-th{text-align:left;color:var(--muted);font-weight:500;padding:8px 12px;font-size:11px;text-transform:uppercase;letter-spacing:.02em;border-bottom:1px solid var(--border);position:sticky;top:0;background:var(--table-header);z-index:2}
-td{padding:10px 12px;border-bottom:1px solid var(--border);transition:background .1s}
-.clickable-row{cursor:pointer}.clickable-row:hover td{background:var(--table-hover)}
-.num{text-align:right;font-variant-numeric:tabular-nums}
-.trips-wrap{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;max-height:calc(100vh - 200px);overflow-y:auto}
-.trip-date{font-weight:500;white-space:nowrap}
-.trip-score{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:6px;font-size:12px;font-weight:600}
-.score-good{background:color-mix(in srgb,var(--green) 15%,var(--surface));color:var(--green)}.score-mid{background:color-mix(in srgb,var(--yellow) 15%,var(--surface));color:var(--yellow)}.score-bad{background:color-mix(in srgb,var(--red) 15%,var(--surface));color:var(--red)}
-.trip-pct{font-size:12px;color:var(--muted)}.trip-pct b{color:var(--text);font-weight:500}
-.sbar{height:4px;border-radius:2px}
-.tip{position:relative;cursor:help;border-bottom:1px dotted var(--muted)}
-.tip .tip-text{display:none;position:absolute;bottom:calc(100% + 6px);left:50%;transform:translateX(-50%);background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:8px 12px;font-size:12px;color:var(--text);width:240px;z-index:50;line-height:1.4;font-weight:400;white-space:normal;box-shadow:0 4px 16px rgba(0,0,0,.15)}
-.tip:hover .tip-text{display:block}
-.progress-bar{width:100%;height:8px;background:var(--border);border-radius:4px;overflow:hidden}
-.progress-fill{height:100%;background:var(--primary);border-radius:4px;transition:width .3s}
-.log-area{background:var(--log-bg);border:1px solid var(--border);border-radius:8px;font-family:'SF Mono',Menlo,monospace;font-size:11px;padding:8px 12px;max-height:300px;overflow-y:auto;white-space:pre-wrap;color:var(--muted);display:none;margin-top:8px}.log-area.open{display:block}
-.stat-num{font-size:28px;font-weight:700;line-height:1.1;font-variant-numeric:tabular-nums}.stat-label{font-size:12px;color:var(--muted);margin-top:2px}.stat-box{padding:12px}
-.overlay{display:none;position:fixed;inset:0;background:var(--overlay-bg);z-index:100}.overlay.open{display:flex;align-items:center;justify-content:center}
-.overlay-wrap{position:relative;width:90%;max-width:900px}
-.overlay-panel{background:var(--bg);border:1px solid var(--border);border-radius:14px;max-height:85vh;overflow-y:auto;padding:24px}
-.overlay-close{position:absolute;top:-14px;right:-14px;width:28px;height:28px;background:var(--surface);border:1px solid var(--border);color:var(--muted);font-size:16px;line-height:26px;text-align:center;cursor:pointer;border-radius:50%;z-index:110;padding:0}
-.overlay-close:hover{color:var(--text);border-color:var(--muted);background:var(--border)}
-.bar-chart{display:flex;align-items:flex-end;gap:3px;height:80px;margin:8px 0}
-.bar-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px}
-.bar-col .bar{background:var(--primary);border-radius:2px 2px 0 0;width:100%;min-height:1px;transition:height .3s}
-.bar-col .bar-label{font-size:9px;color:var(--muted)}
-/* Login */
-.login-wrap{display:flex;align-items:center;justify-content:center;height:100vh}
-.login-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:32px;width:360px;box-shadow:0 1px 2px rgba(0,0,0,.03),0 8px 32px var(--shadow)}
-.login-card h1{font-size:18px;font-weight:600;margin-bottom:4px}
-.login-card p{color:var(--muted);font-size:13px;margin-bottom:20px}
-.login-card label{display:block;font-size:12px;color:var(--muted);margin-bottom:4px;margin-top:12px}
-.login-card .error{margin-top:12px}
-.lang-select{background:var(--input-bg);color:var(--text);border:1px solid var(--border);padding:3px 6px;border-radius:6px;font-size:12px}
-.sync-select{background:var(--input-bg);color:var(--text);border:1px solid var(--border);padding:3px 6px;border-radius:6px;font-size:12px}
-.topbar .lang-select,.topbar .sync-select{color:var(--topbar-text)}
-.theme-toggle{background:none;border:1px solid var(--border);border-radius:6px;cursor:pointer;font-size:1.1em;padding:2px 8px;color:var(--text)}
-.theme-toggle:hover{border-color:var(--muted)}
-/* Subaru topbar special handling */
-body.subaru .topbar select,body.subaru .topbar button{color:var(--topbar-text)}
-body.subaru .topbar .btn{background:rgba(255,255,255,0.15);border-color:rgba(255,255,255,0.25)}
-body.subaru .topbar .btn:hover{background:rgba(255,255,255,0.25)}
-body.subaru .topbar .lang-select,body.subaru .topbar .sync-select{background:rgba(255,255,255,0.15);border-color:rgba(255,255,255,0.25);color:#FFFFFF}
-body.subaru .topbar .theme-toggle{border-color:rgba(255,255,255,0.25);color:#FFFFFF}
-body.dark.subaru .topbar select,body.dark.subaru .topbar button{color:var(--topbar-text)}
-body.dark.subaru .topbar .lang-select,body.dark.subaru .topbar .sync-select{background:var(--input-bg);border-color:var(--border);color:var(--text)}
-/* Responsive */
-@media(max-width:960px){
-  .grid2,.grid3,.grid4{grid-template-columns:1fr}
-  .topbar{flex-wrap:wrap;padding:10px 16px;gap:8px}
-  .tabs{padding:0 16px;overflow-x:auto;-webkit-overflow-scrolling:touch}
-  .page{padding:16px}
-  .overlay-wrap{width:95%;max-width:none}
+/* ========================================================================
+   Toybaru ReCare design tokens — GitHub Primer-adjacent dark default with
+   a light override, subtle brand accent tints (subaru/toyota/lexus).
+   Tokens, scale and rules mirror the Toybaru ReCare Design System exactly.
+   ======================================================================== */
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  /* Surfaces */
+  --bg:      #0d1117;
+  --surface: #161b22;
+  --elev:    #1c232e;
+  --border:  #30363d;
+  --hover:   #1c2533;
+  --row-sep: #1c2028;
+  --code-bg: #0a0c10;
+
+  /* Text */
+  --text:  #c9d1d9;
+  --muted: #8b949e;
+  --faint: #484f58;
+
+  /* Brand / semantic */
+  --primary:     #58a6ff;
+  --primary-ink: #ffffff;
+  --green:       #3fb950;
+  --yellow:      #d29922;
+  --red:         #f85149;
+  --blue:        #58a6ff;
+
+  /* Chips */
+  --chip-green-bg:    #1a3a2a;
+  --chip-yellow-bg:   #2a2a1a;
+  --chip-red-bg:      #2a1a1a;
+  --chip-ok-border:   #1a4731;
+  --chip-warn-border: #5c1a1a;
+
+  /* Legacy aliases so older markup/rendering JS keeps working */
+  --accent: var(--primary);
+  --primary-hover: var(--primary);
+  --link: var(--primary);
+  --shadow: rgba(0,0,0,.3);
+  --overlay-bg: rgba(0,0,0,.5);
+  --log-bg: var(--code-bg);
+  --input-bg: var(--surface);
+  --table-header: var(--surface);
+  --table-hover: var(--hover);
+  --topbar-bg: var(--surface);
+  --topbar-border: var(--border);
+  --topbar-text: var(--text);
+  --tab-active-bg: var(--surface);
+  --tab-active-border: var(--primary);
+  --tab-text: var(--muted);
+  --tab-active-text: var(--text);
+  --error: var(--red);
+  --success: var(--green);
 }
-@media(max-width:640px){
-  .vehicle-hero{flex-direction:column;align-items:flex-start;gap:12px;padding:12px}
-  .vehicle-hero img{max-width:100%;max-height:160px}
-  .bat-pct{font-size:28px}
-  .stat-num{font-size:20px}
-  iframe{height:180px!important}
-  .topbar h1{font-size:14px}
+
+/* Light theme override */
+body.light {
+  --bg:      #f6f8fa;
+  --surface: #ffffff;
+  --elev:    #ffffff;
+  --border:  #d0d7de;
+  --hover:   #eef2f7;
+  --row-sep: #e6ebf1;
+  --code-bg: #f6f8fa;
+
+  --text:  #1f2328;
+  --muted: #656d76;
+  --faint: #afb8c1;
+
+  --primary: #0969da;
+  --primary-ink: #ffffff;
+  --green:   #1a7f37;
+  --yellow:  #9a6700;
+  --red:     #cf222e;
+  --blue:    #0969da;
+
+  --chip-green-bg:    #dafbe1;
+  --chip-yellow-bg:   #fff8c5;
+  --chip-red-bg:      #ffebe9;
+  --chip-ok-border:   #aceebb;
+  --chip-warn-border: #ff8182;
+
+  --shadow: rgba(31,35,40,.04);
+  --overlay-bg: rgba(0,0,0,.4);
 }
-/* Density mode */
-body.dense .card{padding:12px;border-radius:10px}
-body.dense .row{padding:3px 0;font-size:12px}
-body.dense .section-title{font-size:11px;margin-bottom:6px}
-body.dense .stat-num{font-size:20px}
-body.dense .bat-pct{font-size:28px}
-body.dense .grid2{gap:10px}
-body.dense .page{gap:10px!important;padding:12px}
-body.dense .vehicle-hero{padding:10px;gap:12px}
-body.dense .vehicle-hero img{max-width:140px;max-height:100px}
-body.dense .vehicle-hero-name{font-size:16px}
-body.dense .btn{padding:3px 10px;font-size:12px}
-body.dense .meta{font-size:11px}
+
+/* Brand accent variants (primary colour only — no full palette swap) */
+body.subaru       { --primary: #0053a0; --blue: #0053a0; --brand-accent: #0053a0; }
+body.subaru.light { --primary: #0053a0; --blue: #0053a0; }
+body.dark.subaru, body:not(.light).subaru { --primary: #4d9be6; --blue: #4d9be6; --brand-accent: #4d9be6; }
+body.toyota       { --primary: #eb0a1e; --red: #d70010; --blue: #6e7d8c; --brand-accent: #eb0a1e; }
+body.toyota.light { --primary: #eb0a1e; --red: #d70010; }
+body.dark.toyota, body:not(.light).toyota { --primary: #ff5a4a; --brand-accent: #ff5a4a; }
+body.lexus       { --primary: #1c1c1e; --blue: #1c1c1e; --brand-accent: #1c1c1e; }
+body.lexus.light { --primary: #1c1c1e; --blue: #1c1c1e; }
+body.dark.lexus, body:not(.light).lexus { --primary: #c8a97a; --brand-accent: #c8a97a; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  transition: background .2s, color .2s;
+}
+
+/* ---------- Shell & scrollable content (one scroll per tab) ----------- */
+.shell { display: flex; flex-direction: column; height: 100vh; }
+.topbar {
+  display: flex; align-items: center; gap: 12px;
+  padding: 10px 20px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+  background: var(--surface); color: var(--text);
+}
+.topbar h1 {
+  font-size: 15px; font-weight: 600; margin-right: auto;
+  display: flex; align-items: center; gap: 10px;
+}
+.tabs {
+  display: flex;
+  border-bottom: 1px solid var(--border);
+  padding: 0 20px;
+  flex-shrink: 0;
+  background: var(--surface);
+}
+.tab {
+  padding: 10px 16px;
+  font-size: 13px;
+  color: var(--muted);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: color .15s;
+  margin-bottom: -1px;
+  font-family: inherit;
+}
+.tab:hover { color: var(--text); }
+.tab.active { color: var(--text); border-bottom-color: var(--primary); }
+.page {
+  display: none;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 20px;
+  width: 100%;
+}
+.page.active { display: flex; flex-direction: column; gap: 12px; }
+
+/* ---------- Inputs ---------------------------------------------------- */
+input, select, textarea {
+  background: var(--surface); color: var(--text);
+  border: 1px solid var(--border);
+  padding: 6px 10px; border-radius: 6px;
+  font-size: 13px;
+  font-family: inherit;
+  width: 100%;
+}
+input[type=date] { color-scheme: light dark; }
+input:focus, select:focus, textarea:focus { outline: none; border-color: var(--primary); }
+
+/* ---------- Buttons --------------------------------------------------- */
+.btn {
+  background: var(--surface); color: var(--text);
+  border: 1px solid var(--border);
+  padding: 6px 14px; border-radius: 6px;
+  font-size: 13px;
+  font-family: inherit;
+  cursor: pointer;
+  display: inline-flex; align-items: center; gap: 6px;
+  transition: background .15s, border-color .15s;
+}
+.btn:hover:not(:disabled) { border-color: var(--muted); background: var(--hover); }
+.btn:disabled { opacity: .4; cursor: default; }
+.btn-primary {
+  background: var(--primary); color: var(--primary-ink);
+  border-color: var(--primary);
+}
+.btn-primary:hover:not(:disabled) { opacity: .9; border-color: var(--primary); background: var(--primary); }
+.btn-destructive {
+  color: var(--red);
+  border-color: var(--chip-warn-border);
+  background: var(--chip-red-bg);
+}
+.btn-destructive:hover:not(:disabled) { background: color-mix(in srgb, var(--red) 18%, var(--surface)); border-color: var(--red); }
+.btn-sm { padding: 3px 8px; font-size: 11px; }
+.btn-ghost { background: transparent; }
+
+/* ---------- Typography helpers ---------------------------------------- */
+.meta { color: var(--muted); font-size: 12px; }
+.error { color: var(--red); font-size: 13px; }
+a { color: var(--primary); text-decoration: none; }
+a:hover { text-decoration: underline; }
+h1, h2, h3 { color: var(--text); font-weight: 600; }
+
+.row {
+  display: flex; justify-content: space-between;
+  padding: 4px 0; font-size: 13px;
+}
+.row .k { color: var(--muted); }
+.section-title {
+  font-size: 12px; font-weight: 600;
+  color: var(--muted);
+  margin-bottom: 8px;
+  text-transform: uppercase; letter-spacing: .04em;
+  display: flex; align-items: center; gap: 8px;
+}
+
+/* ---------- Panels & grids ------------------------------------------- */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 16px;
+}
+.card + .card { margin-top: 0; }
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+.grid4 { display: grid; grid-template-columns: repeat(4,1fr); gap: 12px; }
+
+/* ---------- Tags & badges -------------------------------------------- */
+.tag {
+  font-size: 11px; padding: 2px 8px;
+  border-radius: 4px;
+  border: 1px solid;
+  display: inline-block;
+  font-weight: 500;
+}
+.tag-ok   { color: var(--green); border-color: var(--chip-ok-border);   background: var(--chip-green-bg); }
+.tag-warn { color: var(--red);   border-color: var(--chip-warn-border); background: var(--chip-red-bg); }
+.cap-badge {
+  display: inline-block;
+  font-size: 11px; font-weight: 500;
+  padding: 2px 8px;
+  border-radius: 4px;
+  border: 1px solid color-mix(in srgb, var(--primary) 40%, transparent);
+  color: var(--primary);
+  background: color-mix(in srgb, var(--primary) 10%, transparent);
+  white-space: nowrap;
+}
+
+/* ---------- Tables --------------------------------------------------- */
+table { width: 100%; font-size: 13px; border-collapse: separate; border-spacing: 0; }
+th {
+  text-align: left; color: var(--muted); font-weight: 500;
+  padding: 10px 14px; font-size: 11px;
+  text-transform: uppercase; letter-spacing: .04em;
+  border-bottom: 1px solid var(--border);
+  position: sticky; top: 0;
+  background: var(--surface);
+  z-index: 2;
+}
+td { padding: 12px 14px; border-bottom: 1px solid var(--row-sep); transition: background .1s; }
+.clickable-row { cursor: pointer; }
+.clickable-row:hover td { background: var(--hover); }
+.num { text-align: right; font-variant-numeric: tabular-nums; }
+/* Outer wrapper — no inner scroll; parent .page handles scrolling */
+.trips-wrap {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+/* ---------- Scores & trip bits --------------------------------------- */
+.trip-score {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 28px; height: 28px;
+  border-radius: 6px;
+  font-size: 12px; font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+.score-good { background: var(--chip-green-bg);  color: var(--green); }
+.score-mid  { background: var(--chip-yellow-bg); color: var(--yellow); }
+.score-bad  { background: var(--chip-red-bg);    color: var(--red); }
+.trip-pct { font-size: 12px; color: var(--muted); }
+.trip-pct b { color: var(--text); font-weight: 500; }
+.trip-date { font-weight: 500; white-space: nowrap; }
+
+/* ---------- Battery & bars ------------------------------------------- */
+.bat-pct {
+  font-size: 28px; font-weight: 600; line-height: 1.2;
+  font-variant-numeric: tabular-nums;
+}
+.bat-bar {
+  width: 100%; height: 8px;
+  background: var(--border);
+  border-radius: 4px;
+  margin: 8px 0 12px;
+  overflow: hidden;
+}
+.bat-fill { height: 100%; border-radius: 4px; transition: width .4s; background: var(--primary); }
+.sbar { display: flex; height: 6px; border-radius: 3px; overflow: hidden; background: var(--border); }
+.sbar-eco   { background: var(--green); }
+.sbar-reku  { background: var(--blue); }
+.sbar-power { background: var(--red); }
+.sbar-legend { display: flex; gap: 12px; font-size: 11px; color: var(--muted); margin-top: 6px; }
+.sbar-legend span::before {
+  content: ''; display: inline-block;
+  width: 8px; height: 8px; border-radius: 2px;
+  margin-right: 4px; vertical-align: middle;
+}
+.leg-eco::before   { background: var(--green); }
+.leg-reku::before  { background: var(--blue); }
+.leg-power::before { background: var(--red); }
+
+/* ---------- Stats ---------------------------------------------------- */
+.stat-num {
+  font-size: 24px; font-weight: 600; line-height: 1.2;
+  font-variant-numeric: tabular-nums;
+}
+.stat-label { font-size: 12px; color: var(--muted); margin-top: 2px; }
+.stat-box { padding: 12px; }
+
+/* ---------- Vehicle hero --------------------------------------------- */
+.vehicle-hero { display: flex; align-items: center; gap: 20px; padding: 16px; }
+.vehicle-hero img {
+  max-width: 200px; max-height: 140px;
+  object-fit: contain;
+  border-radius: 12px;
+}
+.vehicle-hero-info { flex: 1; }
+.vehicle-hero-name { font-size: 20px; font-weight: 600; color: var(--text); }
+.vehicle-hero-detail { font-size: 13px; color: var(--muted); margin-top: 4px; }
+
+/* ---------- Tooltip -------------------------------------------------- */
+.tip { position: relative; cursor: help; border-bottom: 1px dotted var(--muted); }
+.tip .tip-text {
+  display: none; position: absolute;
+  bottom: calc(100% + 6px); left: 50%; transform: translateX(-50%);
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 8px 12px; font-size: 12px; color: var(--text); width: 240px;
+  z-index: 50; line-height: 1.4; font-weight: 400; white-space: normal;
+  box-shadow: 0 2px 8px var(--shadow);
+}
+.tip:hover .tip-text { display: block; }
+
+/* ---------- Progress ------------------------------------------------- */
+.progress-bar {
+  width: 100%; height: 8px;
+  background: var(--border);
+  border-radius: 4px;
+  overflow: hidden;
+}
+.progress-fill { height: 100%; background: var(--primary); border-radius: 4px; transition: width .3s; }
+
+/* ---------- Log area (inline scroll, bounded) ------------------------ */
+.log-area {
+  background: var(--code-bg); border: 1px solid var(--border);
+  border-radius: 6px;
+  font-family: 'SF Mono', Menlo, Consolas, monospace;
+  font-size: 11px;
+  padding: 8px 12px;
+  max-height: 240px;
+  overflow-y: auto;
+  white-space: pre-wrap;
+  color: var(--muted);
+  display: none;
+  margin-top: 8px;
+}
+.log-area.open { display: block; }
+
+/* ---------- Overlay modal ------------------------------------------- */
+.overlay {
+  display: none; position: fixed; inset: 0;
+  background: var(--overlay-bg);
+  z-index: 100;
+}
+.overlay.open { display: flex; align-items: center; justify-content: center; }
+.overlay-wrap { position: relative; width: 90%; max-width: 900px; }
+.overlay-panel {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  max-height: 85vh; overflow-y: auto;
+  padding: 24px;
+  box-shadow: 0 2px 8px var(--shadow);
+}
+.overlay-close {
+  position: absolute; top: -14px; right: -14px;
+  width: 28px; height: 28px;
+  background: var(--surface); border: 1px solid var(--border);
+  color: var(--muted);
+  font-size: 16px; line-height: 26px; text-align: center;
+  cursor: pointer;
+  border-radius: 50%;
+  padding: 0;
+  z-index: 110;
+}
+.overlay-close:hover { color: var(--text); border-color: var(--muted); background: var(--border); }
+
+/* ---------- Bar chart ------------------------------------------------ */
+.bar-chart { display: flex; align-items: flex-end; gap: 3px; height: 80px; margin: 8px 0; }
+.bar-col { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 2px; }
+.bar-col .bar { background: var(--primary); border-radius: 2px 2px 0 0; width: 100%; min-height: 1px; transition: height .3s; }
+.bar-col .bar-label { font-size: 9px; color: var(--muted); }
+
+/* ---------- Login ---------------------------------------------------- */
+.login-wrap { display: flex; align-items: center; justify-content: center; height: 100vh; }
+.login-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 32px;
+  width: 360px;
+}
+.login-card h1 { font-size: 18px; font-weight: 600; margin-bottom: 4px; }
+.login-card p { color: var(--muted); font-size: 13px; margin-bottom: 20px; }
+.login-card label { display: block; font-size: 12px; color: var(--muted); margin-bottom: 4px; margin-top: 12px; }
+.login-card .error { margin-top: 12px; }
+
+/* ---------- Small UI bits ------------------------------------------- */
+.lang-select, .sync-select {
+  background: transparent; color: var(--text);
+  border: 1px solid var(--border);
+  padding: 3px 8px; border-radius: 6px;
+  font-size: 12px;
+  width: auto;
+}
+.theme-toggle {
+  background: transparent; border: 1px solid var(--border);
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  padding: 3px 8px;
+  color: var(--text);
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: 28px; height: 28px;
+  font-family: inherit;
+}
+.theme-toggle:hover { border-color: var(--muted); background: var(--hover); }
+
+/* Brand dot next to topbar title */
+.brand-dot {
+  width: 10px; height: 10px; border-radius: 50%;
+  background: var(--brand-accent, var(--primary));
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--brand-accent, var(--primary)) 25%, transparent);
+}
+
+/* ---------- Scrollbar styling --------------------------------------- */
+* { scrollbar-width: thin; scrollbar-color: var(--border) transparent; }
+*::-webkit-scrollbar { width: 8px; height: 8px; }
+*::-webkit-scrollbar-track { background: transparent; }
+*::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+*::-webkit-scrollbar-thumb:hover { background: var(--muted); }
+
+/* ---------- Responsive ---------------------------------------------- */
+@media (max-width: 960px) {
+  .grid2, .grid3, .grid4 { grid-template-columns: 1fr; }
+  .topbar { flex-wrap: wrap; padding: 10px 16px; gap: 8px; }
+  .tabs { padding: 0 16px; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .page { padding: 16px; }
+  .overlay-wrap { width: 95%; max-width: none; }
+}
+@media (max-width: 640px) {
+  .vehicle-hero { flex-direction: column; align-items: flex-start; gap: 12px; padding: 12px; }
+  .vehicle-hero img { max-width: 100%; max-height: 160px; }
+  .bat-pct { font-size: 24px; }
+  .stat-num { font-size: 20px; }
+  iframe { height: 180px !important; }
+  .topbar h1 { font-size: 14px; }
+}
+
+/* ---------- Density (opt-in compact mode) --------------------------- */
+body.dense .card { padding: 12px; }
+body.dense .row { padding: 3px 0; font-size: 12px; }
+body.dense .page { gap: 10px !important; padding: 16px; }
+body.dense .vehicle-hero { padding: 10px; gap: 14px; }
+body.dense .vehicle-hero img { max-width: 160px; max-height: 110px; }
+body.dense .stat-num { font-size: 20px; }
+body.dense .bat-pct { font-size: 24px; }
+
+/* =======================================================================
+   Kit components (ported from /tmp/toybaru_design/ui_kits/dashboard/styles.css)
+   ======================================================================= */
+
+/* Vehicle hero */
+.tb-hero {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 24px;
+  position: relative;
+  overflow: hidden;
+}
+.tb-hero-head {
+  display: flex; justify-content: space-between; align-items: start;
+  gap: 12px;
+  padding-bottom: 14px;
+  margin-bottom: 14px;
+  border-bottom: 1px solid var(--border);
+}
+.tb-hero-title { font-size: 12px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; }
+.tb-hero-model { font-size: 22px; font-weight: 600; margin-top: 2px; line-height: 1.15; }
+.tb-hero-sub   { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+.tb-car-stage {
+  position: relative;
+  min-height: 460px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 0 16px;
+}
+.tb-car-stage.compact { min-width: 0; min-height: 520px; padding: 0; }
+.tb-car-svg { max-height: 500px; width: auto; max-width: 260px; display: block; }
+
+/* Hero body: three equal columns — car / map / features. Dividers live in the
+   gap as absolutely-positioned pseudo-elements so every column keeps a
+   symmetrical content area (no asymmetric padding/border that would push its
+   centred content sideways). */
+.tb-hero-body {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr);
+  gap: 48px;
+  align-items: stretch;
+  margin: 4px 0 10px;
+  position: relative;
+}
+.tb-hero-body > * { position: relative; min-width: 0; }
+.tb-hero-body > *:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  top: 0; bottom: 0;
+  right: -24px;
+  width: 1px;
+  background: var(--border);
+}
+.tb-hero-map {
+  display: flex; flex-direction: column; gap: 6px;
+}
+.tb-hero-map iframe { width: 100%; flex: 1 1 auto; min-height: 240px; border-radius: 6px; border: 1px solid var(--border); }
+.tb-hero-map .map-coords { font-variant-numeric: tabular-nums; text-align: center; }
+.tb-hero-aside {
+  display: flex; flex-direction: column; gap: 14px;
+}
+.tb-hero-aside .section-title { margin-bottom: 6px; }
+.tb-hero-aside .cap-badge { margin: 0 3px 3px 0; }
+.tb-hero-aside-empty { color: var(--muted); font-size: 12px; font-style: italic; }
+
+/* Indicator labels sit right next to their door on the portrait car */
+.tb-car-stage.compact .tb-indicator { min-width: 0; max-width: 110px; }
+.tb-car-stage.compact .tb-ind-label { font-size: 9px; }
+.tb-car-stage.compact .tb-ind-value { font-size: 11px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+@media (max-width: 1100px) {
+  .tb-hero-body { grid-template-columns: minmax(0, 1fr); gap: 14px; }
+  .tb-car-stage.compact { align-self: center; }
+  .tb-hero-body > *:not(:last-child)::after {
+    top: auto; bottom: -7px;
+    left: 0; right: 0;
+    width: auto; height: 1px;
+  }
+  .tb-hero-map, .tb-hero-aside { padding-top: 14px; }
+}
+
+.tb-indicator {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 110px;
+  pointer-events: none;
+}
+/* Left-side indicator: text hugs its right edge (closer to car), dot sits to
+   the right of the text so it's visually adjacent to the door it describes. */
+.tb-indicator { align-items: flex-end; text-align: right; }
+.tb-indicator .tb-ind-value { flex-direction: row-reverse; }
+/* Right-side indicator (.right modifier): text left-aligned, dot on the left
+   so it sits right next to the door. */
+.tb-indicator.right { align-items: flex-start; text-align: left; }
+.tb-indicator.right .tb-ind-value { flex-direction: row; }
+/* Centred indicator (hatch): dot below the label, centred. */
+.tb-indicator.center { align-items: center; text-align: center; }
+.tb-indicator.center .tb-ind-value { flex-direction: row; }
+.tb-ind-label { font-size: 10px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; }
+.tb-ind-value { font-size: 13px; font-weight: 500; color: var(--text); display: inline-flex; align-items: center; gap: 6px; }
+.tb-ind-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--green); flex-shrink: 0; }
+.tb-ind-dot.warn { background: var(--red); }
+
+/* Battery strip inside hero */
+.tb-soc-row {
+  display: flex; align-items: center; gap: 20px;
+  margin-top: 8px; padding-top: 16px;
+  border-top: 1px solid var(--border);
+  flex-wrap: wrap;
+}
+.tb-soc-big  { font-size: 44px; font-weight: 600; line-height: 1; letter-spacing: -.02em; font-variant-numeric: tabular-nums; }
+.tb-soc-unit { font-size: 18px; color: var(--muted); font-weight: 500; }
+.tb-soc-mid  { flex: 1; min-width: 200px; display: flex; flex-direction: column; gap: 6px; }
+.tb-soc-bar  { width: 100%; height: 8px; background: var(--border); border-radius: 4px; overflow: hidden; }
+.tb-soc-fill { height: 100%; border-radius: 4px; transition: width .4s; background: var(--primary); }
+.tb-soc-meta { display: flex; justify-content: space-between; font-size: 11px; color: var(--muted); }
+.tb-soc-stats { display: flex; gap: 20px; margin-left: auto; }
+.tb-soc-stat { text-align: right; }
+.tb-soc-stat-v { font-size: 18px; font-weight: 600; line-height: 1.1; font-variant-numeric: tabular-nums; }
+.tb-soc-stat-l { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; margin-top: 2px; }
+
+/* Remote strip + expander */
+.tb-remote {
+  display: flex; align-items: center; gap: 8px;
+  padding: 12px 16px;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 12px;
+}
+.tb-remote-label {
+  font-size: 12px; font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase; letter-spacing: .08em;
+  margin-right: 4px; flex-shrink: 0;
+}
+.tb-remote-btns { display: flex; gap: 8px; flex: 1; }
+.tb-remote-btn {
+  flex: 1;
+  display: flex; align-items: center; justify-content: center;
+  gap: 6px;
+  padding: 10px 12px;
+  background: transparent; border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text); font-family: inherit;
+  font-size: 13px; font-weight: 500;
+  cursor: pointer;
+  transition: background .15s, border-color .15s, color .15s;
+}
+.tb-remote-btn:hover:not(:disabled) { background: var(--hover); border-color: var(--primary); color: var(--primary); }
+.tb-remote-btn:disabled { opacity: .35; cursor: not-allowed; }
+.tb-remote-more { margin-top: 8px; }
+.tb-remote-more summary {
+  cursor: pointer; list-style: none;
+  font-size: 11px; font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase; letter-spacing: .08em;
+  padding: 4px 2px;
+  user-select: none;
+  display: inline-flex; align-items: center; gap: 6px;
+}
+.tb-remote-more summary::-webkit-details-marker { display: none; }
+.tb-remote-more[open] summary { color: var(--text); }
+.tb-remote-more-body { margin-top: 8px; display: flex; flex-direction: column; gap: 10px; padding: 10px 16px; border: 1px solid var(--border); border-radius: 8px; background: var(--surface); }
+
+/* Route placeholder (used if Leaflet not ready yet) */
+.tb-route-ph {
+  height: 320px; border-radius: 6px;
+  background:
+    repeating-linear-gradient(90deg, transparent 0 80px, rgba(0,0,0,.04) 80px 81px),
+    repeating-linear-gradient( 0deg, transparent 0 80px, rgba(0,0,0,.04) 80px 81px),
+    linear-gradient(135deg, #e7dfd0, #efe7d8);
+  position: relative; overflow: hidden;
+}
+
+/* Climate toggle pills (seat heaters / defogger / etc.) and temperature slider */
+.tb-toggle {
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 5px 10px;
+  border-radius: 6px; border: 1px solid var(--border);
+  background: transparent; color: var(--muted);
+  font-size: 12px; font-family: inherit; font-weight: 500;
+  cursor: pointer;
+  transition: background .15s, border-color .15s, color .15s;
+}
+.tb-toggle::before {
+  content: ''; display: inline-block;
+  width: 9px; height: 9px; border-radius: 50%;
+  background: var(--border);
+  transition: background .15s;
+}
+.tb-toggle:hover:not(:disabled) { border-color: var(--muted); color: var(--text); }
+.tb-toggle.on { color: var(--text); border-color: var(--green); background: var(--chip-green-bg); }
+.tb-toggle.on::before { background: var(--green); }
+.tb-toggle:disabled { opacity: .4; cursor: not-allowed; }
+
+.tb-temp-slider {
+  display: flex; flex-direction: column; gap: 6px;
+  margin: 10px 0 12px;
+}
+.tb-temp-slider-row { display: flex; align-items: center; gap: 12px; }
+.tb-temp-slider-big {
+  font-size: 28px; font-weight: 600; line-height: 1;
+  font-variant-numeric: tabular-nums;
+  color: var(--text);
+  min-width: 80px;
+}
+.tb-temp-slider-big .unit { font-size: 14px; color: var(--muted); font-weight: 500; margin-left: 2px; }
+.tb-temp-slider input[type=range] {
+  flex: 1;
+  -webkit-appearance: none; appearance: none;
+  height: 4px; border-radius: 2px;
+  background: var(--border);
+  outline: none; padding: 0;
+  border: none;
+}
+.tb-temp-slider input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none; appearance: none;
+  width: 18px; height: 18px; border-radius: 50%;
+  background: var(--primary); border: 2px solid var(--surface);
+  cursor: pointer; box-shadow: 0 0 0 1px var(--border);
+}
+.tb-temp-slider input[type=range]::-moz-range-thumb {
+  width: 18px; height: 18px; border-radius: 50%;
+  background: var(--primary); border: 2px solid var(--surface);
+  cursor: pointer;
+}
+.tb-temp-slider-scale {
+  display: flex; justify-content: space-between;
+  font-size: 10px; color: var(--muted);
+  font-variant-numeric: tabular-nums; letter-spacing: .04em;
+}
+
+.tb-climate-group { margin-top: 10px; }
+.tb-climate-group-title {
+  font-size: 11px; font-weight: 600; color: var(--muted);
+  text-transform: uppercase; letter-spacing: .04em;
+  margin-bottom: 6px;
+}
+.tb-climate-toggles { display: flex; flex-wrap: wrap; gap: 6px; }
+
+/* Segmented switcher (reserved for future theme/brand toggles) */
+.tb-switcher { display: inline-flex; align-items: center; gap: 4px; padding: 3px; background: var(--hover); border-radius: 7px; border: 1px solid var(--border); }
+.tb-switcher button { background: transparent; border: none; color: var(--muted); font-size: 11px; padding: 3px 8px; border-radius: 5px; cursor: pointer; font-family: inherit; font-weight: 500; }
+.tb-switcher button.active { background: var(--surface); color: var(--text); box-shadow: 0 0 0 1px var(--border); }
+.tb-switcher button:hover:not(.active) { color: var(--text); }
+
+/* Responsive tweaks for hero indicators */
+@media (max-width: 720px) {
+  .tb-car-stage { min-height: 220px; }
+  .tb-car-svg { max-height: 200px; }
+  .tb-indicator { min-width: 90px; }
+  .tb-ind-value { font-size: 12px; }
+  .tb-soc-row { gap: 12px; }
+  .tb-soc-big { font-size: 32px; }
+  .tb-soc-stats { gap: 14px; }
+}
 </style>
 </head>
 <body class="toyota">
@@ -163,7 +780,7 @@ body.dense .meta{font-size:11px}
 <div id="appView" style="display:none">
 <div class="shell">
 <div class="topbar">
-  <h1>Toybaru ReCare</h1>
+  <h1><span class="brand-dot" aria-hidden="true"></span>Toybaru ReCare</h1>
   <select id="vinSelect" style="width:auto"></select>
   <span class="meta" id="lastUpdate"></span>
   <select class="lang-select" onchange="setLang(this.value)" id="langSelect" style="width:auto"></select>
@@ -175,22 +792,17 @@ body.dense .meta{font-size:11px}
     <option value="30">Auto: 30 min</option>
     <option value="60">Auto: 60 min</option>
   </select>
-  <button onclick="toggleTheme()" id="themeBtn" class="theme-toggle" title="Toggle dark/light mode">&#x1F319;</button>
-  <button onclick="toggleDensity()" id="densityBtn" class="theme-toggle" title="Toggle comfort/dense mode">⊞</button>
+  <button onclick="toggleTheme()" id="themeBtn" class="theme-toggle" title="Toggle dark/light mode"></button>
+  <button onclick="toggleDensity()" id="densityBtn" class="theme-toggle" title="Toggle comfort/dense mode"></button>
   <button class="btn btn-sm" onclick="doLogout()" id="logoutBtn"></button>
 </div>
 <div class="tabs" id="tabBar"></div>
 
-<div class="page active" id="page-vehicle" style="display:flex;flex-direction:column;gap:16px">
-  <div class="card" id="vehicleHeroCard" style="display:none;margin:0"></div>
-  <div class="grid2">
-    <div class="card" id="batteryCard" style="margin:0"></div>
-    <div class="card" id="statusCard"></div>
-    <div class="card" id="tireCard"></div>
-    <div class="card" id="remoteCard"></div>
-    <div class="card" id="efficiencyCard"></div>
-  </div>
-  <div class="card" id="lastTripCard" style="margin:0"></div>
+<div class="page active" id="page-vehicle">
+  <div id="vehicleHeroCard"></div>
+  <div id="remoteCard"></div>
+  <div class="card" id="lastTripCard"></div>
+  <div class="card" id="efficiencyCard"></div>
   <div style="text-align:right"><button class="btn" onclick="loadOverview()" id="refreshOverviewBtn"></button></div>
 </div>
 
@@ -330,39 +942,40 @@ let BRAND = 'toyota';
 
 function applyBrand(brand) {
   BRAND = brand;
-  document.body.classList.remove('toyota', 'subaru');
+  document.body.classList.remove('toyota', 'lexus', 'subaru');
   document.body.classList.add(brand);
 }
 
+function _setThemeIcon(isDark) {
+  document.getElementById('themeBtn').innerHTML = isDark ? icon('sun') : icon('moon');
+}
+function _setDensityIcon(isDense) {
+  const btn = document.getElementById('densityBtn');
+  btn.innerHTML = isDense ? icon('density_on') : icon('density');
+  btn.title = isDense ? 'Switch to comfort mode' : 'Switch to dense mode';
+}
+
 function toggleTheme() {
-  const isDark = document.body.classList.toggle('dark');
-  localStorage.setItem('toybaru_theme', isDark ? 'dark' : 'light');
-  document.getElementById('themeBtn').textContent = isDark ? '\u2600\uFE0F' : '\uD83C\uDF19';
+  // Dark is default; the .light class opts in to the light override.
+  const isLight = document.body.classList.toggle('light');
+  localStorage.setItem('toybaru_theme', isLight ? 'light' : 'dark');
+  _setThemeIcon(!isLight);
 }
 
 function toggleDensity() {
   const isDense = document.body.classList.toggle('dense');
   localStorage.setItem('toybaru_density', isDense ? 'dense' : 'comfort');
-  document.getElementById('densityBtn').textContent = isDense ? '⊟' : '⊞';
-  document.getElementById('densityBtn').title = isDense ? 'Switch to comfort mode' : 'Switch to dense mode';
+  _setDensityIcon(isDense);
 }
 
 function initTheme() {
-  const saved = localStorage.getItem('toybaru_theme') || 'light';
-  if (saved === 'dark') {
-    document.body.classList.add('dark');
-    document.getElementById('themeBtn').textContent = '\u2600\uFE0F';
-  } else {
-    document.body.classList.remove('dark');
-    document.getElementById('themeBtn').textContent = '\uD83C\uDF19';
-  }
-  // Density
+  const saved = localStorage.getItem('toybaru_theme') || 'dark';
+  if (saved === 'light') document.body.classList.add('light');
+  else document.body.classList.remove('light');
+  _setThemeIcon(saved !== 'light');
   const density = localStorage.getItem('toybaru_density') || 'comfort';
-  if (density === 'dense') {
-    document.body.classList.add('dense');
-    document.getElementById('densityBtn').textContent = '⊟';
-    document.getElementById('densityBtn').title = 'Switch to comfort mode';
-  }
+  if (density === 'dense') document.body.classList.add('dense');
+  _setDensityIcon(density === 'dense');
 }
 
 function updateLangSelects() {
@@ -378,7 +991,6 @@ function updateLangSelects() {
 
 function applyI18n() {
   updateLangSelects();
-  // Update sync select labels
   document.querySelectorAll('.sync-select').forEach(sel => {
     const opts = sel.options;
     opts[0].textContent = 'Auto: ' + t('app.sync_off');
@@ -428,8 +1040,12 @@ function applyI18n() {
 // --- Globals ---
 let currentVin = null;
 let allData = {};
+// Climate settings: _climateState is the live edit, _climateStateOrig is the
+// last-saved snapshot used to diff and toggle the Apply button.
+let _climateState = null;
+let _climateStateOrig = null;
 let _csrfToken = '';
-let UNIT = 'km';
+let UNIT = 'km';  // mirrors bat.evRange.unit
 let HAS_TRIPS = true;
 
 function _postHeaders() {
@@ -446,8 +1062,26 @@ function normUnit(u) {
   return l;
 }
 
-function speedUnit() { return UNIT === 'miles' ? 'mph' : 'km/h'; }
-function distLabel() { return UNIT === 'miles' ? 'miles' : 'km'; }
+// --- Unit labels ---
+// Values are never converted — the API already returns them in the account's
+// native unit. We only swap the displayed label.
+function unitVar(name) {
+  const variant = UNIT === 'miles' ? 'imperial' : 'metric';
+  const v = t(`units.${name}.${variant}`);
+  if (v && !v.startsWith('units.')) return v;
+  const fallback = t(`units.${name}.metric`);
+  return (fallback && !fallback.startsWith('units.')) ? fallback : null;
+}
+function distLabel()       { return unitVar('dist')        || 'km'; }
+function speedUnit()       { return unitVar('speed')       || 'km/h'; }
+function distPer100Label() { return unitVar('consumption') || 'kWh/100km'; }
+
+function tu(key) {
+  return t(key).replace(/\{(\w+)\}/g, (m, name) => {
+    const v = unitVar(name);
+    return v != null ? v : m;
+  });
+}
 
 function switchTab(id) {
   document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === id));
@@ -465,6 +1099,93 @@ function fmtKm(m){return m!=null?(m/1000).toFixed(1):'?'}
 function scoreClass(s){return s>=80?'score-good':s>=60?'score-mid':'score-bad'}
 
 function _escAttr(s){return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/'/g,'&#39;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+function _prettyCap(key){return key.replace(/([A-Z])/g,' $1').replace(/^./,s=>s.toUpperCase()).replace(/\bCapable\b/g,'').replace(/\s+/g,' ').trim()}
+
+// Lock/Unlock are the only icons in the design system; the rest of these
+// resolve to a small Unicode mark or empty string to preserve template spacing.
+const GLYPHS = {
+  lock: '&#128274;',  // 🔒
+  unlock: '&#128275;',// 🔓
+  sun: '\u2600',      // ☀
+  moon: '\u263E',     // ☾
+  density: '\u229E',  // ⊞
+  density_on: '\u229F', // ⊟
+  check: '\u2713',    // ✓
+  warning: '\u26A0',  // ⚠
+  hourglass: '\u29D6',// ⧖
+};
+function icon(name) { return GLYPHS[name] || ''; }
+
+// ---------- Car top-down renderer (ported from design kit CarTopdown.jsx) ----------
+function _shadeHex(hex, amount) {
+  const h = String(hex || '').replace('#','');
+  const n = parseInt(h.length === 3 ? h.split('').map(c => c + c).join('') : (h || '000000'), 16) || 0;
+  let r = (n >> 16) & 255, g = (n >> 8) & 255, b = n & 255;
+  r = Math.max(0, Math.min(255, Math.round(r * (1 - amount))));
+  g = Math.max(0, Math.min(255, Math.round(g * (1 - amount))));
+  b = Math.max(0, Math.min(255, Math.round(b * (1 - amount))));
+  return '#' + [r,g,b].map(v => v.toString(16).padStart(2,'0')).join('');
+}
+function _brandEmblem(brand) {
+  if (brand === 'subaru') {
+    return '<g transform="translate(300 135)"><ellipse cx="0" cy="0" rx="14" ry="5" fill="#0053a0"/><g fill="#e3c04b"><polygon points="0,-3 .6,-1 2.6,-1 1,.3 1.6,2.4 0,1.1 -1.6,2.4 -1,.3 -2.6,-1 -.6,-1"/></g></g>';
+  }
+  if (brand === 'toyota') {
+    return '<g transform="translate(300 135)" fill="none" stroke="#eb0a1e" stroke-width="1.2"><ellipse cx="0" cy="0" rx="13" ry="6"/><ellipse cx="0" cy="-0.5" rx="8" ry="2.3"/><ellipse cx="0" cy="1" rx="3.8" ry="4.5"/></g>';
+  }
+  if (brand === 'lexus') {
+    return '<g transform="translate(300 135)" fill="none" stroke="#c8a97a" stroke-width="1.4"><ellipse cx="0" cy="0" rx="13" ry="6"/><path d="M -5 -2 L -5 2 L 5 2" stroke-linecap="round"/></g>';
+  }
+  return '';
+}
+// Traced top-down silhouette — generated from a real Solterra reference photo
+// via potrace. Two layers: body (outer shell + door/seam outlines) and detail
+// (windows/shadows/mirrors). Inner coord space is 1600 × 739 (potrace output),
+// embedded inside our 640 × 270 outer viewBox via a nested <svg>.
+const CAR_BODY_PATHS = `<path d="M10870 7888 c-30 0 -67 -3 -81 -5 -15 -2 -37 -15 -49 -28 -18 -19 -21 -32 -18 -72 3 -26 10 -68 16 -93 6 -25 15 -63 21 -85 5 -22 14 -59 20 -82 6 -24 16 -62 22 -85 5 -24 14 -63 19 -88 6 -25 16 -61 24 -80 8 -19 19 -62 26 -95 7 -33 19 -68 28 -77 9 -11 30 -18 51 -18 20 0 41 -4 47 -8 6 -4 17 -18 23 -30 7 -13 10 -26 7 -29 -2 -3 -11 -1 -18 3 -7 5 -101 10 -208 11 -107 2 -283 5 -390 8 -107 3 -260 8 -340 11 -80 3 -268 7 -419 10 -227 3 -277 7 -291 19 -11 10 -47 18 -97 22 -73 5 -83 4 -119 -19 -36 -23 -47 -25 -157 -23 -111 2 -120 4 -145 27 -26 24 -31 25 -109 19 -61 -5 -87 -11 -103 -26 -22 -20 -39 -20 -859 -23 -460 -1 -960 1 -1111 6 -248 7 -279 10 -320 29 -25 12 -65 24 -90 28 -36 5 -60 1 -114 -19 -47 -18 -88 -26 -130 -26 -51 0 -68 5 -105 30 -32 22 -56 30 -85 30 -23 -1 -60 -5 -83 -9 -23 -4 -64 -5 -92 0 -27 4 -350 9 -718 10 -451 1 -736 -2 -878 -11 -133 -8 -221 -17 -239 -26 -16 -8 -41 -14 -55 -14 -14 0 -55 -7 -91 -16 -36 -8 -96 -21 -135 -29 -38 -8 -106 -23 -150 -33 -44 -10 -99 -29 -122 -40 -23 -12 -44 -26 -48 -32 -3 -5 -22 -10 -41 -10 -19 0 -61 -11 -94 -25 -33 -14 -67 -25 -76 -25 -9 0 -47 -11 -84 -24 -37 -14 -85 -34 -106 -45 -21 -12 -46 -21 -54 -21 -8 0 -35 -9 -59 -20 -27 -12 -94 -26 -175 -35 -72 -8 -153 -20 -181 -26 -27 -6 -70 -18 -94 -27 -32 -10 -68 -39 -126 -97 -45 -46 -89 -98 -98 -117 -9 -20 -23 -41 -32 -48 -8 -7 -15 -16 -15 -20 0 -4 -26 -48 -58 -96 -32 -49 -66 -102 -74 -119 -9 -16 -35 -66 -59 -110 -24 -44 -57 -110 -73 -145 -15 -36 -34 -78 -41 -95 -7 -16 -21 -55 -33 -85 -11 -30 -30 -89 -42 -130 -11 -41 -25 -91 -31 -110 -5 -19 -14 -66 -19 -105 -5 -38 -16 -95 -25 -125 -8 -30 -15 -80 -15 -112 0 -31 -6 -108 -14 -170 -8 -62 -17 -178 -21 -258 -3 -80 -12 -224 -20 -320 -10 -129 -11 -229 -5 -380 5 -113 13 -288 19 -390 6 -102 17 -232 25 -290 9 -58 18 -141 20 -185 3 -44 12 -111 21 -150 8 -38 15 -87 15 -107 0 -20 5 -49 11 -65 6 -15 17 -55 24 -88 8 -33 21 -80 30 -105 8 -25 32 -88 52 -140 21 -52 68 -156 106 -230 38 -74 74 -141 80 -149 7 -8 32 -49 57 -91 25 -43 78 -127 119 -186 40 -60 96 -130 125 -156 39 -36 70 -53 129 -72 43 -14 101 -26 129 -26 29 0 79 -6 112 -14 34 -8 93 -19 131 -26 39 -7 86 -21 105 -31 19 -11 41 -19 48 -19 8 0 57 -17 110 -39 54 -21 129 -46 167 -56 39 -10 105 -31 148 -48 43 -16 80 -34 83 -38 3 -5 21 -9 40 -9 19 0 51 -7 72 -16 20 -9 60 -19 87 -24 28 -4 79 -15 115 -23 36 -9 99 -22 140 -30 41 -9 129 -21 195 -28 85 -9 382 -14 1009 -16 889 -4 889 -4 911 17 18 17 38 22 91 25 38 1 83 6 100 10 26 6 36 2 65 -25 30 -28 39 -31 74 -26 22 3 56 9 75 12 19 3 45 16 57 29 20 21 32 23 195 30 95 3 601 7 1125 8 952 2 952 2 982 -27 27 -26 38 -29 115 -33 84 -4 85 -4 98 24 9 19 24 29 48 35 19 4 77 4 128 1 58 -4 98 -11 105 -19 7 -7 18 -20 25 -29 7 -8 28 -15 47 -15 19 0 58 5 87 11 29 6 62 20 74 30 18 17 37 19 170 19 82 0 273 5 424 10 151 6 439 14 640 19 240 4 370 4 378 -3 10 -7 17 -5 23 7 6 9 14 17 19 17 6 0 10 -9 10 -19 0 -11 -10 -27 -22 -35 -12 -9 -32 -16 -44 -16 -12 0 -30 -3 -39 -6 -9 -4 -26 -28 -37 -53 -12 -25 -24 -64 -29 -86 -4 -22 -16 -69 -25 -105 -9 -36 -23 -80 -30 -98 -8 -18 -14 -48 -14 -66 0 -19 -9 -63 -20 -98 -11 -34 -20 -74 -20 -87 0 -13 -7 -47 -16 -75 -12 -38 -13 -58 -5 -78 5 -15 21 -34 35 -43 14 -9 51 -19 83 -22 47 -4 68 0 113 20 30 14 77 44 103 67 26 23 68 74 93 112 25 37 68 113 96 168 27 55 54 103 59 106 5 3 9 12 9 20 0 8 9 36 20 62 12 26 27 59 35 74 8 14 15 34 15 43 0 9 9 28 20 42 12 15 20 41 20 62 0 21 -7 46 -15 57 -8 10 -15 22 -15 27 0 4 8 7 18 7 10 0 24 -6 31 -12 6 -7 35 -13 64 -14 29 0 257 -6 507 -12 304 -9 477 -17 520 -26 36 -8 92 -17 125 -20 33 -3 204 -13 380 -22 242 -13 416 -15 716 -10 217 3 429 10 470 16 41 5 128 14 194 20 66 5 145 15 175 21 30 6 87 20 125 31 39 11 106 31 150 45 44 13 112 36 150 50 39 14 93 34 120 45 28 11 64 26 80 33 17 8 47 21 67 30 21 10 58 35 83 57 25 22 57 64 72 94 20 41 47 71 111 124 46 39 112 101 146 138 34 37 74 85 89 107 15 22 44 58 65 80 21 22 55 54 75 71 20 18 82 83 138 145 56 63 120 138 143 168 22 30 51 70 64 90 12 20 31 55 42 79 11 24 20 53 20 65 0 12 7 31 15 41 8 10 24 49 36 85 12 36 28 70 35 74 8 4 14 21 14 37 0 20 6 31 20 35 11 3 22 16 25 28 3 12 10 42 16 67 6 25 14 122 19 215 5 94 13 278 19 410 7 132 10 404 7 605 -2 201 -9 480 -15 620 -6 140 -15 281 -21 312 -6 31 -22 81 -36 110 -14 29 -39 78 -55 108 -16 30 -29 65 -29 78 0 12 -15 55 -34 95 -18 40 -37 85 -40 101 -4 16 -27 60 -51 97 -24 37 -65 94 -90 126 -26 32 -123 137 -215 233 -93 97 -182 192 -197 211 -16 20 -95 100 -176 179 -81 79 -147 149 -147 156 0 6 -17 33 -38 58 -21 26 -62 62 -91 80 -29 19 -67 39 -84 46 -18 6 -47 18 -65 26 -18 8 -38 14 -44 14 -7 0 -30 8 -52 18 -23 10 -57 24 -76 31 -19 7 -55 19 -80 26 -25 7 -58 18 -75 24 -16 6 -58 20 -93 31 -34 11 -75 20 -90 20 -16 0 -51 7 -78 15 -27 8 -69 15 -94 15 -25 0 -94 7 -155 16 -77 10 -235 17 -525 21 -251 3 -512 1 -660 -6 -135 -6 -328 -16 -430 -21 -102 -5 -201 -14 -220 -20 -19 -6 -64 -12 -100 -15 -36 -2 -222 -9 -415 -16 -192 -6 -382 -12 -422 -13 -46 -2 -81 -9 -97 -20 -14 -9 -32 -16 -41 -16 -8 0 -15 6 -15 13 0 6 7 21 15 31 8 11 15 31 15 45 0 14 -9 40 -20 56 -11 17 -20 39 -20 50 0 11 -6 29 -14 40 -7 11 -17 31 -21 45 -4 14 -25 62 -46 107 -21 45 -43 84 -49 88 -5 3 -10 17 -10 30 0 13 -4 27 -10 30 -5 3 -30 44 -55 90 -32 58 -66 102 -112 145 -37 35 -85 71 -107 81 -26 12 -61 18 -96 17z m1087 -976 c70 -1 135 -5 143 -8 13 -5 13 -6 0 -14 -8 -4 -117 -11 -242 -15 -149 -4 -228 -3 -232 4 -4 6 10 15 31 20 21 6 66 10 101 9 34 0 64 1 66 3 3 2 62 3 133 1z m-4589 -64 c44 1 72 -2 72 -8 0 -6 -20 -10 -47 -8 -27 1 -131 -2 -233 -6 -102 -5 -182 -5 -178 -1 4 4 76 11 160 15 84 4 186 8 226 8z m-598 -20 c8 0 24 -3 35 -8 19 -7 18 -8 -5 -13 -14 -3 -99 -8 -190 -12 -91 -3 -219 -10 -285 -15 -66 -6 -201 -15 -300 -20 -99 -6 -234 -14 -300 -20 -66 -5 -175 -12 -242 -15 -71 -4 -123 -2 -127 3 -3 5 39 12 99 16 58 4 109 5 113 2 5 -3 37 -1 73 5 35 5 134 14 219 20 85 6 211 13 280 15 69 2 131 6 137 9 7 2 64 7 125 11 62 3 167 9 233 13 66 5 127 8 135 9z m5430 -108 c10 0 23 -7 31 -16 9 -12 23 -14 53 -10 23 3 70 8 106 12 53 5 68 3 79 -9 11 -14 9 -17 -11 -21 -12 -2 -97 -9 -188 -15 -91 -6 -202 -14 -247 -17 -56 -4 -83 -3 -83 4 0 6 5 14 11 17 5 4 47 8 92 8 69 2 87 6 111 25 16 12 37 22 46 22z m2958 -80 c6 0 30 -9 54 -20 24 -11 56 -28 73 -38 16 -9 34 -20 40 -24 5 -4 42 -33 80 -64 39 -31 91 -79 116 -107 25 -29 85 -99 133 -157 48 -58 96 -121 106 -141 10 -19 26 -41 34 -48 9 -8 16 -20 16 -27 0 -8 -5 -14 -11 -14 -5 0 -17 16 -25 35 -8 19 -20 35 -27 35 -7 0 -30 23 -51 50 -21 28 -44 50 -51 50 -7 0 -15 13 -18 28 -4 17 -16 33 -31 40 -16 7 -26 20 -26 32 0 13 -7 20 -20 20 -11 0 -24 8 -27 17 -4 9 -14 24 -22 34 -9 9 -29 35 -45 58 -17 23 -37 41 -46 41 -8 0 -23 -9 -33 -20 -10 -12 -22 -18 -27 -15 -6 3 -10 13 -10 21 0 8 6 14 14 14 8 0 18 5 21 10 4 6 1 17 -5 25 -7 8 -21 15 -31 15 -12 0 -19 7 -19 20 0 15 -7 20 -25 20 -14 0 -29 8 -35 19 -5 11 -20 23 -32 27 -12 4 -35 20 -51 35 -16 16 -24 29 -19 29z m-4528 -32 c61 1 64 0 40 -13 -16 -9 -56 -14 -114 -15 -49 0 -86 3 -82 7 3 4 25 10 49 14 23 3 71 7 107 7z m-247 -29 c74 1 77 0 67 -19 -6 -11 -26 -22 -47 -26 -20 -4 -64 -1 -98 5 -46 9 -67 10 -90 1 -29 -12 -30 -12 -7 -21 12 -5 32 -14 45 -19 16 -8 4 -9 -48 -5 -38 3 -77 6 -85 7 -8 0 -43 0 -77 0 -58 -2 -63 -4 -60 -24 1 -15 -4 -23 -16 -26 -12 -2 -20 3 -24 16 -3 11 -15 23 -26 26 -12 3 -50 6 -85 6 -35 0 -73 -5 -84 -11 -13 -7 -91 -12 -204 -13 -101 -1 -181 0 -179 2 2 2 21 5 42 7 21 2 92 9 158 14 66 6 143 13 170 15 28 3 84 9 125 15 41 6 134 15 205 21 72 6 155 15 185 19 30 5 90 9 133 10z m434 -20 c1 0 8 -2 17 -5 9 -3 16 -9 16 -13 0 -5 -24 -13 -52 -19 -29 -6 -80 -16 -112 -22 -33 -5 -77 -10 -98 -10 -21 0 -38 4 -38 8 0 4 5 13 12 20 7 7 43 12 88 13 41 0 95 6 120 13 25 8 46 14 47 15z m-392 -61 c28 1 59 -3 70 -8 16 -6 17 -9 5 -13 -8 -3 -40 -8 -70 -11 -30 -2 -70 -8 -87 -11 -22 -5 -33 -3 -33 4 0 6 15 17 33 25 17 8 55 14 82 14z m-1240 -39 c81 0 115 -2 105 -9 -8 -5 -73 -9 -145 -8 -77 0 -120 4 -105 8 14 5 79 8 145 9z m-6731 -30 c5 1 3 -6 -4 -14 -12 -14 8 -16 186 -14 109 0 305 -4 434 -11 148 -7 240 -16 249 -23 10 -8 121 -14 370 -18 196 -4 364 -7 374 -8 9 -1 17 -5 17 -11 0 -6 -157 -8 -437 -5 -241 2 -584 7 -763 10 -179 4 -383 8 -455 10 -71 1 -130 6 -130 11 0 5 16 17 35 27 19 11 53 25 75 32 22 8 44 14 49 14z m1655 -317 c3 -6 6 -95 5 -199 0 -111 -4 -186 -10 -183 -5 3 -9 86 -9 185 0 99 2 186 4 193 2 8 6 10 10 4z m204 -901 c10 -7 16 -52 21 -143 4 -73 10 -216 14 -318 3 -102 5 -392 5 -645 0 -253 -3 -570 -7 -705 -4 -135 -12 -260 -18 -277 -5 -18 -13 -33 -17 -33 -5 0 -9 480 -10 1066 -1 897 1 1065 12 1055z m11452 -2944 c5 -2 9 -13 7 -23 -2 -10 -11 -26 -20 -34 -9 -8 -44 -51 -76 -95 -32 -44 -112 -133 -177 -198 -66 -64 -141 -131 -169 -148 -27 -17 -58 -29 -67 -27 -14 3 -12 7 12 21 17 9 81 70 144 137 63 66 120 120 127 120 6 0 19 10 27 23 8 12 47 55 86 95 39 41 71 81 71 91 0 9 5 22 12 29 7 7 17 11 23 9z"/>`;
+const CAR_DETAIL_PATHS = `<path d="M10862 7859 c-31 0 -67 -4 -79 -9 -12 -5 -24 -18 -28 -30 -4 -12 -4 -43 0 -68 4 -26 29 -136 56 -245 28 -109 61 -232 75 -273 13 -41 24 -81 24 -89 0 -7 7 -21 16 -29 8 -9 30 -16 47 -16 18 0 40 -7 50 -14 10 -8 23 -31 29 -52 5 -22 15 -46 22 -54 7 -8 27 -38 44 -66 21 -32 30 -58 26 -69 -6 -14 -16 -16 -74 -10 -52 5 -79 3 -117 -11 -49 -17 -77 -17 -689 -1 -371 10 -932 18 -1339 18 -386 0 -707 -2 -715 -5 -8 -3 -132 -10 -275 -16 -143 -5 -411 -17 -595 -25 -184 -8 -420 -20 -525 -25 -104 -6 -309 -17 -455 -25 -146 -8 -328 -20 -405 -25 -77 -6 -246 -17 -375 -26 -129 -8 -278 -19 -330 -23 -52 -5 -176 -25 -275 -45 -99 -20 -184 -41 -189 -46 -7 -7 -5 -16 5 -26 9 -8 141 -46 295 -84 153 -38 296 -77 317 -86 34 -16 76 -17 435 -11 218 4 541 11 717 17 176 6 552 20 835 30 283 11 585 22 670 25 85 4 322 15 525 26 204 10 447 26 540 34 94 8 222 19 285 24 63 6 194 17 290 25 96 9 236 22 310 31 74 8 162 17 195 20 33 3 119 12 190 20 72 8 184 22 250 30 66 9 156 20 200 26 44 5 175 21 290 34 116 14 248 29 295 35 47 6 137 15 200 20 63 5 183 16 265 24 83 9 178 18 213 22 38 4 60 10 55 15 -5 5 -115 10 -244 10 -129 0 -262 -3 -297 -6 -61 -7 -64 -7 -116 29 -30 20 -73 62 -96 93 -37 50 -41 61 -36 94 6 37 6 37 -39 43 -34 6 -51 15 -69 39 -13 18 -40 73 -59 122 -19 50 -44 122 -56 160 -11 39 -30 88 -41 109 -11 22 -23 55 -26 73 -3 18 -12 33 -20 33 -7 0 -17 -8 -23 -17 -9 -17 -11 -17 -28 2 -10 11 -26 33 -36 48 -10 15 -26 27 -35 26 -9 -1 -30 4 -47 11 -16 8 -38 20 -47 28 -10 9 -18 25 -18 37 0 13 7 26 16 29 9 3 31 6 50 6 19 0 51 -9 72 -19 20 -10 44 -27 53 -37 9 -11 32 -41 51 -69 19 -27 58 -99 87 -158 29 -60 68 -145 87 -190 19 -45 49 -102 66 -128 18 -25 42 -53 55 -62 22 -17 23 -17 23 0 0 11 -8 34 -18 54 -10 19 -26 57 -36 84 -10 28 -48 109 -84 180 -36 72 -91 171 -123 220 -37 57 -76 104 -106 127 -27 20 -61 42 -76 47 -16 6 -54 11 -85 10z"/> <path d="M13685 7114 c-247 2 -484 1 -525 0 -41 -2 -169 -8 -284 -14 -115 -5 -213 -13 -219 -19 -5 -5 2 -11 20 -15 15 -3 120 -10 233 -16 113 -6 275 -15 360 -20 85 -6 229 -17 320 -25 91 -8 190 -17 220 -20 30 -4 93 -10 140 -15 47 -6 146 -19 220 -30 74 -12 180 -30 235 -40 55 -11 155 -29 223 -40 68 -12 133 -25 145 -30 12 -6 48 -14 81 -19 32 -4 67 -6 77 -4 11 3 19 8 19 12 0 4 -6 13 -12 20 -11 11 4 13 87 8 74 -4 118 -12 168 -31 38 -15 86 -35 107 -46 22 -11 41 -16 44 -12 3 5 -12 24 -32 44 -20 19 -71 49 -112 68 -41 18 -100 41 -130 51 -30 11 -116 39 -190 63 -74 24 -164 50 -200 59 -36 9 -110 23 -165 32 -55 9 -163 20 -240 26 -77 6 -342 12 -590 13z"/> <path d="M4160 7088 c-96 0 -188 -4 -205 -8 -18 -4 38 -8 135 -8 91 -1 183 3 205 7 27 6 -17 9 -135 9z"/> <path d="M15055 6794 c-16 3 -38 1 -48 -5 -9 -5 -15 -14 -12 -20 4 -5 23 -9 44 -9 30 0 38 -4 37 -17 0 -11 10 -21 29 -27 17 -5 67 -27 111 -48 45 -21 87 -44 94 -53 7 -8 17 -15 22 -15 6 0 33 -18 61 -40 27 -22 52 -39 54 -37 2 2 1 10 -3 18 -3 8 -31 34 -62 59 -32 25 -86 60 -122 77 -36 17 -73 34 -84 37 -11 4 -16 12 -12 21 4 11 -2 15 -24 15 -16 0 -32 5 -35 10 -4 6 6 10 22 11 26 1 25 2 -7 9 -19 4 -48 11 -65 14z"/> <path d="M3225 6728 c-104 0 -228 -5 -275 -9 -47 -4 -161 -12 -255 -18 -93 -5 -190 -13 -215 -16 -25 -3 -74 -11 -110 -16 -36 -6 -83 -18 -105 -27 -22 -9 -57 -28 -77 -43 -20 -14 -59 -53 -86 -85 -26 -32 -73 -97 -104 -144 -30 -47 -82 -130 -114 -185 -33 -55 -81 -145 -108 -200 -26 -55 -66 -145 -88 -200 -22 -55 -49 -131 -60 -170 -10 -38 -29 -115 -42 -170 -13 -55 -30 -140 -39 -190 -9 -49 -21 -153 -27 -230 -6 -77 -15 -192 -20 -255 -5 -63 -15 -203 -21 -310 -7 -117 -9 -287 -5 -425 3 -126 10 -300 16 -385 5 -85 17 -225 25 -310 9 -85 23 -202 31 -260 8 -58 19 -130 25 -160 5 -30 22 -95 36 -145 14 -49 34 -115 44 -146 10 -30 36 -101 58 -157 23 -56 63 -144 90 -195 27 -52 60 -110 73 -129 13 -19 34 -54 48 -77 14 -24 64 -103 113 -176 48 -73 103 -147 123 -165 20 -17 61 -42 91 -56 33 -14 85 -27 127 -30 39 -4 98 -13 131 -21 33 -8 98 -19 145 -23 47 -5 199 -13 339 -20 140 -6 302 -9 360 -5 58 4 121 13 139 21 18 7 35 20 38 29 4 8 1 22 -6 30 -7 8 -35 22 -63 30 -28 8 -132 26 -232 40 -99 14 -229 32 -290 40 -60 8 -177 21 -260 29 -82 8 -173 21 -200 28 -28 8 -90 35 -138 61 -48 27 -92 57 -98 69 -7 14 -8 23 -1 30 6 6 106 14 234 19 123 4 524 11 891 15 484 5 672 10 684 19 14 11 14 52 3 477 -8 255 -11 472 -7 481 4 10 17 21 29 26 13 5 57 20 98 33 63 21 76 29 84 54 7 19 11 374 11 1067 0 1039 0 1039 -21 1056 -12 10 -60 28 -107 40 -47 12 -90 28 -96 34 -6 8 -6 119 -1 312 5 165 10 378 11 473 2 141 0 175 -12 183 -8 5 -106 9 -218 9 -112 0 -391 4 -620 10 -229 5 -539 11 -690 14 -150 2 -277 8 -282 13 -5 5 -7 16 -4 24 3 8 30 31 61 53 31 21 79 51 107 65 29 15 77 33 107 39 30 6 98 16 150 22 52 6 127 15 165 20 39 5 111 15 160 21 50 6 149 19 220 30 72 10 154 23 182 28 29 6 64 18 78 27 14 9 25 23 25 30 0 8 -15 23 -32 34 -30 18 -50 20 -223 18z"/> <path d="M12543 6629 c-10 -1 -49 -5 -88 -9 -38 -4 -117 -12 -175 -18 -58 -6 -172 -16 -255 -22 -82 -7 -186 -16 -230 -21 -44 -5 -106 -9 -138 -9 -32 0 -106 -7 -165 -15 -59 -8 -226 -28 -372 -45 -146 -16 -346 -41 -445 -55 -99 -14 -238 -34 -310 -45 -71 -10 -170 -24 -220 -30 -49 -6 -172 -22 -273 -35 -101 -14 -229 -29 -285 -35 -56 -5 -212 -20 -347 -34 -135 -13 -344 -32 -465 -40 -121 -9 -287 -21 -370 -26 -82 -5 -229 -14 -325 -20 -96 -6 -242 -15 -325 -21 -82 -5 -233 -14 -335 -19 -102 -5 -327 -16 -500 -25 -173 -8 -430 -19 -570 -25 -140 -5 -356 -14 -480 -20 -124 -5 -313 -12 -420 -15 -107 -3 -304 -10 -437 -17 -224 -11 -243 -13 -243 -30 0 -15 9 -18 63 -18 34 0 213 7 397 15 184 8 616 26 960 40 344 14 771 32 950 40 179 8 496 24 705 35 209 11 400 22 425 25 25 3 108 9 185 15 77 5 235 16 350 25 116 8 293 22 395 30 102 9 226 20 275 25 50 6 128 15 175 21 47 6 157 21 245 35 88 14 193 30 233 36 51 9 75 9 83 1 6 -6 15 -57 19 -114 5 -57 16 -223 25 -369 8 -146 20 -476 26 -735 6 -276 8 -822 5 -1322 -4 -571 -11 -935 -21 -1105 -8 -139 -19 -332 -25 -428 -6 -96 -13 -192 -16 -213 -3 -21 -12 -41 -20 -44 -8 -3 -54 2 -102 11 -48 8 -118 20 -157 26 -38 6 -119 17 -180 25 -60 8 -177 21 -260 30 -82 8 -195 20 -250 25 -55 6 -192 17 -305 25 -113 9 -297 22 -410 30 -113 9 -351 24 -530 35 -179 11 -467 26 -640 34 -173 9 -423 20 -555 26 -132 5 -478 19 -770 30 -291 11 -640 25 -775 30 -135 6 -302 13 -372 17 -117 5 -128 4 -134 -12 -5 -11 -1 -22 8 -29 11 -8 208 -19 584 -34 313 -13 695 -27 849 -32 154 -6 471 -19 705 -30 234 -11 549 -27 700 -35 151 -8 352 -20 445 -25 94 -6 233 -15 310 -21 77 -5 232 -16 345 -24 113 -8 284 -22 380 -30 96 -9 222 -20 280 -26 58 -6 150 -14 205 -19 55 -5 168 -19 250 -30 83 -11 193 -27 245 -35 53 -8 121 -15 151 -15 31 0 148 -14 260 -30 112 -17 258 -38 324 -46 66 -8 181 -21 255 -29 74 -7 191 -20 260 -29 69 -8 175 -19 235 -25 61 -6 180 -18 265 -26 85 -8 256 -21 380 -30 124 -8 250 -19 282 -24 51 -9 65 -6 150 24 51 18 113 42 138 53 25 10 106 43 180 72 74 29 191 77 260 107 69 30 190 87 270 126 80 39 169 86 198 105 30 18 71 52 93 74 21 22 55 67 75 99 25 42 41 86 55 152 10 51 23 160 28 243 6 82 17 241 25 354 9 113 20 356 25 540 6 184 9 490 7 680 -2 190 -9 453 -15 585 -6 132 -20 368 -31 525 -13 181 -28 316 -41 369 -10 46 -33 110 -51 143 -17 32 -48 78 -69 102 -21 23 -73 63 -116 88 -43 24 -134 72 -203 105 -69 33 -163 77 -210 97 -47 20 -110 48 -140 60 -30 13 -89 38 -130 56 -41 18 -99 41 -129 52 -30 11 -84 33 -119 49 -36 16 -71 29 -79 29 -7 0 -31 9 -53 20 -22 11 -47 19 -57 19z"/> <path d="M15818 6110 c-6 0 -2 -12 8 -27 9 -16 54 -77 100 -138 45 -60 91 -119 103 -129 12 -11 24 -16 28 -13 3 4 2 16 -3 27 -5 11 -45 66 -89 122 -44 57 -93 115 -109 130 -15 16 -33 28 -38 28z"/> <path d="M15992 6010 c-7 0 -12 -3 -12 -6 0 -4 16 -32 37 -63 20 -31 44 -65 53 -76 10 -11 25 -42 35 -70 9 -27 27 -67 41 -87 13 -21 32 -38 41 -38 8 0 22 8 29 18 12 15 13 13 14 -20 0 -27 8 -47 31 -73 17 -19 37 -35 45 -35 8 0 14 4 14 9 0 5 -18 45 -40 89 -22 44 -40 87 -40 96 0 9 -8 24 -17 34 -10 10 -31 38 -48 62 -16 25 -34 48 -40 52 -5 4 -13 2 -17 -5 -5 -7 -7 -2 -6 13 3 20 -1 25 -19 23 -15 -2 -33 10 -56 37 -19 22 -39 40 -45 40z"/> <path d="M16321 2780 c-5 0 -23 -12 -40 -26 -17 -14 -39 -39 -48 -55 -10 -16 -26 -32 -38 -35 -11 -4 -30 -18 -43 -33 -12 -14 -29 -38 -37 -53 -9 -16 -22 -28 -29 -28 -8 0 -39 -28 -70 -61 -32 -34 -76 -86 -99 -116 -23 -31 -67 -90 -97 -133 -30 -42 -68 -96 -84 -119 -16 -23 -26 -44 -23 -47 3 -3 33 22 67 57 34 34 67 76 74 94 7 17 25 39 40 48 14 10 26 23 26 30 0 8 10 23 23 35 13 12 29 22 35 22 7 0 12 -6 12 -14 0 -8 -15 -27 -33 -43 -17 -15 -42 -45 -54 -65 -12 -21 -18 -40 -14 -43 5 -2 26 11 47 30 21 19 41 35 45 35 4 0 38 30 76 68 38 37 95 102 126 144 31 42 57 82 57 88 0 7 6 24 13 38 8 15 28 55 45 88 18 34 32 69 32 78 0 9 -4 16 -9 16z"/> <path d="M5543 1950 c-80 -1 -116 -5 -138 -17 -16 -9 -151 -47 -300 -85 -148 -37 -285 -75 -302 -83 -22 -10 -31 -19 -27 -30 4 -8 9 -15 13 -15 3 0 60 -12 126 -26 66 -14 158 -32 205 -40 47 -8 175 -21 285 -29 110 -8 279 -19 375 -25 96 -6 265 -17 375 -25 110 -7 450 -25 755 -39 305 -13 663 -30 795 -36 132 -6 305 -15 385 -20 80 -6 465 -10 855 -10 391 0 861 4 1045 10 184 6 457 15 606 19 175 6 287 5 315 -1 24 -6 86 -12 137 -15 68 -4 95 -9 99 -19 3 -8 -6 -29 -19 -47 -14 -17 -37 -53 -51 -78 -15 -25 -27 -55 -27 -67 0 -11 -10 -28 -22 -36 -12 -9 -34 -16 -48 -16 -14 0 -35 -7 -47 -15 -11 -8 -23 -25 -26 -37 -3 -13 -24 -95 -47 -183 -23 -88 -48 -189 -55 -225 -7 -36 -20 -93 -29 -126 -9 -34 -16 -82 -16 -108 0 -33 5 -48 18 -54 9 -5 34 -12 55 -16 27 -5 53 -1 92 13 30 11 65 26 77 33 13 7 36 24 52 38 15 14 49 57 75 95 27 39 66 104 89 146 22 42 70 145 107 228 36 83 69 166 72 185 3 22 0 42 -12 60 -17 25 -16 27 19 80 20 30 53 68 73 85 21 17 51 37 68 45 25 12 81 14 326 9 231 -5 298 -3 304 7 4 7 2 16 -5 20 -6 4 -64 10 -128 14 -64 4 -175 13 -247 21 -71 8 -184 19 -250 25 -66 6 -181 17 -255 25 -74 8 -202 23 -285 34 -82 11 -197 25 -255 31 -58 6 -154 17 -215 25 -60 8 -177 22 -260 30 -82 9 -208 22 -280 30 -71 8 -227 24 -345 34 -118 11 -298 27 -400 36 -102 8 -304 21 -450 29 -146 9 -332 18 -415 21 -82 3 -193 8 -245 10 -52 2 -322 13 -600 24 -278 11 -638 25 -800 31 -162 6 -474 15 -692 20 -219 6 -446 10 -505 10z m5804 -721 c1 1 8 -2 17 -5 9 -3 16 -10 16 -16 0 -5 -18 -30 -39 -56 -22 -26 -51 -75 -65 -109 -14 -35 -38 -89 -52 -120 -14 -32 -45 -96 -68 -143 -24 -47 -53 -102 -66 -122 -12 -21 -26 -35 -31 -32 -5 3 -9 11 -9 18 0 8 7 19 15 26 8 7 15 21 15 31 0 11 9 36 20 56 11 21 20 43 20 49 0 7 13 42 30 78 16 37 36 88 44 114 8 26 27 79 43 117 15 39 32 76 36 82 4 7 22 17 40 22 18 5 33 10 34 10z"/> <path d="M15539 1859 c-3 9 -21 -1 -54 -28 -27 -22 -53 -47 -57 -56 -5 -8 -15 -15 -22 -15 -8 0 -19 -7 -26 -14 -6 -8 -66 -42 -133 -75 -67 -32 -133 -62 -147 -66 -14 -4 -32 -13 -40 -20 -8 -7 -31 -15 -52 -19 -20 -4 -39 -13 -42 -21 -3 -8 -1 -17 5 -20 5 -4 19 -3 32 1 12 4 47 7 78 6 39 -2 60 2 68 12 7 8 27 18 44 22 18 3 49 24 70 45 21 22 43 39 47 39 5 0 36 27 69 60 33 33 64 60 68 60 5 0 20 12 34 28 14 15 33 32 43 37 11 6 17 17 15 24z"/> <path d="M15343 1569 c-5 0 -32 -11 -62 -25 -29 -13 -60 -24 -68 -24 -7 0 -24 -6 -36 -14 -12 -8 -55 -19 -95 -26 -40 -7 -84 -9 -98 -6 -13 4 -29 18 -34 31 -8 21 -14 24 -42 19 -18 -3 -73 -15 -123 -25 -49 -11 -106 -24 -125 -29 -19 -4 -55 -11 -80 -15 -25 -4 -71 -13 -102 -21 -31 -8 -115 -23 -185 -34 -70 -10 -200 -29 -288 -40 -88 -12 -234 -28 -325 -35 -91 -8 -264 -22 -385 -30 -121 -8 -294 -19 -385 -25 -91 -6 -181 -14 -200 -16 -28 -5 -31 -8 -18 -15 9 -5 113 -15 230 -21 117 -7 427 -12 688 -12 261 0 545 6 631 12 86 6 214 21 284 32 70 11 169 32 218 46 50 14 129 38 177 54 47 16 122 42 167 58 45 16 108 42 140 57 32 16 73 42 91 59 17 16 32 34 32 38 0 4 -3 8 -7 7z"/> <path d="M4070 1248 c-95 0 -154 -3 -139 -8 14 -4 77 -9 140 -10 63 -2 157 -2 209 0 95 3 95 3 25 10 -38 4 -144 8 -235 8z"/>`;
+
+// Paint-colour catalogue. Subaru/Toyota APIs give us the colour NAME only (e.g.
+// "Dark Blue Mica") — no hex. Map the common factory colours so the car
+// top-down renders in the vehicle's actual paint.
+const PAINT_HEX = {
+  'dark blue mica':             '#1c2a44',
+  'sapphire blue pearl':        '#1e3960',
+  'harbour mist gray metallic': '#838a92',
+  'harbor mist gray metallic':  '#838a92',
+  'magnetite gray metallic':    '#2c3036',
+  'ice silver metallic':        '#c5c9cc',
+  'crystal white pearl':        '#eef0f2',
+  'crystal black silica':       '#15181a',
+  'plasma yellow pearl':        '#e3d34a',
+  'autumn green metallic':      '#364a33',
+  'sonic copper':               '#8a5a3c',
+  'sonic titanium':             '#b7bcc0',
+};
+function paintForVehicle(v) {
+  const name = String(v?.color || '').trim().toLowerCase();
+  if (!name) return '#e8e9eb';
+  if (PAINT_HEX[name]) return PAINT_HEX[name];
+  for (const [k, hex] of Object.entries(PAINT_HEX)) {
+    if (name.includes(k)) return hex;
+  }
+  return '#e8e9eb';
+}
+
+function carTopdownSvg(brand, paintHex) {
+  // Pass the vehicle's paint colour to the asset endpoint so the server can
+  // tint the body fills to match. Bump `v` when the asset itself changes to
+  // bust stale browser caches.
+  const paint = (paintHex || paintForVehicle(allData?.vehicle || {})).replace('#', '');
+  const url = `/assets/car-topdown.svg?paint=${paint}&v=4`;
+  // Outer <svg> rotates the landscape asset into portrait. preserveAspectRatio
+  // meets the whole illustration inside the slot — no crop, no clipping.
+  return `<svg class="tb-car-svg" viewBox="0 0 1568 2658" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet" aria-label="Vehicle top-down">
+    <g transform="translate(0 2658) rotate(-90)">
+      <image href="${url}" x="0" y="0" width="2658" height="1568"/>
+    </g>
+  </svg>`;
+}
 
 const SL={
   // EU API uses carstatus_ prefixed keys
@@ -609,250 +1330,250 @@ async function loadOverview() {
   if (!currentVin) return;
   document.getElementById('lastUpdate').textContent = t('app.loading');
   allData = await (await fetch(`/api/all/${currentVin}`)).json();
-  // Detect unit from battery data
   if (allData.battery?.evRange?.unit) {
     UNIT = normUnit(allData.battery.evRange.unit);
   }
-  // Detect capabilities
   const prevHasTrips = HAS_TRIPS;
   if (allData.capabilities) {
     HAS_TRIPS = allData.capabilities.trips !== false;
-    // Use US locale for date/time formatting for NA users
+    // NA accounts (no trips) get US-formatted dates/times.
     if (allData.capabilities.trips === false) LC = 'en-US';
   }
   if (HAS_TRIPS !== prevHasTrips) applyI18n();
-  // Detect brand from API response
   if (allData.brand) {
     applyBrand(allData.brand);
   }
-  renderVehicleHero(allData.vehicle, allData.battery?.solar, allData.battery, allData.status);
-  renderBattery(allData.battery, allData);
-  renderStatus(allData.status, allData.telemetry, allData.location);
-  renderTirePressure(allData.telemetry, allData.status);
+  renderVehicleHero(allData);
   renderEfficiency(allData);
-  renderRemote(allData.vehicle?.remote_capabilities, allData.climate_settings);
+  renderRemote(allData.vehicle?.remote_capabilities, allData.climate_settings, allData.climate_status);
   renderLastTrip();
   document.getElementById('lastUpdate').textContent = new Date().toLocaleTimeString(LC);
 }
 
 function _escHtml(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;')}
 
-function renderVehicleHero(v, solar, bat, status) {
+// Flatten vehicleStatus = [{ category, sections: [{ section, values }] }] into
+// a `category|section` -> values lookup for indicator rendering.
+function _buildVehicleStateMap(vehicleStatus) {
+  const map = {};
+  for (const cat of vehicleStatus || []) {
+    for (const sec of cat.sections || []) {
+      const vals = (sec.values || []).map(v => String(v.value || '').toLowerCase());
+      const key = (String(cat.category || '') + '|' + String(sec.section || '')).toLowerCase();
+      map[key] = vals;
+    }
+  }
+  return map;
+}
+function _stateFor(map, catHas, secHas, secNot) {
+  // EU API sections: "carstatus_item_driver_door" is front-left, "..._rear_door"
+  // is rear-left — there is no explicit "front" token, hence the substring match.
+  const catList = Array.isArray(catHas) ? catHas : [catHas];
+  const secList = Array.isArray(secHas) ? secHas : [secHas];
+  const secExcl = secNot || [];
+  for (const key of Object.keys(map)) {
+    const [cat, sec] = key.split('|');
+    const catOk = catList.every(x => cat.includes(x));
+    const secOk = secList.every(x => sec.includes(x)) && !secExcl.some(x => sec.includes(x));
+    if (catOk && secOk) {
+      const vals = map[key];
+      const warn = vals.some(v => /open|unlocked/.test(v));
+      // ts() resolves raw API values like "carstatus_locked" via i18n.
+      const label = vals.map(v => ts(v)).join(' \u00b7 ');
+      return { label: label || '—', warn };
+    }
+  }
+  return { label: '—', warn: false };
+}
+
+// ---------- Vehicle hero (car top-down + indicators + SoC strip) ----------
+function renderVehicleHero(all) {
   const el = document.getElementById('vehicleHeroCard');
+  const v = all?.vehicle;
+  const bat = all?.battery;
+  const status = all?.status;
   if (!v || (!v.image && !v.nickname && !v.model_name)) { el.style.display = 'none'; return; }
   el.style.display = '';
-  const name = _escHtml(v.nickname || v.model_name || '');
-  const model = v.model_year && v.model_name ? _escHtml(v.model_year + ' ' + v.model_name) : _escHtml(v.model_name || '');
-  const color = _escHtml(v.color || '');
-  const caps = v.capabilities || [];
-  // Add solar panel badge
-  if (solar) {
-    const solarLabel = solar.equipped ? '☀️ ' + t('hero.solar_panel') : t('hero.solar_na');
-    const solarStyle = solar.equipped ? '' : 'opacity:0.5';
-    caps.push({label: solarLabel, _style: solarStyle});
-  }
-  const capsHtml = caps.length ? `<div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:8px">${caps.map(c =>
-    `<span class="cap-badge" ${c._style ? 'style="'+_escAttr(c._style)+'"' : ''}>${_escHtml(c.label)}</span>`).join('')}</div>` : '';
-  // Validate image URL (only allow https:)
-  const imgUrl = v.image && /^https:\/\//i.test(v.image) ? _escAttr(v.image) : '';
 
-  // Key metrics strip — coerce API values to safe numbers
+  const name = _escHtml(v.nickname || v.model_name || '');
+  const modelLine = v.model_year && v.model_name ? _escHtml(v.model_year + ' ' + v.model_name) : _escHtml(v.model_name || '');
+  const color = _escHtml(v.color || '');
+  const paintHex = paintForVehicle(v);
+
+  const stateMap = _buildVehicleStateMap(status?.vehicleStatus);
+  // Front door = has "door", no "rear" / "window". Rear door = has "rear_door".
+  const driverFront = _stateFor(stateMap, 'driver',    ['door'],          ['rear', 'window']);
+  const driverRear  = _stateFor(stateMap, 'driver',    ['rear', 'door'],  ['window']);
+  const passFront   = _stateFor(stateMap, 'passenger', ['door'],          ['rear', 'window']);
+  const passRear    = _stateFor(stateMap, 'passenger', ['rear', 'door'],  ['window']);
+  const hatch       = _stateFor(stateMap, 'other',     ['hatch'],         []);
+
+  const warnings = Number(status?.cautionOverallCount) || 0;
+  const anyUnlocked = [driverFront, driverRear, passFront, passRear, hatch].some(s => s.warn);
+  const overallWarn = warnings > 0 || anyUnlocked;
+  const statusFetchError = status?.error;
+  const overallTag = statusFetchError
+    ? `<span class="tag tag-warn" title="${_escHtml(statusFetchError)}">${_escHtml(statusFetchError)}</span>`
+    : overallWarn
+      ? `<span class="tag tag-warn">${warnings ? warnings + ' ' + _escHtml(t('status.warnings').toLowerCase()) : _escHtml(t('status.open'))}</span>`
+      : `<span class="tag tag-ok">${_escHtml(t('status.locked'))}</span>`;
+
   const pct = Number(bat?.batteryLevel); const pctOk = isFinite(pct);
   const range = Number(bat?.evRange?.value); const rangeOk = isFinite(range);
-  const unit = _escHtml(bat?.evRange?.unit || 'km');
+  const rangeAc = Number(bat?.evRangeWithAc?.value); const rangeAcOk = isFinite(rangeAc);
+  const unit = _escHtml(bat?.evRange?.unit || UNIT || 'km');
   const cs = String(bat?.chargingStatus || '');
-  const warnings = Number(status?.cautionOverallCount) || 0;
-  const batColor = pctOk&&pct>20?'var(--green)':pctOk&&pct>=10?'var(--yellow)':'var(--red)';
-  let metricsHtml = '';
-  if (pctOk || warnings > 0) {
-    metricsHtml = `<div style="display:flex;gap:16px;flex-wrap:wrap;margin-top:12px;padding-top:12px;border-top:1px solid var(--border)">`;
-    if (pctOk) {
-      metricsHtml += `<div style="display:flex;align-items:center;gap:8px"><span style="font-size:24px;font-weight:700;color:${batColor}">${pct}%</span>`;
-      if (rangeOk) metricsHtml += `<span class="meta">${Math.round(range)} ${unit}</span>`;
-      if (cs === 'charging') metricsHtml += `<span class="tag tag-ok" style="font-size:10px">⚡ ${t('battery.charging')}</span>`;
-      metricsHtml += `</div>`;
-    }
-    if (warnings > 0) {
-      metricsHtml += `<div style="display:flex;align-items:center;gap:6px"><span class="tag tag-warn">⚠ ${warnings} ${t('status.warnings').toLowerCase()}</span></div>`;
-    }
-    metricsHtml += `</div>`;
+  const batColor = pctOk && pct > 50 ? 'var(--green)' : pctOk && pct > 20 ? 'var(--yellow)' : 'var(--red)';
+
+  function indicator(side, pos, label, state) {
+    return `<div class="tb-indicator ${side}" style="${pos}">
+      <span class="tb-ind-label">${_escHtml(label)}</span>
+      <span class="tb-ind-value"><span class="tb-ind-dot ${state.warn ? 'warn' : ''}"></span>${_escHtml(state.label)}</span>
+    </div>`;
   }
 
-  el.innerHTML = `<div class="vehicle-hero">
-    ${imgUrl ? `<img src="${imgUrl}" alt="${name}">` : ''}
-    <div class="vehicle-hero-info">
-      <div class="vehicle-hero-name">${name}</div>
-      ${model && model !== name ? `<div class="vehicle-hero-detail">${model}</div>` : ''}
-      ${color ? `<div class="vehicle-hero-detail" style="margin-top:2px"><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#333;border:1px solid var(--border);vertical-align:middle;margin-right:6px"></span>${color}</div>` : ''}
-      ${v.manufactured_date || v.first_use_date ? `<div class="vehicle-hero-detail" style="margin-top:2px">${
-        v.manufactured_date ? t('hero.built') + ' ' + new Date(v.manufactured_date+'T00:00:00').toLocaleDateString(LC, {year:'numeric',month:'short',day:'numeric'}) : ''
-      }${v.manufactured_date && v.first_use_date ? ' · ' : ''}${
-        v.first_use_date ? t('hero.first_use') + ' ' + new Date(v.first_use_date+'T00:00:00').toLocaleDateString(LC, {year:'numeric',month:'short',day:'numeric'}) : ''
-      }</div>` : ''}
-      ${capsHtml}
-      ${metricsHtml}
+  const carHtml = carTopdownSvg(BRAND, paintHex);
+
+  let socHtml = '';
+  if (pctOk || rangeOk) {
+    socHtml = `<div class="tb-soc-row">
+      <div style="display:flex;align-items:baseline;gap:4px">
+        <span class="tb-soc-big" style="color:${batColor}">${pctOk ? pct : '?'}</span><span class="tb-soc-unit">%</span>
+      </div>
+      <div class="tb-soc-mid">
+        <div class="tb-soc-bar"><div class="tb-soc-fill" style="width:${pctOk ? pct : 0}%;background:${batColor}"></div></div>
+        <div class="tb-soc-meta">
+          <span>${cs === 'charging' ? _escHtml(t('battery.charging')) : cs === 'connected' ? _escHtml(t('battery.connected')) : _escHtml(t('battery.not_charging'))}</span>
+          <span>${bat?.lastUpdateTimestamp ? fmtDate(bat.lastUpdateTimestamp) : ''}</span>
+        </div>
+      </div>
+      <div class="tb-soc-stats">
+        <div class="tb-soc-stat">
+          <div class="tb-soc-stat-v">${rangeOk ? Math.round(range) + ' ' + unit : '—'}</div>
+          <div class="tb-soc-stat-l">${_escHtml(t('battery.range'))}</div>
+        </div>
+        <div class="tb-soc-stat">
+          <div class="tb-soc-stat-v">${rangeAcOk ? Math.round(rangeAc) + ' ' + unit : '—'}</div>
+          <div class="tb-soc-stat-l">${_escHtml(t('battery.range_ac'))}</div>
+        </div>
+      </div>
+    </div>`;
+  }
+
+  let chargeDetail = '';
+  if (cs === 'charging' && bat?.remainingChargeTime) {
+    const rt = bat.remainingChargeTime;
+    const kw = ((100 - (pctOk ? pct : 0)) / 100 * 71.4 / (rt / 60));
+    const fullAt = new Date(Date.now() + rt * 60000).toLocaleTimeString(LC, { hour: '2-digit', minute: '2-digit' });
+    chargeDetail = `<div class="meta" style="margin-top:6px">
+      ${Math.floor(rt/60)}h ${rt%60}min · ${_escHtml(t('battery.full_at'))} ${fullAt} · ${kw.toFixed(1)} kW
+    </div>`;
+  }
+
+  el.innerHTML = `<div class="tb-hero">
+    <div class="tb-hero-head">
+      <div>
+        <div class="tb-hero-title">${_escHtml(t('nav.vehicle'))}</div>
+        <div class="tb-hero-model">${name}</div>
+        ${modelLine && modelLine !== name ? `<div class="tb-hero-sub">${modelLine}${color ? ' · ' + color : ''}</div>` : ''}
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px">
+        ${overallTag}
+        <div class="meta" style="display:flex;gap:6px;align-items:center">
+          <span class="meta" id="batRefreshStatus"></span>
+          <button class="btn btn-sm" onclick="refreshBattery()" id="batRefreshBtn">${_escHtml(t('battery.refresh_btn'))}</button>
+        </div>
+      </div>
     </div>
-  </div>
-  ${v.subscriptions?.length ? `<div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border)">
-    <div class="meta" style="font-weight:600;margin-bottom:6px">${t('hero.subscriptions')}</div>
-    ${v.subscriptions.map(s => {
+    <div class="tb-hero-body">
+      <div class="tb-car-stage compact">
+        ${carHtml}
+        ${indicator('',       'top:130px; left:0',                             _escHtml(t('status.driver_door')),         driverFront)}
+        ${indicator('right',  'top:130px; right:0',                            _escHtml(t('status.passenger_door')),      passFront)}
+        ${indicator('',       'top:360px; left:0',                             _escHtml(t('status.driver_rear_door')),    driverRear)}
+        ${indicator('right',  'top:360px; right:0',                            _escHtml(t('status.passenger_rear_door')), passRear)}
+        ${indicator('center', 'bottom:4px; left:50%; transform:translateX(-50%)', _escHtml(t('status.rear_hatch')),       hatch)}
+      </div>
+      ${_renderHeroAside(all)}
+      ${_renderHeroMap(all)}
+    </div>
+    ${socHtml}
+    ${chargeDetail}
+  </div>`;
+}
+
+function _renderHeroMap(all) {
+  const locData = all?.location;
+  const loc = locData && !locData.error ? (locData.vehicleLocation || locData) : null;
+  const lat = loc?.latitude, lon = loc?.longitude;
+  const locTs = loc?.locationAcquisitionDatetime || locData?.lastTimestamp;
+  if (!lat || !lon) {
+    return `<div class="tb-hero-map">
+      <div class="section-title">${_escHtml(t('location.title'))}</div>
+      <div class="meta" style="flex:1 1 auto;display:flex;align-items:center;justify-content:center">${_escHtml(t('location.unavailable'))}</div>
+    </div>`;
+  }
+  let agoTag = '';
+  if (locTs) {
+    const ago = Math.round((Date.now() - new Date(locTs).getTime()) / 60000);
+    const agoLabel = ago < 1 ? 'just now' : ago < 60 ? ago + 'm ago' : Math.round(ago / 60) + 'h ago';
+    const stale = ago > 60;
+    agoTag = `<span class="tag ${stale ? 'tag-warn' : 'tag-ok'}" style="font-size:10px">${_escHtml(agoLabel)}</span>`;
+  }
+  return `<div class="tb-hero-map">
+    <div class="section-title" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+      <span>${_escHtml(t('location.title'))}</span>
+      ${agoTag}
+    </div>
+    <iframe sandbox="allow-scripts allow-same-origin" loading="lazy"
+            src="https://www.openstreetmap.org/export/embed.html?bbox=${lon-.004},${lat-.002},${lon+.004},${lat+.002}&layer=mapnik&marker=${lat},${lon}"></iframe>
+    <div class="meta map-coords">${lat.toFixed(5)}, ${lon.toFixed(5)}</div>
+  </div>`;
+}
+
+function _renderHeroAside(all) {
+  const v = all?.vehicle || {};
+  const bat = all?.battery || {};
+  const sections = [];
+
+  if (Array.isArray(v.features) && v.features.length) {
+    const badges = v.features.map(k => `<span class="cap-badge">${_escHtml(_prettyCap(k))}</span>`).join('');
+    sections.push(`<div><div class="section-title">${_escHtml(t('hero.features').replace('{n}', v.features.length))}</div><div>${badges}</div></div>`);
+  }
+
+  if (Array.isArray(v.subscriptions) && v.subscriptions.length) {
+    const rows = v.subscriptions.map(s => {
       const days = s.daysRemaining || 0;
       const urgency = days < 90 ? 'var(--red)' : days < 365 ? 'var(--yellow)' : 'var(--green)';
-      const endFmt = s.endDate ? new Date(s.endDate+'T00:00:00').toLocaleDateString(LC, {year:'numeric',month:'short',day:'numeric'}) : '?';
-      return `<div class="row"><span class="k">${_escHtml(s.name)}</span><span><span style="color:${urgency}">${_escHtml(s.type || s.status)}</span> &middot; ${endFmt}</span></div>`;
-    }).join('')}
-  </div>` : ''}
-  ${(v.head_unit?.description || v.dcm?.supplier || v.katashiki_code || v.family_sharing != null) ? `<div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border)">
-    <div class="meta" style="font-weight:600;margin-bottom:6px">${t('hero.vehicle_details')}</div>
-    ${v.head_unit?.description ? `<div class="row"><span class="k">${t('hero.head_unit')}</span><span>${_escHtml(v.head_unit.description)}${v.head_unit.multimedia_type ? ' (' + _escHtml(v.head_unit.multimedia_type) + ')' : ''}</span></div>` : ''}
-    ${v.head_unit?.generation ? `<div class="row"><span class="k">${t('hero.platform')}</span><span>${_escHtml(v.head_unit.generation)}</span></div>` : ''}
-    ${v.dcm?.supplier ? `<div class="row"><span class="k">${t('hero.telematics')}</span><span>${_escHtml(v.dcm.supplier)}${v.dcm.hardware_type ? ' (HW ' + _escHtml(v.dcm.hardware_type) + ')' : ''}${v.dcm.status ? ' \u00B7 ' + _escHtml(v.dcm.status) : ''}</span></div>` : ''}
-    ${v.katashiki_code ? `<div class="row"><span class="k">${t('hero.katashiki')}</span><span style="font-family:monospace;font-size:12px">${_escHtml(v.katashiki_code)}</span></div>` : ''}
-    ${v.family_sharing != null ? `<div class="row"><span class="k">${t('hero.family_sharing')}</span><span>${v.family_sharing ? t('hero.enabled') : t('hero.disabled')}</span></div>` : ''}
-    ${v.extended_capabilities && Object.keys(v.extended_capabilities).some(k => v.extended_capabilities[k]) ? `<div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:6px">${
-      Object.entries(v.extended_capabilities).filter(([,val]) => val).map(([key]) => {
-        const label = key.replace(/([A-Z])/g, ' $1').replace(/^./, s => s.toUpperCase()).replace('Capable','').trim();
-        return `<span class="cap-badge" style="background:var(--surface);color:var(--muted);border:1px solid var(--border);font-size:10px">${_escHtml(label)}</span>`;
-      }).join('')
-    }</div>` : ''}
-  </div>` : ''}`;
-}
-
-function renderBattery(d, allCtx) {
-  const el = document.getElementById('batteryCard');
-  if(!d||d.error){el.innerHTML=`<div class="section-title">${t('battery.title')}</div><div class="error" id="batErr"></div>`;document.getElementById('batErr').textContent=d?.error||'N/A';return}
-  const pct=Number(d.batteryLevel),range=Number(d.evRange?.value),rangeAc=Number(d.evRangeWithAc?.value),unit=_escHtml(d.evRange?.unit||'km');
-  const pctOk=isFinite(pct),rangeOk=isFinite(range),rangeAcOk=isFinite(rangeAc);
-  const cs=String(d.chargingStatus||'?'),csMap={none:t('battery.not_charging'),charging:t('battery.charging'),connected:t('battery.connected')};
-  const color=pctOk&&pct>20?'var(--green)':pctOk&&pct>=10?'var(--yellow)':'var(--red)';
-
-  // Current status section
-  let html=`<div class="section-title" style="display:flex;justify-content:space-between;align-items:center">${t('battery.title')} <span style="flex:1"></span><span class="meta" id="batRefreshStatus" style="margin-right:8px"></span><button class="btn btn-sm" onclick="refreshBattery()" id="batRefreshBtn">${t('battery.refresh_btn')}</button></div>`;
-  html+=`<div style="display:flex;gap:24px;flex-wrap:wrap;align-items:center">`;
-  // Left: big percentage + ring gauge
-  html+=`<div style="flex:0 0 auto;text-align:center">`;
-  const circR=54,circC=2*Math.PI*circR,circOff=circC*(1-(pctOk?pct:0)/100);
-  html+=`<svg viewBox="0 0 130 130" width="130" height="130" style="display:block;margin:0 auto">`;
-  html+=`<circle cx="65" cy="65" r="${circR}" fill="none" stroke="var(--border)" stroke-width="10"/>`;
-  html+=`<circle cx="65" cy="65" r="${circR}" fill="none" stroke="${color}" stroke-width="10" stroke-linecap="round" stroke-dasharray="${circC}" stroke-dashoffset="${circOff}" transform="rotate(-90 65 65)" style="transition:stroke-dashoffset .6s"/>`;
-  html+=`<text x="65" y="60" text-anchor="middle" fill="${color}" font-size="28" font-weight="700">${pctOk?pct+'%':'?'}</text>`;
-  html+=`<text x="65" y="80" text-anchor="middle" fill="var(--muted)" font-size="11">${rangeOk?Math.round(range)+' '+unit:''}</text>`;
-  html+=`</svg>`;
-  html+=`</div>`;
-  // Right: stats grid
-  html+=`<div style="flex:1;min-width:200px;display:grid;grid-template-columns:1fr 1fr;gap:8px">`;
-  html+=`<div style="background:color-mix(in srgb,var(--border) 20%,var(--bg));border-radius:8px;padding:10px"><div style="font-size:18px;font-weight:700">${rangeOk?Math.round(range):'?'}<span style="font-size:12px;font-weight:400;color:var(--muted)"> ${unit}</span></div><div class="stat-label">${t('battery.range')}</div></div>`;
-  html+=`<div style="background:color-mix(in srgb,var(--border) 20%,var(--bg));border-radius:8px;padding:10px"><div style="font-size:18px;font-weight:700">${rangeAcOk?Math.round(rangeAc):'?'}<span style="font-size:12px;font-weight:400;color:var(--muted)"> ${unit}</span></div><div class="stat-label">${t('battery.range_ac')}</div></div>`;
-  html+=`<div style="background:color-mix(in srgb,var(--border) 20%,var(--bg));border-radius:8px;padding:10px;grid-column:1/-1"><div style="font-size:14px;font-weight:600">${_escHtml(csMap[cs]||cs)}</div><div class="stat-label">${t('battery.status')}</div></div>`;
-  html+=`</div></div>`;
-  if(cs==='charging'&&d.remainingChargeTime){
-    const kw=((100-(pctOk?pct:0))/100*71.4/(d.remainingChargeTime/60));
-    const lvl=kw>=20?'DC Fast (L3)':kw>=2?'Level 2':'Level 1';
-    const lvlColor=kw>=20?'var(--green)':kw>=2?'var(--accent)':'var(--yellow)';
-    const ct=d.chargeType!=null?` (type ${d.chargeType})`:'';
-    html+=`<div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border)">`;
-    html+=`<div class="row"><span class="k">${t('battery.full_in')}</span><span>${Math.floor(d.remainingChargeTime/60)}h ${d.remainingChargeTime%60}min</span></div>`;
-    html+=`<div class="row"><span class="k">${t('battery.full_at')}</span><span>${new Date(Date.now()+d.remainingChargeTime*60000).toLocaleTimeString(LC,{hour:'2-digit',minute:'2-digit'})}</span></div>`;
-    html+=`<div class="row"><span class="k">${t('battery.charge_rate')}</span><span>${kw.toFixed(1)} kW</span></div>`;
-    html+=`<div class="row"><span class="k">${t('battery.charger')}</span><span style="color:${lvlColor};font-weight:600">${_escHtml(lvl)}${ct}</span></div>`;
-    html+=`</div>`;
-  }
-  if(d.lastUpdateTimestamp)html+=`<div class="row" style="margin-top:8px"><span class="k">${t('battery.last_update')}</span><span class="meta">${fmtDate(d.lastUpdateTimestamp)}</span></div>`;
-
-  // Charge cycle stats
-  const cycles=d.plugInHistory;
-  const firstUse=allCtx?.vehicle?.first_use_date;
-  if(cycles!=null){
-    let cyclesPerMonth='';
-    if(firstUse){
-      const days=(Date.now()-new Date(firstUse+'T00:00:00').getTime())/86400000;
-      if(days>0)cyclesPerMonth=` (~${(cycles/days*30.44).toFixed(1)}/month)`;
-    }
-    html+=`<div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border)">`;
-    html+=`<div class="row"><span class="k">${t('battery.lifetime_sessions')}</span><span>${cycles}${cyclesPerMonth}</span></div>`;
-    html+=`<div class="row"><span class="k">${t('battery.est_throughput')}</span><span>~${(cycles*0.5*71.4).toFixed(0)} kWh</span></div>`;
-    html+=`<div class="meta" style="margin-top:4px">${t('battery.lifetime_note').replace('{cycles}',cycles)}</div>`;
-    html+=`</div>`;
+      const endFmt = s.endDate ? new Date(s.endDate + 'T00:00:00').toLocaleDateString(LC, { year: '2-digit', month: 'short' }) : '?';
+      return `<div class="row" style="padding:2px 0"><span class="k">${_escHtml(s.name)}</span><span><span style="color:${urgency}">${_escHtml(s.type || s.status)}</span> &middot; ${endFmt}</span></div>`;
+    }).join('');
+    sections.push(`<div><div class="section-title">${_escHtml(t('hero.subscriptions'))}</div>${rows}</div>`);
   }
 
-  // History chart placeholder
-  html+=`<div id="batHistoryArea" style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border)"><div class="meta">${t('battery.history_loading')}</div></div>`;
-  el.innerHTML=html;
-
-  // Show last update time next to refresh button
-  if(d.lastUpdateTimestamp){
-    const st=document.getElementById('batRefreshStatus');
-    if(st) st.textContent=`Updated ${new Date(d.lastUpdateTimestamp).toLocaleTimeString(LC,{hour:'2-digit',minute:'2-digit'})}`;
+  const solar = bat.solar;
+  if (solar && (solar.equipped != null || solar.cumulativeDistance != null)) {
+    const status = solar.equipped ? _escHtml(t('hero.solar_panel')) : _escHtml(t('hero.solar_na'));
+    const extra = solar.cumulativeDistance ? ` <span class="meta">· ${Math.round(solar.cumulativeDistance)} ${distLabel()}</span>` : '';
+    sections.push(`<div><div class="section-title">Equipment</div><div class="row" style="padding:2px 0"><span class="k">Solar</span><span>${status}${extra}</span></div></div>`);
   }
 
-  // Load history chart async
-  _loadBatteryHistoryChart();
-}
-
-async function _loadBatteryHistoryChart() {
-  const el=document.getElementById('batHistoryArea');
-  if(!el)return;
-  try {
-    const data = await (await fetch('/api/battery-history')).json();
-    if (!data.length) { el.innerHTML = `<div class="meta">${t('battery.history_empty')}</div>`; return; }
-    const W = 700, H = 200, pad = {t:20, r:20, b:40, l:50};
-    const pw = W - pad.l - pad.r, ph = H - pad.t - pad.b;
-    const times = data.map(d => new Date(d.timestamp).getTime());
-    const tMin = Math.min(...times), tMax = Math.max(...times);
-    const tSpan = tMax - tMin || 1;
-    const xf = t => pad.l + ((t - tMin) / tSpan) * pw;
-    const yf = v => pad.t + (1 - v / 100) * ph;
-
-    let socPath = '';
-    data.forEach((d, i) => { const px=xf(times[i]),py=yf(d.soc); socPath+=(i===0?'M':'L')+px.toFixed(1)+','+py.toFixed(1); });
-
-    const ranges = data.filter(d => d.range_km != null);
-    let rangePath = '', maxRange = 0;
-    if (ranges.length > 1) {
-      maxRange = Math.max(...ranges.map(d => d.range_km));
-      ranges.forEach((d, i) => {
-        const px = xf(new Date(d.timestamp).getTime());
-        const py = pad.t + (1 - d.range_km / maxRange) * ph;
-        rangePath += (i === 0 ? 'M' : 'L') + px.toFixed(1) + ',' + py.toFixed(1);
-      });
-    }
-
-    let grid = '';
-    for (const pct of [0, 25, 50, 75, 100]) {
-      const gy = yf(pct);
-      grid += `<line x1="${pad.l}" y1="${gy}" x2="${W-pad.r}" y2="${gy}" stroke="var(--border)" stroke-dasharray="3,3"/>`;
-      grid += `<text x="${pad.l-6}" y="${gy+4}" text-anchor="end" font-size="10" fill="var(--muted)">${pct}%</text>`;
-    }
-    const labelCount = Math.min(5, data.length);
-    let timeLabels = '';
-    for (let i = 0; i < labelCount; i++) {
-      const idx = Math.floor(i * (data.length - 1) / (labelCount - 1));
-      const tx = xf(times[idx]);
-      const dt = new Date(times[idx]);
-      timeLabels += `<text x="${tx}" y="${H-5}" text-anchor="middle" font-size="10" fill="var(--muted)">${dt.toLocaleDateString(LC,{month:'short',day:'numeric'})}</text>`;
-    }
-    let chargeDots = '';
-    data.forEach((d, i) => {
-      if (d.charging_status === 'charging') chargeDots += `<circle cx="${xf(times[i])}" cy="${yf(d.soc)}" r="3" fill="var(--green)" opacity="0.6"/>`;
-    });
-
-    const svgHtml = `<svg viewBox="0 0 ${W} ${H}" style="width:100%;max-height:230px">
-      ${grid}${timeLabels}
-      <path d="${socPath}" fill="none" stroke="var(--accent)" stroke-width="2"/>
-      ${rangePath ? `<path d="${rangePath}" fill="none" stroke="var(--blue)" stroke-width="1.5" stroke-dasharray="4,3" opacity="0.7"/>` : ''}
-      ${chargeDots}
-    </svg>`;
-    const legend = `<div style="display:flex;gap:16px;font-size:11px;color:var(--muted);margin-top:4px;flex-wrap:wrap">
-      <span><span style="display:inline-block;width:12px;height:3px;background:var(--accent);vertical-align:middle;margin-right:4px"></span>SOC %</span>
-      ${rangePath ? `<span><span style="display:inline-block;width:12px;height:3px;background:var(--blue);vertical-align:middle;margin-right:4px;border-top:1px dashed var(--blue)"></span>Range (max ${Math.round(maxRange)} mi)</span>` : ''}
-      <span><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--green);vertical-align:middle;margin-right:4px;opacity:0.6"></span>Charging</span>
-      <span style="margin-left:auto">${data.length} snapshots</span>
-    </div>`;
-
-    el.innerHTML = `<div style="font-size:12px;font-weight:600;color:var(--muted);margin-bottom:6px">${t('battery.history')}</div>${svgHtml}${legend}`;
-  } catch (e) {
-    el.innerHTML = `<div class="meta">${t('battery.history_error')}: ${_escHtml(e.message)}</div>`;
+  const hasDetails = v.head_unit?.description || v.dcm?.supplier || v.katashiki_code || v.family_sharing != null;
+  if (hasDetails) {
+    let rows = '';
+    if (v.head_unit?.description)
+      rows += `<div class="row" style="padding:2px 0"><span class="k">${_escHtml(t('hero.head_unit'))}</span><span>${_escHtml(v.head_unit.description)}</span></div>`;
+    if (v.dcm?.supplier)
+      rows += `<div class="row" style="padding:2px 0"><span class="k">${_escHtml(t('hero.telematics'))}</span><span>${_escHtml(v.dcm.supplier)}</span></div>`;
+    if (v.katashiki_code)
+      rows += `<div class="row" style="padding:2px 0"><span class="k">${_escHtml(t('hero.katashiki'))}</span><span style="font-family:'SF Mono',monospace;font-size:11px">${_escHtml(v.katashiki_code)}</span></div>`;
+    if (v.family_sharing != null)
+      rows += `<div class="row" style="padding:2px 0"><span class="k">${_escHtml(t('hero.family_sharing'))}</span><span>${v.family_sharing ? _escHtml(t('hero.enabled')) : _escHtml(t('hero.disabled'))}</span></div>`;
+    sections.push(`<div><div class="section-title">${_escHtml(t('hero.vehicle_details'))}</div>${rows}</div>`);
   }
+
+  const body = sections.length ? sections.join('') : `<div class="tb-hero-aside-empty">${_escHtml(t('status.no_additional'))}</div>`;
+  return `<div class="tb-hero-aside">${body}</div>`;
 }
 
 async function refreshBattery() {
@@ -863,11 +1584,11 @@ async function refreshBattery() {
     const resp = await fetch(`/api/refresh/${currentVin}`,{method:'POST',headers:_postHeaders()});
     if (resp.status === 429) {
       const msg = await resp.json().catch(() => ({detail:'Rate limited'}));
-      st.textContent = '⚠️ ' + (msg.detail || 'Rate limited');
+      st.innerHTML = icon('warning', 11) + ' ' + _escHtml(msg.detail || 'Rate limited');
       btn.disabled=false;btn.textContent=t('battery.refresh_btn');btn.style.opacity='1';
       return;
     }
-    st.textContent='⏳ Waking vehicle...';
+    st.innerHTML = icon('hourglass', 11) + ' Waking vehicle...';
 
     const originalPct = allData?.battery?.batteryLevel;
     const originalTs = allData?.battery?.lastUpdateTimestamp;
@@ -877,7 +1598,7 @@ async function refreshBattery() {
 
     function showStatus(msg) {
       const el = document.getElementById('batRefreshStatus');
-      if (el) el.textContent = msg;
+      if (el) el.innerHTML = msg;
     }
     function resetBtn() {
       const b = document.getElementById('batRefreshBtn');
@@ -890,7 +1611,7 @@ async function refreshBattery() {
 
     const poll = async () => {
       attempts++;
-      showStatus(`⏳ Waiting (${attempts}/${maxAttempts})...`);
+      showStatus(icon('hourglass', 11) + ` Waiting (${attempts}/${maxAttempts})...`);
       const b = document.getElementById('batRefreshBtn');
       if (b) b.textContent = `${attempts}/${maxAttempts}`;
       try {
@@ -902,7 +1623,7 @@ async function refreshBattery() {
             allData.battery = c;
             renderBattery(c, allData);
             renderVehicleHero(allData.vehicle, c.solar, c, allData.status);
-            showStatus(`✅ ${newPct}% · Updated ${fmtTs(newTs)}`);
+            showStatus(icon('check', 11) + ` ${newPct}% · Updated ${fmtTs(newTs)}`);
             resetBtn();
             return;
           }
@@ -912,14 +1633,14 @@ async function refreshBattery() {
       if (attempts < maxAttempts) {
         setTimeout(poll, interval);
       } else {
-        showStatus('⏳ Final refresh...');
+        showStatus(icon('hourglass', 11) + ' Final refresh...');
         await loadOverview();
         const finalPct = allData?.battery?.batteryLevel;
         const finalTs = allData?.battery?.lastUpdateTimestamp;
         if (finalPct != null && finalPct !== originalPct) {
-          showStatus(`✅ ${finalPct}% · Updated ${fmtTs(finalTs)}`);
+          showStatus(icon('check', 11) + ` ${finalPct}% · Updated ${fmtTs(finalTs)}`);
         } else {
-          showStatus(`⚠️ No change yet · Last: ${fmtTs(finalTs || originalTs)}`);
+          showStatus(icon('warning', 11) + ` No change yet · Last: ${fmtTs(finalTs || originalTs)}`);
         }
         resetBtn();
       }
@@ -933,281 +1654,34 @@ async function refreshBattery() {
   }
 }
 
-function renderStatus(d, tel, locData) {
-  const el=document.getElementById('statusCard');
-  if(!d||d.error){el.innerHTML=`<div class="section-title">${t('status.title')}</div><div class="error" id="statusErr"></div>`;document.getElementById('statusErr').textContent=d?.error||'N/A';return}
 
-  let h=`<div class="section-title">${t('status.title')}</div>`;
 
-  // KPI tiles row — coerce API values to safe numbers
-  const cnt=Number(d.cautionOverallCount)||0;
-  const odo=d.telemetry?.odo;
-  const svc=tel?.nextService;
-  h+=`<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:12px;margin-bottom:16px">`;
-  // Warnings tile
-  h+=`<div style="background:${cnt>0?'color-mix(in srgb,var(--red) 8%,var(--bg))':'color-mix(in srgb,var(--green) 8%,var(--bg))'};border-radius:10px;padding:12px;text-align:center">`;
-  h+=`<div class="stat-num" style="color:${cnt>0?'var(--red)':'var(--green)'}">${cnt}</div>`;
-  h+=`<div class="stat-label">${t('status.warnings')}</div></div>`;
-  // Odometer tile
-  if(odo?.value!=null){
-    const odoVal = Number(odo.value);
-    h+=`<div style="background:color-mix(in srgb,var(--primary) 6%,var(--bg));border-radius:10px;padding:12px;text-align:center">`;
-    h+=`<div class="stat-num" style="font-size:20px">${isFinite(odoVal)?odoVal.toLocaleString(LC):_escHtml(odo.value)}</div>`;
-    h+=`<div class="stat-label">${_escHtml(normUnit(odo.unit)||distLabel())}</div></div>`;
-  }
-  // Next Service tile
-  if(svc?.value!=null){
-    const svcVal = Number(svc.value);
-    h+=`<div style="background:color-mix(in srgb,var(--blue) 8%,var(--bg));border-radius:10px;padding:12px;text-align:center">`;
-    h+=`<div class="stat-num" style="font-size:20px">${isFinite(svcVal)?svcVal.toLocaleString(LC):_escHtml(svc.value)}</div>`;
-    h+=`<div class="stat-label">${t('status.next_service')} (${_escHtml(normUnit(svc.unit)||distLabel())})</div></div>`;
-  }
-  h+=`</div>`;
-
-  // Remaining status rows (skip categories handled by Vehicle Status card)
-  const skipCats=new Set(['Driver Side','Passenger Side','Other']);
-  let hasRows=false;
-  for(const cat of d.vehicleStatus||[]){
-    if(skipCats.has(cat.category))continue;
-    hasRows=true;
-    h+=`<div style="font-size:11px;color:var(--muted);margin-top:6px">${_escHtml(ts(cat.category))}</div>`;
-    for(const sec of cat.sections||[]){
-      h+=`<div class="row"><span class="k">${_escHtml(ts(sec.section))}</span><span>`;
-      for(const v of (sec.values||[])){const bad=/open|unlocked/i.test(v.value);h+=`<span class="tag ${bad?'tag-warn':'tag-ok'}">${_escHtml(ts(v.value))}</span> `}
-      h+=`</span></div>`;
-    }
-  }
-  if(d.occurrenceDate)h+=`<div class="row" style="margin-top:8px"><span class="k">${t('status.last_update')}</span><span class="meta">${fmtDate(d.occurrenceDate)}</span></div>`;
-
-  // Location map
-  const loc=locData&&!locData.error?(locData.vehicleLocation||locData):null;
-  const lat=loc?.latitude,lon=loc?.longitude;
-  const locTs=loc?.locationAcquisitionDatetime||locData?.lastTimestamp;
-  if(lat&&lon){
-    h+=`<div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border)">`;
-    h+=`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><span style="font-size:12px;font-weight:600;color:var(--muted)">${t('location.title')}</span>`;
-    if(locTs){
-      const ago=Math.round((Date.now()-new Date(locTs).getTime())/60000);
-      const agoLabel=ago<1?'just now':ago<60?ago+'m ago':Math.round(ago/60)+'h ago';
-      const stale=ago>60;
-      h+=`<span style="font-size:11px;font-weight:500;padding:2px 8px;border-radius:8px;background:${stale?'color-mix(in srgb,var(--yellow) 12%,var(--bg))':'color-mix(in srgb,var(--green) 10%,var(--bg))'};color:${stale?'var(--yellow)':'var(--green)'}">⏱ ${agoLabel}</span>`;
-    }
-    h+=`</div>`;
-    h+=`<iframe sandbox="allow-scripts allow-same-origin" style="width:100%;height:200px;border-radius:10px;border:1px solid var(--border);margin-bottom:6px" loading="lazy" src="https://www.openstreetmap.org/export/embed.html?bbox=${lon-.004},${lat-.002},${lon+.004},${lat+.002}&layer=mapnik&marker=${lat},${lon}"></iframe>`;
-    h+=`<div class="meta" style="text-align:center">${lat.toFixed(5)}, ${lon.toFixed(5)}</div>`;
-    h+=`</div>`;
-  }
-
-  if(!hasRows&&!odo&&!svc&&cnt===0&&!lat)h+=`<div class="meta">${t('status.no_additional')}</div>`;
-  el.innerHTML=h;
-}
-
-function renderTirePressure(tel, status) {
-  const el=document.getElementById('tireCard');
-  if(!tel||tel.error){el.style.display='none';return}
-  const fl=tel.flTirePressure, fr=tel.frTirePressure, rl=tel.rlTirePressure, rr=tel.rrTirePressure;
-  if(!fl&&!fr&&!rl&&!rr){el.style.display='none';return}
-  el.style.display='';
-
-  function tireColor(tire){
-    if(!tire)return'var(--muted)';
-    if(tire.displayLowTirePressureWarning)return'var(--yellow)';
-    const v=tire.value;if(v<30||v>50)return'var(--yellow)';return'var(--green)';
-  }
-  function psiVal(tire){return tire?tire.value+'':'--'}
-  function winColor(v){return v===2?'var(--green)':v===1?'var(--yellow)':'var(--muted)'}
-  function winLabel(v){return v===2?'Closed':v===1?'Open':'—'}
-
-  // Parse door/hatch/hood from vehicleStatus
-  const doorInfo={};
-  if(status&&status.vehicleStatus){
-    for(const cat of status.vehicleStatus){
-      for(const sec of (cat.sections||[])){
-        const key=`${cat.category} ${sec.section}`;
-        const vals=(sec.values||[]).map(v=>v.value);
-        doorInfo[key]={
-          closed:vals.some(v=>/closed/i.test(v)),
-          open:vals.some(v=>/open/i.test(v)),
-          locked:vals.some(v=>/locked/i.test(v)&&!/unlocked/i.test(v)),
-          unlocked:vals.some(v=>/unlocked/i.test(v)),
-        };
-      }
-    }
-  }
-  function doorColor(key){const d=doorInfo[key];if(!d)return'var(--muted)';if(d.open||d.unlocked)return'var(--yellow)';return'var(--green)'}
-
-  // Mini car outline (reusable) — simple rounded rect
-  const carBody=`<rect x="12" y="8" width="56" height="84" rx="12" fill="var(--surface)" stroke="var(--border)" stroke-width="1.5"/>`;
-
-  let h=`<div class="section-title">${t('vehicle_status.title')}</div>`;
-
-  // Summary strip
-  const tireOk=[fl,fr,rl,rr].filter(t=>t&&!t.displayLowTirePressureWarning&&t.value>=30&&t.value<=50).length;
-  const tireTotal=[fl,fr,rl,rr].filter(Boolean).length;
-  const doorsOpen=Object.entries(doorInfo).filter(([k,v])=>/Door/i.test(k)&&(v.open||v.unlocked)).length;
-  const winsOpen=[tel.driverWindow,tel.passengerWindow,tel.rlWindow,tel.rrWindow].filter(v=>v===1).length;
-  const summaryParts=[];
-  if(tireTotal)summaryParts.push(`<span style="color:${tireOk===tireTotal?'var(--green)':'var(--yellow)'}">${tireOk}/${tireTotal} ${t('vehicle_status.tires_ok')}</span>`);
-  summaryParts.push(`<span style="color:${doorsOpen?'var(--yellow)':'var(--green)'}">${doorsOpen} ${t('vehicle_status.doors_open')}</span>`);
-  summaryParts.push(`<span style="color:${winsOpen?'var(--yellow)':'var(--green)'}">${winsOpen} ${t('vehicle_status.windows_open')}</span>`);
-  h+=`<div style="display:flex;gap:12px;flex-wrap:wrap;font-size:12px;font-weight:500;margin-bottom:12px;padding:8px 12px;background:color-mix(in srgb,var(--border) 30%,var(--bg));border-radius:8px">${summaryParts.join(' <span style="color:var(--border)">·</span> ')}</div>`;
-
-  h+=`<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:8px 0">`;
-
-  // --- Tires section ---
-  h+=`<div>`;
-  h+=`<div style="font-size:12px;font-weight:600;margin-bottom:6px">🛞 Tires</div>`;
-  h+=`<div style="position:relative;width:80px;height:100px;margin:0 auto 8px">`;
-  h+=`<svg viewBox="0 0 80 100" width="80" height="100">${carBody}`;
-  // Tire rectangles
-  const tData=[{t:fl,x:2,y:16},{t:fr,x:60,y:16},{t:rl,x:2,y:64},{t:rr,x:60,y:64}];
-  for(const td of tData) h+=`<rect x="${td.x}" y="${td.y}" width="10" height="20" rx="3" fill="${tireColor(td.t)}" opacity="0.8"/>`;
-  h+=`</svg>`;
-  // PSI labels
-  const pLbl=[{t:fl,x:-4,y:36},{t:fr,x:58,y:36},{t:rl,x:-4,y:84},{t:rr,x:58,y:84}];
-  for(const p of pLbl) h+=`<div style="position:absolute;left:${p.x}px;top:${p.y}px;width:24px;text-align:center;font-size:10px;font-weight:700;color:${tireColor(p.t)}">${psiVal(p.t)}</div>`;
-  h+=`</div>`;
-  h+=`<div style="text-align:center;font-size:10px;color:var(--muted)">${fl?.unit||'psi'}</div>`;
-  if(tel.tirePressureTimestamp) h+=`<div class="row" style="font-size:11px;margin-top:4px"><span class="k">Updated</span><span>${fmtDate(tel.tirePressureTimestamp)}</span></div>`;
-  h+=`</div>`;
-
-  // --- Doors section ---
-  const hasDoors=Object.keys(doorInfo).some(k=>/Door/i.test(k));
-  h+=`<div>`;
-  h+=`<div style="font-size:12px;font-weight:600;margin-bottom:6px">🚪 Doors</div>`;
-  if(hasDoors){
-    h+=`<div style="width:80px;height:100px;margin:0 auto 8px">`;
-    h+=`<svg viewBox="0 0 80 100" width="80" height="100">${carBody}`;
-    // Door lines on body edges
-    const dLines=[
-      {key:'Driver Side Door',x:12,y1:18,y2:48},
-      {key:'Passenger Side Door',x:68,y1:18,y2:48},
-      {key:'Driver Side Rear Door',x:12,y1:52,y2:78},
-      {key:'Passenger Side Rear Door',x:68,y1:52,y2:78},
-    ];
-    for(const dl of dLines){
-      const c=doorColor(dl.key);
-      h+=`<line x1="${dl.x}" y1="${dl.y1}" x2="${dl.x}" y2="${dl.y2}" stroke="${c}" stroke-width="3" stroke-linecap="round"/>`;
-    }
-    h+=`</svg></div>`;
-    const doorRows=[
-      {label:'Driver Front',key:'Driver Side Door'},
-      {label:'Pass. Front',key:'Passenger Side Door'},
-      {label:'Driver Rear',key:'Driver Side Rear Door'},
-      {label:'Pass. Rear',key:'Passenger Side Rear Door'},
-    ];
-    for(const dr of doorRows){
-      const d=doorInfo[dr.key];if(!d)continue;
-      let tags='';
-      if(d.open)tags+=`<span class="tag tag-warn">Open</span> `;
-      else if(d.closed)tags+=`<span class="tag tag-ok">Closed</span> `;
-      if(d.locked)tags+=`<span class="tag tag-ok">🔒</span>`;
-      else if(d.unlocked)tags+=`<span class="tag tag-warn">🔓</span>`;
-      h+=`<div class="row" style="font-size:11px"><span class="k">${dr.label}</span><span>${tags}</span></div>`;
-    }
-  } else {
-    h+=`<div class="meta">${t('vehicle_status.no_door_data')}</div>`;
-  }
-  h+=`</div>`;
-
-  // --- Windows section ---
-  const dw=tel.driverWindow, pw=tel.passengerWindow, rdw=tel.rlWindow, rpw=tel.rrWindow, sr=tel.sunRoof;
-  const hasWindows=(dw!=null||pw!=null||rdw!=null||rpw!=null);
-  h+=`<div>`;
-  h+=`<div style="font-size:12px;font-weight:600;margin-bottom:6px">🪟 Windows</div>`;
-  if(hasWindows){
-    h+=`<div style="width:80px;height:100px;margin:0 auto 8px">`;
-    h+=`<svg viewBox="0 0 80 100" width="80" height="100">${carBody}`;
-    // Window fills inside car body
-    h+=`<rect x="16" y="14" width="22" height="30" rx="4" fill="${winColor(dw)}" opacity="0.25"/>`;
-    h+=`<rect x="42" y="14" width="22" height="30" rx="4" fill="${winColor(pw)}" opacity="0.25"/>`;
-    h+=`<rect x="16" y="56" width="22" height="24" rx="4" fill="${winColor(rdw)}" opacity="0.25"/>`;
-    h+=`<rect x="42" y="56" width="22" height="24" rx="4" fill="${winColor(rpw)}" opacity="0.25"/>`;
-    if(sr===1||sr===2) h+=`<rect x="28" y="46" width="24" height="8" rx="3" fill="${winColor(sr)}" opacity="0.25" stroke="${winColor(sr)}" stroke-width="0.5"/>`;
-    h+=`</svg></div>`;
-    const wins=[{label:'Driver Front',v:dw},{label:'Pass. Front',v:pw},{label:'Driver Rear',v:rdw},{label:'Pass. Rear',v:rpw}];
-    if(sr===1||sr===2)wins.push({label:'Sunroof',v:sr});
-    for(const w of wins){
-      const cls=w.v===2?'tag-ok':w.v===1?'tag-warn':'';
-      h+=`<div class="row" style="font-size:11px"><span class="k">${w.label}</span><span class="tag ${cls}">${winLabel(w.v)}</span></div>`;
-    }
-  } else {
-    h+=`<div class="meta">${t('vehicle_status.no_window_data')}</div>`;
-  }
-  h+=`</div>`;
-
-  // --- Hood & Hatch section ---
-  const hoodInfo=doorInfo['Other Hood'];
-  const hatchKey=doorInfo['Other Hatch']?'Other Hatch':doorInfo['Other Trunk']?'Other Trunk':null;
-  const hatchInfo=hatchKey?doorInfo[hatchKey]:null;
-  h+=`<div>`;
-  h+=`<div style="font-size:12px;font-weight:600;margin-bottom:6px">🏗️ Hood & Hatch</div>`;
-  if(hoodInfo||hatchInfo){
-    h+=`<div style="width:80px;height:100px;margin:0 auto 8px">`;
-    h+=`<svg viewBox="0 0 80 100" width="80" height="100">${carBody}`;
-    // Hood highlight at top
-    if(hoodInfo){
-      const hc=hoodInfo.open?'var(--yellow)':'var(--green)';
-      h+=`<line x1="22" y1="10" x2="58" y2="10" stroke="${hc}" stroke-width="3" stroke-linecap="round"/>`;
-      h+=`<text x="40" y="28" text-anchor="middle" font-size="8" fill="${hc}" font-weight="bold">HOOD</text>`;
-    }
-    // Hatch highlight at bottom
-    if(hatchInfo){
-      const hc=hatchInfo.open||hatchInfo.unlocked?'var(--yellow)':'var(--green)';
-      h+=`<line x1="22" y1="90" x2="58" y2="90" stroke="${hc}" stroke-width="3" stroke-linecap="round"/>`;
-      h+=`<text x="40" y="80" text-anchor="middle" font-size="8" fill="${hc}" font-weight="bold">HATCH</text>`;
-    }
-    h+=`</svg></div>`;
-    if(hoodInfo){
-      let tags='';
-      if(hoodInfo.open)tags=`<span class="tag tag-warn">Open</span>`;
-      else if(hoodInfo.closed)tags=`<span class="tag tag-ok">Closed</span>`;
-      h+=`<div class="row" style="font-size:11px"><span class="k">Hood</span><span>${tags}</span></div>`;
-    }
-    if(hatchInfo){
-      let tags='';
-      if(hatchInfo.open)tags+=`<span class="tag tag-warn">Open</span> `;
-      else if(hatchInfo.closed)tags+=`<span class="tag tag-ok">Closed</span> `;
-      if(hatchInfo.locked)tags+=`<span class="tag tag-ok">🔒</span>`;
-      else if(hatchInfo.unlocked)tags+=`<span class="tag tag-warn">🔓</span>`;
-      h+=`<div class="row" style="font-size:11px"><span class="k">${hatchKey==='Other Trunk'?'Trunk':'Hatch'}</span><span>${tags}</span></div>`;
-    }
-  } else {
-    h+=`<div class="meta">${t('vehicle_status.no_data')}</div>`;
-  }
-  h+=`</div>`;
-
-  h+=`</div>`; // close grid
-
-  el.innerHTML=h;
-}
-
-function renderLocation(d) {
-  // Location is now rendered inside renderStatus / Overview card
-}
 
 function renderEfficiency(all) {
   const el=document.getElementById('efficiencyCard');
   if(!DEBUG){el.style.display='none';return}
   let h=`<div class="section-title">${tip(t('efficiency.title'),'efficiency.eco_desc')}</div>`;
   const c=all.consumption;
-  if(c?.kwh_per_100km)h+=`<div class="stat-num">${c.kwh_per_100km} <span style="font-size:14px;color:var(--muted)">kWh/100km</span></div>`;
+  if(c?.kwh_per_100km)h+=`<div class="stat-num">${c.kwh_per_100km} <span style="font-size:14px;color:var(--muted)">${distPer100Label()}</span></div>`;
   else if(c?.message)h+=`<div class="meta">${c.message}</div>`;
   const bat=all.battery;
   if(bat?.batteryLevel&&bat?.evRange?.value){
+    // Solterra nominal pack capacity is 71.4 kWh.
     const eff=(bat.batteryLevel/100*71.4)/bat.evRange.value*100;
-    h+=`<div class="row" style="margin-top:8px"><span class="k">${t('efficiency.current')}</span><span>${eff.toFixed(1)} kWh/100km</span></div>`;
+    h+=`<div class="row" style="margin-top:8px"><span class="k">${t('efficiency.current')}</span><span>${eff.toFixed(1)} ${distPer100Label()}</span></div>`;
   }
   el.innerHTML=h;
 }
 
-function renderRemote(remoteCaps, climateSettings) {
+function renderRemote(remoteCaps, climateSettings, climateStatus) {
   const el=document.getElementById('remoteCard');
-  let h=`<div class="section-title">${t('remote.title')}</div>`;
   const rc = remoteCaps || {};
-  const cs = climateSettings && !climateSettings.error ? climateSettings : null;
+  // Backend returns {_unavailable: "climate_settings"} on platforms that don't
+  // expose the endpoint. Treat that as "no data" so we skip the empty panel.
+  const cs = climateSettings && !climateSettings.error && !climateSettings._unavailable ? climateSettings : null;
+  const cst = climateStatus && !climateStatus.error && !climateStatus._unavailable ? climateStatus : null;
 
-  // Map commands to their remote capability flag
+  // Capability map — command -> boolean/undefined. undefined means "assume capable"
   const capMap = {
     'door-lock': rc.dlockUnlockCapable,
     'door-unlock': rc.dlockUnlockCapable,
@@ -1224,114 +1698,247 @@ function renderRemote(remoteCaps, climateSettings) {
     'find-vehicle': rc.vehicleFinderCapable,
   };
 
-  function cmdBtn(b, variant) {
-    const supported = capMap[b.cmd];
-    const disabled = supported === false;
+  function primaryBtn(cmd, label, glyph) {
+    const disabled = capMap[cmd] === false;
     const disAttr = disabled ? 'disabled' : '';
-    const tip = disabled ? b.tip + ' (not supported)' : b.tip;
-    let cls='btn btn-sm';
-    if(variant==='destructive')cls+=' btn-destructive';
-    else if(variant==='primary')cls+=' btn-primary';
-    const extraStyle = disabled ? 'opacity:0.35;cursor:not-allowed;' : '';
-    return `<button class="${cls}" data-cmd="${_escAttr(b.cmd)}" title="${_escAttr(tip)}" ${disAttr} style="${extraStyle}">${b.icon} ${_escAttr(b.label)}</button>`;
+    const g = icon(glyph);
+    return `<button class="tb-remote-btn" data-cmd="${_escAttr(cmd)}" ${disAttr} title="${_escAttr(label)}">${g ? g + ' ' : ''}${_escHtml(label)}</button>`;
+  }
+  function secondaryBtn(cmd, label, variant) {
+    const disabled = capMap[cmd] === false;
+    const disAttr = disabled ? 'disabled' : '';
+    let cls = 'btn btn-sm';
+    if (variant === 'destructive') cls += ' btn-destructive';
+    return `<button class="${cls}" data-cmd="${_escAttr(cmd)}" ${disAttr} title="${_escAttr(label)}">${_escHtml(label)}</button>`;
   }
 
-  // Primary actions — most common day-to-day
-  h+=`<div style="margin-bottom:14px">`;
-  h+=`<div class="meta" style="margin-bottom:6px;font-weight:600">${t('remote.group_doors')}</div>`;
-  h+=`<div style="display:flex;gap:6px;flex-wrap:wrap">`;
-  h+=cmdBtn({cmd:'door-lock', icon:'&#128274;', label:t('remote.lock'), tip:t('remote.lock_desc')}, 'primary');
-  h+=cmdBtn({cmd:'door-unlock', icon:'&#128275;', label:t('remote.unlock'), tip:t('remote.unlock_desc')});
-  h+=`</div></div>`;
+  let h = `<div class="tb-remote">
+    <div class="tb-remote-label">${_escHtml(t('remote.title'))}</div>
+    <div class="tb-remote-btns">
+      ${primaryBtn('door-lock',   t('remote.lock'),         'lock')}
+      ${primaryBtn('door-unlock', t('remote.unlock'),       'unlock')}
+      ${primaryBtn('sound-horn',  t('remote.horn'),         '')}
+      ${primaryBtn('headlight-on',t('remote.headlight_on'), '')}
+    </div>
+    <span class="meta" id="remoteStatus" style="margin-left:4px;white-space:nowrap;min-width:90px;text-align:right"></span>
+  </div>
+  <details class="tb-remote-more">
+    <summary>${_escHtml(t('remote.more') || 'More commands')}</summary>
+    <div class="tb-remote-more-body">
+      <div>
+        <div class="meta" style="margin-bottom:6px;font-weight:600;text-transform:uppercase;letter-spacing:.04em">${_escHtml(t('remote.group_hatch'))}</div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap">
+          ${secondaryBtn('trunk-lock',   t('remote.hatch_lock'))}
+          ${secondaryBtn('trunk-unlock', t('remote.hatch_unlock'))}
+        </div>
+      </div>
+      <div>
+        <div class="meta" style="margin-bottom:6px;font-weight:600;text-transform:uppercase;letter-spacing:.04em">${_escHtml(t('remote.group_lights'))} / ${_escHtml(t('remote.group_find'))}</div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap">
+          ${secondaryBtn('headlight-off', t('remote.headlight_off'))}
+          ${secondaryBtn('find-vehicle',  t('remote.find_vehicle'))}
+        </div>
+      </div>
+      <div>
+        <div class="meta" style="margin-bottom:6px;font-weight:600;text-transform:uppercase;letter-spacing:.04em">${_escHtml(t('remote.group_engine'))}</div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap">
+          ${secondaryBtn('engine-start', t('remote.engine_start'))}
+          ${secondaryBtn('engine-stop',  t('remote.engine_stop'))}
+        </div>
+      </div>
+      <div>
+        <div class="meta" style="margin-bottom:6px;font-weight:600;color:var(--yellow);text-transform:uppercase;letter-spacing:.04em">${_escHtml(t('remote.group_horn'))} / ${_escHtml(t('remote.alerts'))}</div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap">
+          ${secondaryBtn('hazard-on',     t('remote.hazard_on'), 'destructive')}
+          ${secondaryBtn('hazard-off',    t('remote.hazard_off'))}
+          ${secondaryBtn('buzzer-warning',t('remote.buzzer'))}
+        </div>
+      </div>
+    </div>
+  </details>`;
 
-  h+=`<div style="margin-bottom:14px">`;
-  h+=`<div class="meta" style="margin-bottom:6px;font-weight:600">${t('remote.group_hatch')}</div>`;
-  h+=`<div style="display:flex;gap:6px;flex-wrap:wrap">`;
-  h+=cmdBtn({cmd:'trunk-lock', icon:'&#128274;', label:t('remote.hatch_lock'), tip:t('remote.hatch_lock')});
-  h+=cmdBtn({cmd:'trunk-unlock', icon:'&#128275;', label:t('remote.hatch_unlock'), tip:t('remote.hatch_unlock')});
-  h+=`</div></div>`;
+  if (cs || cst) {
+    // Stage edits in _climateState; nothing is sent until the user clicks Apply.
+    _climateState = cs ? JSON.parse(JSON.stringify(cs)) : null;
+    _climateStateOrig = cs ? JSON.parse(JSON.stringify(cs)) : null;
 
-  // Secondary — lights, find, engine
-  h+=`<div style="margin-bottom:14px;padding-top:10px;border-top:1px solid var(--border)">`;
-  h+=`<div class="meta" style="margin-bottom:6px;font-weight:600">${t('remote.group_lights')} / ${t('remote.group_find')}</div>`;
-  h+=`<div style="display:flex;gap:6px;flex-wrap:wrap">`;
-  h+=cmdBtn({cmd:'headlight-on', icon:'&#128161;', label:t('remote.headlight_on'), tip:t('remote.headlight_on')});
-  h+=cmdBtn({cmd:'headlight-off', icon:'&#128262;', label:t('remote.headlight_off'), tip:t('remote.headlight_off')});
-  h+=cmdBtn({cmd:'find-vehicle', icon:'&#128269;', label:t('remote.find_vehicle'), tip:t('remote.find_vehicle')});
-  h+=`</div></div>`;
+    const running = !!(cst && cst.status);
+    const unit = cs?.temperatureUnit || 'F';
+    const targetTemp = cs?.temperature ?? cst?.targetTemperature?.value;
+    const currentTemp = cst?.currentTemperature?.value;
+    const duration = cst?.duration;
+    const startedAt = cst?.startedAt;
+    const minT = cs?.minTemp;
+    const maxT = cs?.maxTemp;
+    const interval = cs?.tempInterval || 1;
+    const statusTag = running
+      ? `<span class="tag tag-ok">${_escHtml(t('remote.climate_running'))}</span>`
+      : `<span class="tag" style="background:transparent;color:var(--muted);border-color:var(--border)">${_escHtml(t('remote.climate_off'))}</span>`;
 
-  h+=`<div style="margin-bottom:14px">`;
-  h+=`<div class="meta" style="margin-bottom:6px;font-weight:600">${t('remote.group_engine')}</div>`;
-  h+=`<div style="display:flex;gap:6px;flex-wrap:wrap">`;
-  h+=cmdBtn({cmd:'engine-start', icon:'&#9654;', label:t('remote.engine_start'), tip:t('remote.engine_start')});
-  h+=cmdBtn({cmd:'engine-stop', icon:'&#9632;', label:t('remote.engine_stop'), tip:t('remote.engine_stop')});
-  h+=`</div></div>`;
+    h+=`<div class="card" style="margin-top:8px">
+      <div class="section-title" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+        <span>${_escHtml(t('remote.climate_title'))}</span>${statusTag}
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">
+        <button class="btn btn-primary" data-climate="start" ${running ? 'disabled' : ''}>${_escHtml(t('remote.climate_start'))}</button>
+        <button class="btn btn-destructive" data-climate="stop" ${running ? '' : 'disabled'}>${_escHtml(t('remote.climate_stop'))}</button>
+        <button class="btn btn-sm" data-climate="refresh" style="margin-left:auto">${_escHtml(t('app.refresh'))}</button>
+      </div>`;
 
-  // Destructive — hazards, horn (attention-getting, use with caution)
-  h+=`<div style="margin-bottom:8px;padding-top:10px;border-top:1px solid var(--border)">`;
-  h+=`<div class="meta" style="margin-bottom:6px;font-weight:600;color:var(--yellow)">⚠ ${t('remote.group_horn')} / ${t('remote.alerts')}</div>`;
-  h+=`<div style="display:flex;gap:6px;flex-wrap:wrap">`;
-  h+=cmdBtn({cmd:'hazard-on', icon:'&#9888;', label:t('remote.hazard_on'), tip:t('remote.hazard_on')}, 'destructive');
-  h+=cmdBtn({cmd:'hazard-off', icon:'&#10060;', label:t('remote.hazard_off'), tip:t('remote.hazard_off')});
-  h+=cmdBtn({cmd:'sound-horn', icon:'&#128227;', label:t('remote.horn'), tip:t('remote.horn')}, 'destructive');
-  h+=cmdBtn({cmd:'buzzer-warning', icon:'&#128276;', label:t('remote.buzzer'), tip:t('remote.buzzer')});
-  h+=`</div></div>`;
-
-  // Climate settings from /v1/global/remote/climate-settings
-  if (cs) {
-    const unit = cs.temperatureUnit || 'F';
-    const temp = cs.temperature;
-    const minT = cs.minTemp || 58;
-    const maxT = cs.maxTemp || 90;
-    const interval = cs.tempInterval || 1;
-    h+=`<div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border)">
-      <div class="meta" style="margin-bottom:6px;font-weight:600">${t('remote.climate_title')}</div>
-      <div class="row"><span class="k">${t('remote.temperature')}</span><span style="font-weight:600">${temp != null ? temp + '\u00B0' + unit : '?'}</span></div>
-      <div class="row"><span class="k">${t('battery.range')}</span><span>${minT}\u00B0 \u2013 ${maxT}\u00B0${unit} (${interval}\u00B0 intervals)</span></div>
-      <div class="meta" style="margin-top:4px;color:var(--yellow)">${t('remote.remote_temp_note')}</div>`;
-    // Show available operations
-    const ops = cs.acOperations || [];
-    const availOps = ops.filter(o => o.available);
-    const unavailOps = ops.filter(o => !o.available);
-    if (availOps.length) {
-      h+=`<div style="margin-top:8px">`;
-      for (const op of availOps) {
-        h+=`<div class="row"><span class="k">${_escHtml(op.categoryDisplayName)}</span><span style="color:var(--green)">${t('remote.available')}</span></div>`;
-        for (const p of (op.acParameters || []).filter(p => p.available)) {
-          h+=`<div class="row" style="padding-left:12px"><span class="k">${_escHtml(p.displayName || p.name)}</span><span>${p.enabled ? t('remote.on') : t('remote.off')}</span></div>`;
-        }
-      }
-      h+=`</div>`;
-    }
-    if (unavailOps.length) {
-      h+=`<div style="margin-top:6px"><div class="meta">${t('remote.not_available')}: ${_escHtml(unavailOps.map(o => o.categoryDisplayName).join(', '))}</div></div>`;
-    }
-    h+=`</div>`;
-  } else {
-    // Fallback to basic HVAC from battery data
-    const hvac = allData?.battery?.hvac;
-    if (hvac) {
-      h+=`<div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border)">
-        <div class="meta" style="margin-bottom:6px;font-weight:600">${t('remote.climate_title')}</div>
-        <div class="row"><span class="k">${t('remote.set_temperature')}</span><span>${hvac.settingTemperature != null ? hvac.settingTemperature + '\u00B0F' : '?'}</span></div>
-        <div class="row"><span class="k">${t('remote.blower')}</span><span>${hvac.blowerOn ? t('remote.on') : t('remote.off')}</span></div>
-        <div class="row"><span class="k">${t('remote.front_defogger')}</span><span>${hvac.frontDefogger ? t('remote.on') : t('remote.off')}</span></div>
-        <div class="row"><span class="k">${t('remote.rear_defogger')}</span><span>${hvac.rearDefogger ? t('remote.on') : t('remote.off')}</span></div>
-        ${hvac.hvacProhibited ? '<div class="meta" style="margin-top:4px;color:var(--yellow)">' + t('remote.climate_unavailable') + '</div>' : ''}
+    if (cs && minT != null && maxT != null && targetTemp != null) {
+      h+=`<div class="tb-temp-slider">
+        <div class="tb-temp-slider-row">
+          <div class="tb-temp-slider-big"><span id="climateTempVal">${targetTemp}</span><span class="unit">\u00B0${_escHtml(unit)}</span></div>
+          <input type="range" id="climateTempSlider" min="${minT}" max="${maxT}" step="${interval}" value="${targetTemp}">
+        </div>
+        <div class="tb-temp-slider-scale"><span>${minT}\u00B0</span><span>${maxT}\u00B0</span></div>
       </div>`;
     }
+
+    if (running && currentTemp != null) {
+      h+=`<div class="row"><span class="k">${_escHtml(t('remote.current_temp'))}</span><span>${currentTemp}\u00B0${unit}</span></div>`;
+    }
+    if (running && duration != null) {
+      h+=`<div class="row"><span class="k">${_escHtml(t('remote.duration'))}</span><span>${duration} min</span></div>`;
+    }
+    if (running && startedAt) {
+      h+=`<div class="row"><span class="k">${_escHtml(t('remote.started_at'))}</span><span>${fmtDate(startedAt)}</span></div>`;
+    }
+
+    const ops = cs?.acOperations || [];
+    const availOps = ops.filter(o => o.available);
+    for (let i = 0; i < availOps.length; i++) {
+      const op = availOps[i];
+      const params = (op.acParameters || []).filter(p => p.available);
+      if (!params.length) continue;
+      const opIdx = ops.indexOf(op);  // original index into full acOperations array
+      h+=`<div class="tb-climate-group">
+        <div class="tb-climate-group-title">${_escHtml(op.categoryDisplayName || op.category || op.categoryName || '—')}</div>
+        <div class="tb-climate-toggles">`;
+      for (const p of params) {
+        const pIdx = op.acParameters.indexOf(p);
+        h+=`<button type="button" class="tb-toggle ${p.enabled ? 'on' : ''}" data-op-idx="${opIdx}" data-param-idx="${pIdx}">${_escHtml(p.displayName || p.name)}</button>`;
+      }
+      h+=`</div></div>`;
+    }
+
+    if (cs) {
+      h+=`<div style="display:flex;gap:8px;align-items:center;margin-top:14px;padding-top:12px;border-top:1px solid var(--border)">
+        <button class="btn btn-primary" id="climateApplyBtn" data-climate-apply disabled>${_escHtml(t('remote.apply'))}</button>
+        <button class="btn btn-sm" id="climateRevertBtn" data-climate-revert disabled>${_escHtml(t('remote.revert'))}</button>
+        <span class="meta" id="climateStatus" style="margin-left:auto;min-height:14px"></span>
+      </div>`;
+    } else {
+      h+=`<div class="meta" id="climateStatus" style="margin-top:8px;min-height:14px"></div>`;
+    }
+    h+=`</div>`;
   }
 
-  h+=`<div class="meta" id="remoteStatus" style="margin-top:8px"></div>`;
   el.innerHTML=h;
 
-  // Replace element to remove any previous click listeners
+  // cloneNode strips previous listeners; rebind on the fresh root.
   const fresh = el.cloneNode(true);
   el.parentNode.replaceChild(fresh, el);
   fresh.addEventListener('click', function(e) {
-    const btn = e.target.closest('[data-cmd]');
-    if (btn) sendCommand(btn.dataset.cmd);
+    const cmdBtn = e.target.closest('[data-cmd]');
+    if (cmdBtn) { sendCommand(cmdBtn.dataset.cmd); return; }
+    const climateBtn = e.target.closest('[data-climate]');
+    if (climateBtn) { sendClimate(climateBtn.dataset.climate); return; }
+    if (e.target.closest('[data-climate-apply]')) { applyClimateSettings(); return; }
+    if (e.target.closest('[data-climate-revert]')) { revertClimateSettings(); return; }
+    const toggle = e.target.closest('[data-op-idx]');
+    if (toggle) {
+      const opIdx = parseInt(toggle.dataset.opIdx, 10);
+      const pIdx = parseInt(toggle.dataset.paramIdx, 10);
+      if (_climateState?.acOperations?.[opIdx]?.acParameters?.[pIdx]) {
+        _climateState.acOperations[opIdx].acParameters[pIdx].enabled = !toggle.classList.contains('on');
+        toggle.classList.toggle('on');
+        _climateMarkDirty();
+      }
+    }
   });
+  const slider = fresh.querySelector('#climateTempSlider');
+  if (slider) {
+    const valEl = fresh.querySelector('#climateTempVal');
+    slider.addEventListener('input', () => { if (valEl) valEl.textContent = slider.value; });
+    slider.addEventListener('change', () => {
+      if (_climateState) _climateState.temperature = parseFloat(slider.value);
+      _climateMarkDirty();
+    });
+  }
+}
+
+// Enable Apply / Revert iff staged state differs from last-saved snapshot.
+function _climateMarkDirty() {
+  const dirty = _climateState && _climateStateOrig
+    && JSON.stringify(_climateState) !== JSON.stringify(_climateStateOrig);
+  const apply = document.getElementById('climateApplyBtn');
+  const revert = document.getElementById('climateRevertBtn');
+  if (apply) apply.disabled = !dirty;
+  if (revert) revert.disabled = !dirty;
+  const statusEl = document.getElementById('climateStatus');
+  if (statusEl && dirty) statusEl.textContent = t('remote.unsaved');
+}
+
+async function applyClimateSettings() {
+  if (!currentVin || !_climateState) return;
+  const statusEl = document.getElementById('climateStatus');
+  const apply = document.getElementById('climateApplyBtn');
+  if (apply) apply.disabled = true;
+  if (statusEl) statusEl.textContent = t('app.loading');
+  try {
+    const r = await fetch(`/api/climate-settings/${currentVin}`, {
+      method: 'PUT',
+      headers: _postHeaders(),
+      body: JSON.stringify(_climateState),
+    });
+    const j = await r.json().catch(() => ({}));
+    if (!r.ok || j.error) {
+      if (statusEl) statusEl.textContent = _escHtml(j.error || `HTTP ${r.status}`);
+      if (apply) apply.disabled = false;
+      return;
+    }
+    if (statusEl) statusEl.textContent = t('remote.sent');
+    _climateStateOrig = JSON.parse(JSON.stringify(_climateState));
+    _climateMarkDirty();
+  } catch (e) {
+    if (statusEl) statusEl.textContent = _escHtml(e.message || 'Error');
+    if (apply) apply.disabled = false;
+  }
+}
+
+function revertClimateSettings() {
+  if (!_climateStateOrig) return;
+  _climateState = JSON.parse(JSON.stringify(_climateStateOrig));
+  renderRemote(allData.vehicle?.remote_capabilities, _climateState, allData.climate_status);
+}
+
+async function sendClimate(action) {
+  if (!currentVin) return;
+  const statusEl = document.getElementById('climateStatus');
+  function show(msg) { if (statusEl) statusEl.textContent = msg; }
+  try {
+    if (action === 'refresh') {
+      show(t('app.loading'));
+      await fetch(`/api/climate-refresh/${currentVin}`, { method: 'POST', headers: _postHeaders() });
+      await loadOverview();
+      show('');
+      return;
+    }
+    if (!confirm(t('remote.confirm'))) return;
+    show(t('app.loading'));
+    const r = await fetch(`/api/climate/${currentVin}/${action}`, { method: 'POST', headers: _postHeaders() });
+    const j = await r.json().catch(() => ({}));
+    if (!r.ok || j.error) {
+      show(_escHtml(j.error || `HTTP ${r.status}`));
+      return;
+    }
+    show(t('remote.sent'));
+    // Poll-once after a short delay so the fresh status reflects the change.
+    setTimeout(() => loadOverview(), 4000);
+  } catch (e) {
+    show(_escHtml(e.message || 'Error'));
+  }
 }
 
 async function sendCommand(cmd) {
@@ -1361,9 +1968,11 @@ async function renderLastTrip() {
   const d=r.start_ts?new Date(r.start_ts):null;
   const dateStr=d?d.toLocaleDateString(LC,{weekday:'long',day:'2-digit',month:'long',year:'numeric'}):'?';
   const timeStr=d?d.toLocaleTimeString(LC,{hour:'2-digit',minute:'2-digit'}):'';
-  const km=r.length_m!=null?(r.length_m/1000).toFixed(1):'?';
+  const km=fmtKm(r.length_m);
   const dur=r.duration_s?Math.round(r.duration_s/60):'?';
   const sc=r.score_global;
+  const avgKmh=r.avg_speed?Math.round(r.avg_speed):'?';
+  const maxKmh=r.max_speed?Math.round(r.max_speed):'?';
 
   let h=`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
     <div class="section-title" style="margin:0">${t('app.last_trip')}</div>
@@ -1372,21 +1981,17 @@ async function renderLastTrip() {
 
   h+=`<div style="display:flex;gap:24px;align-items:center;flex-wrap:wrap">`;
 
-  // Date + time
   h+=`<div><div style="font-size:16px;font-weight:500">${dateStr}</div><div class="meta">${timeStr}</div></div>`;
 
-  // Key numbers
   h+=`<div style="display:flex;gap:16px">`;
   h+=`<div class="stat-box" style="padding:0"><div class="stat-num" style="font-size:20px">${km}</div><div class="stat-label">${distLabel()}</div></div>`;
   h+=`<div class="stat-box" style="padding:0"><div class="stat-num" style="font-size:20px">${dur}</div><div class="stat-label">min</div></div>`;
-  h+=`<div class="stat-box" style="padding:0"><div class="stat-num" style="font-size:20px">${r.avg_speed?Math.round(r.avg_speed):'?'}</div><div class="stat-label">&#8709; ${speedUnit()}</div></div>`;
-  h+=`<div class="stat-box" style="padding:0"><div class="stat-num" style="font-size:20px">${r.max_speed?Math.round(r.max_speed):'?'}</div><div class="stat-label">max ${speedUnit()}</div></div>`;
+  h+=`<div class="stat-box" style="padding:0"><div class="stat-num" style="font-size:20px">${avgKmh}</div><div class="stat-label">&#8709; ${speedUnit()}</div></div>`;
+  h+=`<div class="stat-box" style="padding:0"><div class="stat-num" style="font-size:20px">${maxKmh}</div><div class="stat-label">max ${speedUnit()}</div></div>`;
   h+=`</div>`;
 
-  // Score
   h+=`<div><span class="trip-score ${scoreClass(sc)}" style="width:36px;height:36px;font-size:15px">${sc??'?'}</span></div>`;
 
-  // Efficiency bar
   h+=`<div style="min-width:160px;flex:1">`;
   h+=sbarHtml(p);
   h+=`<div class="trip-pct"><b>${p.eco}</b> eco &middot; <b>${p.reku}</b> reku &middot; <b>${p.power}</b> pwr</div>`;
@@ -1394,7 +1999,6 @@ async function renderLastTrip() {
 
   h+=`</div>`;
 
-  // Behaviours summary
   if(badB||badA){
     h+=`<div style="margin-top:8px;font-size:12px;color:var(--red)">${badB?badB+' '+t('trips.braking_events'):''} ${badA?badA+' '+t('trips.accel_events'):''}</div>`;
   }
@@ -1428,7 +2032,7 @@ function renderTripsTable(trips) {
   if(!trips.length){document.getElementById('tripsTable').innerHTML=`<div class="meta" style="padding:24px">${t('trips.no_trips')}</div>`;return}
   let h=`<div class="trips-wrap"><table><thead><tr>
     <th>${t('trips.date')}</th><th class="num">${t('trips.distance')}</th><th class="num">${t('trips.duration')}</th>
-    <th class="num">${t('trips.speed')}</th><th class="num">${tip(t('efficiency.score'),'efficiency.score_desc')}</th>
+    <th class="num">${tu('trips.speed')}</th><th class="num">${tip(t('efficiency.score'),'efficiency.score_desc')}</th>
     <th>${tip(t('efficiency.distribution'),'efficiency.distribution_desc')}</th>
     ${DEBUG?`<th class="num">${tip(t('efficiency.est_consumption'),'efficiency.est_consumption_desc')}</th>`:''}
   </tr></thead><tbody>`;
@@ -1483,7 +2087,7 @@ async function showTrip(tripId) {
   h+=`<div class="row" style="margin-top:8px"><span class="k">${tip(t('efficiency.eco'),'efficiency.eco_desc')}</span><span>${p.eco}% (${fmtKm(r.hdc_eco_dist)} ${distLabel()})</span></div>`;
   h+=`<div class="row"><span class="k">${tip(t('efficiency.reku'),'efficiency.reku_desc')}</span><span>${p.reku}% (${fmtKm(r.hdc_charge_dist)} ${distLabel()})</span></div>`;
   h+=`<div class="row"><span class="k">${tip(t('efficiency.power'),'efficiency.power_desc')}</span><span>${p.power}% (${fmtKm(r.hdc_power_dist)} ${distLabel()})</span></div>`;
-  if(DEBUG&&r.est_kwh_100km)h+=`<div class="row" style="margin-top:8px;border-top:1px solid var(--border);padding-top:8px"><span class="k">${tip(t('efficiency.est_consumption'),'efficiency.est_consumption_desc')}</span><span style="font-weight:600">${r.est_kwh_100km} kWh/100km</span></div>`;
+  if(DEBUG&&r.est_kwh_100km)h+=`<div class="row" style="margin-top:8px;border-top:1px solid var(--border);padding-top:8px"><span class="k">${tip(t('efficiency.est_consumption'),'efficiency.est_consumption_desc')}</span><span style="font-weight:600">${r.est_kwh_100km} ${distPer100Label()}</span></div>`;
   h+=`</div></div>`;
 
   if(beh.length){
@@ -1540,7 +2144,7 @@ async function loadStats() {
   // Top numbers
   h+=`<div class="grid4" style="margin-bottom:16px">`;
   h+=`<div class="card stat-box"><div class="stat-num">${s.total_trips.toLocaleString(lc)}</div><div class="stat-label">${t('stats.total_trips')}</div></div>`;
-  h+=`<div class="card stat-box"><div class="stat-num">${s.total_km.toLocaleString(lc)}</div><div class="stat-label">${t('stats.total_km')}</div></div>`;
+  h+=`<div class="card stat-box"><div class="stat-num">${s.total_km.toLocaleString(lc)}</div><div class="stat-label">${tu('stats.total_km')}</div></div>`;
   h+=`<div class="card stat-box"><div class="stat-num">${s.total_hours.toLocaleString(lc)}</div><div class="stat-label">${t('stats.total_hours')}</div></div>`;
   h+=`<div class="card stat-box"><div class="stat-num">${s.km_per_day}</div><div class="stat-label">${distLabel()}/${t('app.days')}</div></div></div>`;
 
@@ -1561,7 +2165,7 @@ async function loadStats() {
   // Monthly km + score chart
   if(s.monthly?.length>1){
     const maxKm=Math.max(...s.monthly.map(m=>m.km));
-    h+=`<div class="card" style="margin-bottom:16px"><div class="section-title">${t('stats.km_per_month')}</div>`;
+    h+=`<div class="card" style="margin-bottom:16px"><div class="section-title">${tu('stats.km_per_month')}</div>`;
     h+=`<div class="bar-chart">`;
     for(const m of s.monthly){
       const ht=Math.max(4,Math.round(m.km/maxKm*72));
@@ -1601,9 +2205,9 @@ async function loadStats() {
   const sc=s.speed_cats;
   const totalCat=sc.city_trips+sc.rural_trips+sc.highway_trips||1;
   h+=`<div class="card"><div class="section-title">${t('stats.speed_categories')}</div>`;
-  h+=`<div class="row"><span class="k">${t('stats.city')}</span><span>${sc.city_trips} (${Math.round(sc.city_trips/totalCat*100)}%) &middot; ${sc.city_km} ${distLabel()}</span></div>`;
-  h+=`<div class="row"><span class="k">${t('stats.rural')}</span><span>${sc.rural_trips} (${Math.round(sc.rural_trips/totalCat*100)}%) &middot; ${sc.rural_km} ${distLabel()}</span></div>`;
-  h+=`<div class="row"><span class="k">${t('stats.highway')}</span><span>${sc.highway_trips} (${Math.round(sc.highway_trips/totalCat*100)}%) &middot; ${sc.highway_km} ${distLabel()}</span></div></div>`;
+  h+=`<div class="row"><span class="k">${tu('stats.city')}</span><span>${sc.city_trips} (${Math.round(sc.city_trips/totalCat*100)}%) &middot; ${sc.city_km} ${distLabel()}</span></div>`;
+  h+=`<div class="row"><span class="k">${tu('stats.rural')}</span><span>${sc.rural_trips} (${Math.round(sc.rural_trips/totalCat*100)}%) &middot; ${sc.rural_km} ${distLabel()}</span></div>`;
+  h+=`<div class="row"><span class="k">${tu('stats.highway')}</span><span>${sc.highway_trips} (${Math.round(sc.highway_trips/totalCat*100)}%) &middot; ${sc.highway_km} ${distLabel()}</span></div></div>`;
 
   // Score distribution
   if(s.score_dist?.length){
@@ -1628,15 +2232,15 @@ async function loadStats() {
   // Records
   h+=`<div class="card"><div class="section-title">${t('stats.records')}</div>`;
   const rec=s.records||{};
-  if(rec.longest_trip)h+=`<div class="row"><span class="k">${t('stats.longest_trip')}</span><span>${(rec.longest_trip.value/1000).toFixed(1)} ${distLabel()} <span class="meta">${rec.longest_trip.date?.slice(0,10)}</span></span></div>`;
-  if(rec.top_speed)h+=`<div class="row"><span class="k">${t('stats.max_speed')}</span><span>${rec.top_speed.value} ${speedUnit()} <span class="meta">${rec.top_speed.date?.slice(0,10)}</span></span></div>`;
+  if(rec.longest_trip)h+=`<div class="row"><span class="k">${t('stats.longest_trip')}</span><span>${fmtKm(rec.longest_trip.value)} ${distLabel()} <span class="meta">${rec.longest_trip.date?.slice(0,10)}</span></span></div>`;
+  if(rec.top_speed)h+=`<div class="row"><span class="k">${tu('stats.max_speed')}</span><span>${rec.top_speed.value} ${speedUnit()} <span class="meta">${rec.top_speed.date?.slice(0,10)}</span></span></div>`;
   if(rec.fastest_avg)h+=`<div class="row"><span class="k">${t('stats.fastest_avg')}</span><span>${Math.round(rec.fastest_avg.value)} ${speedUnit()} <span class="meta">${rec.fastest_avg.date?.slice(0,10)}</span></span></div>`;
   if(rec.best_score)h+=`<div class="row"><span class="k">${t('stats.best_score')}</span><span>${rec.best_score.value} <span class="meta">${rec.best_score.date?.slice(0,10)}</span></span></div>`;
   if(rec.best_reku)h+=`<div class="row"><span class="k">${t('stats.best_reku')}</span><span>${rec.best_reku.value}% <span class="meta">${rec.best_reku.date?.slice(0,10)}</span></span></div>`;
-  if(s.best_day)h+=`<div class="row"><span class="k">${t('stats.most_km_day')}</span><span>${s.best_day.km} ${distLabel()} (${s.best_day.trips} ${t('nav.trips').toLowerCase()}) <span class="meta">${s.best_day.date}</span></span></div>`;
+  if(s.best_day)h+=`<div class="row"><span class="k">${tu('stats.most_km_day')}</span><span>${s.best_day.km} ${distLabel()} (${s.best_day.trips} ${t('nav.trips').toLowerCase()}) <span class="meta">${s.best_day.date}</span></span></div>`;
   h+=`</div></div>`;
 
-  if(DEBUG&&s.est_avg_kwh_100km){h+=`<div class="card"><div class="stat-num">${s.est_avg_kwh_100km} <span style="font-size:14px;color:var(--muted)">kWh/100km</span></div><div class="stat-label">${t('stats.est_consumption')}</div></div>`}
+  if(DEBUG&&s.est_avg_kwh_100km){h+=`<div class="card"><div class="stat-num">${s.est_avg_kwh_100km} <span style="font-size:14px;color:var(--muted)">${distPer100Label()}</span></div><div class="stat-label">${t('stats.est_consumption')}</div></div>`}
   el.innerHTML=h;
 }
 
@@ -1658,7 +2262,7 @@ function startImport() {
       const ts=new Date().toLocaleTimeString();
       let line=`[${ts}] ${d.pct}% | ${d.fetched}/${d.total} | +${d.new} new, ~${d.updated} upd`;
       if(d.trips?.length){
-        const details=d.trips.map(tr=>`  ${tr.date} ${tr.km}km ${tr.spd}km/h score:${tr.score??'?'}`).join('\n');
+        const details=d.trips.map(tr=>`  ${tr.date} ${tr.km}${distLabel()} ${tr.spd}${speedUnit()} score:${tr.score??'?'}`).join('\n');
         line+='\n'+details;
       }
       log.textContent+=line+'\n';

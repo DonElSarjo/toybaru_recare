@@ -59,7 +59,6 @@ def get_db(db_name: str) -> sqlite3.Connection:
     conn = sqlite3.connect(str(db_path))
     conn.execute("PRAGMA journal_mode=WAL")
 
-    # Migration tracking table
     conn.execute("""
         CREATE TABLE IF NOT EXISTS _migrations (
             name TEXT PRIMARY KEY,
@@ -67,10 +66,8 @@ def get_db(db_name: str) -> sqlite3.Connection:
         )
     """)
 
-    # Run schema.sql if main table doesn't exist yet
     schema_file = sql_dir / "schema.sql"
     if schema_file.exists():
-        # Check if the main table exists (first CREATE TABLE in schema.sql)
         schema_sql = schema_file.read_text()
         match = re.search(r"CREATE TABLE\s+(?:IF NOT EXISTS\s+)?(\w+)", schema_sql, re.IGNORECASE)
         if match:
@@ -82,7 +79,6 @@ def get_db(db_name: str) -> sqlite3.Connection:
                 conn.executescript(schema_sql)
                 conn.commit()
 
-    # Run numbered migrations in order
     applied = {r[0] for r in conn.execute("SELECT name FROM _migrations").fetchall()}
     migration_files = sorted(sql_dir.glob("[0-9][0-9][0-9]_*.sql"))
 
@@ -93,9 +89,9 @@ def get_db(db_name: str) -> sqlite3.Connection:
             conn.executescript(mf.read_text())
             conn.execute("INSERT INTO _migrations (name) VALUES (?)", (mf.name,))
             conn.commit()
-        except sqlite3.OperationalError as e:
-            # Migration might fail if it was already applied manually (e.g. column already exists)
-            # Log and mark as applied
+        except sqlite3.OperationalError:
+            # Migration may already be applied manually (e.g. column added by hand);
+            # mark it as applied so we don't keep retrying.
             conn.rollback()
             conn.execute("INSERT OR IGNORE INTO _migrations (name) VALUES (?)", (mf.name,))
             conn.commit()

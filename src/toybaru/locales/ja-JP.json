@@ -3,6 +3,16 @@
     "locale": "ja-JP",
     "label": "日本語"
   },
+  "units": {
+    "dist":        { "metric": "km",         "imperial": "mi"  },
+    "distLong":    { "metric": "km",         "imperial": "マイル" },
+    "speed":       { "metric": "km/h",       "imperial": "mph" },
+    "temp":        { "metric": "°C",         "imperial": "°F"  },
+    "consumption": { "metric": "kWh/100km",  "imperial": "kWh/100mi" },
+    "cityThr":     { "metric": "<40 km/h",   "imperial": "<25 mph" },
+    "ruralThr":    { "metric": "40-80 km/h", "imperial": "25-50 mph" },
+    "highwayThr":  { "metric": ">80 km/h",   "imperial": ">50 mph" }
+  },
   "app": {
     "name": "Toybaru ReCare",
     "logout": "ログアウト",
@@ -14,7 +24,7 @@
     "close": "閉じる",
     "language": "言語",
     "days": "日",
-    "last_trip": "🛣️ 最終トリップ",
+    "last_trip": "最終トリップ",
     "details": "詳細",
     "idle_time": "停車時間",
     "overspeed": "速度超過",
@@ -56,7 +66,7 @@
     "remote": "リモート操作"
   },
   "battery": {
-    "title": "🔋 バッテリー",
+    "title": "バッテリー",
     "soc": "充電状態",
     "range": "航続距離",
     "range_ac": "航続距離（エアコン使用時）",
@@ -81,7 +91,7 @@
     "history_error": "履歴を取得できません"
   },
   "status": {
-    "title": "📊 概要",
+    "title": "概要",
     "odometer": "走行距離計",
     "last_update": "時点",
     "closed": "閉",
@@ -106,13 +116,13 @@
     "no_additional": "追加のステータスデータはありません"
   },
   "location": {
-    "title": "📍 位置情報",
+    "title": "位置情報",
     "position": "位置",
     "last_update": "時点",
     "unavailable": "利用不可"
   },
   "efficiency": {
-    "title": "⚡ 効率",
+    "title": "効率",
     "current": "現在（航続距離から）",
     "eco": "エコ",
     "eco_desc": "省エネ走行モード。穏やかな加速と速度。航続距離に最適。",
@@ -132,7 +142,7 @@
     "date": "日付",
     "distance": "距離",
     "duration": "時間",
-    "speed": "平均/最高 km/h",
+    "speed": "平均/最高 {speed}",
     "no_trips": "この期間の走行記録はありません",
     "no_db": "データベースに走行記録がありません。先にデータをインポートしてください。",
     "sync": "新しい走行記録を取得",
@@ -166,8 +176,8 @@
     "total_trips": "総走行回数",
     "total_km": "総走行距離",
     "total_hours": "総運転時間",
-    "avg_speed": "平均速度（km/h）",
-    "max_speed": "最高速度（km/h）",
+    "avg_speed": "平均速度（{speed}）",
+    "max_speed": "最高速度（{speed}）",
     "avg_score": "平均スコア",
     "first_trip": "最初の走行",
     "last_trip": "最後の走行",
@@ -179,16 +189,16 @@
     "avg_trip_length": "平均走行距離",
     "avg_trip_duration": "平均走行時間",
     "trips_per_day": "1日あたりの走行回数",
-    "km_per_day": "1日あたりのkm",
+    "km_per_day": "1日あたりの{dist}",
     "trends": "傾向",
-    "km_per_month": "月間km",
+    "km_per_month": "月間{dist}",
     "trips_by_weekday": "曜日別走行回数",
     "driving_style": "運転スタイル",
     "score_distribution": "スコア分布",
     "speed_categories": "速度帯",
-    "city": "市街地（<40 km/h）",
-    "rural": "郊外（40-80 km/h）",
-    "highway": "高速道路（>80 km/h）",
+    "city": "市街地（{cityThr}）",
+    "rural": "郊外（{ruralThr}）",
+    "highway": "高速道路（{highwayThr}）",
     "time_of_day": "時間帯",
     "morning": "朝（6-12時）",
     "afternoon": "午後（12-18時）",
@@ -219,7 +229,7 @@
     "error": "エラー"
   },
   "remote": {
-    "title": "🎮 リモート操作",
+    "title": "リモート操作",
     "lock": "施錠",
     "unlock": "解錠",
     "sent": "コマンド送信済み",
@@ -257,7 +267,21 @@
     "on": "オン",
     "off": "オフ",
     "available": "利用可能",
-    "not_available": "利用不可"
+    "not_available": "利用不可",
+    "temp_range": "範囲",
+    "temp_step": "ステップ",
+    "climate_start": "エアコン開始",
+    "climate_stop": "エアコン停止",
+    "climate_running": "稼働中",
+    "climate_off": "停止",
+    "climate_more": "すべての設定",
+    "target_temp": "設定",
+    "current_temp": "車内温度",
+    "duration": "時間",
+    "started_at": "開始",
+    "apply": "適用",
+    "revert": "取消",
+    "unsaved": "未保存の変更"
   },
   "hero": {
     "solar_panel": "ソーラーパネル",
@@ -272,10 +296,12 @@
     "katashiki": "型式コード",
     "family_sharing": "ファミリーシェアリング",
     "enabled": "有効",
-    "disabled": "無効"
+    "disabled": "無効",
+    "features": "有効な機能 ({n})",
+    "capabilities": "ハードウェア機能 ({n})"
   },
   "vehicle_status": {
-    "title": "🚗 車両状態",
+    "title": "車両状態",
     "tires_ok": "タイヤ正常",
     "doors_open": "ドア開",
     "windows_open": "窓開",

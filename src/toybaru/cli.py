@@ -50,7 +50,6 @@ def _get_client(username: str | None, password: str | None, region: str | None) 
         sys.exit(1)
 
     if not password:
-        # Try keyring
         try:
             import keyring
             password = keyring.get_password("toybaru", username)
@@ -65,12 +64,10 @@ def _get_client(username: str | None, password: str | None, region: str | None) 
 
 
 def _run(coro):
-    """Run async coroutine."""
     return asyncio.run(coro)
 
 
 def _print_json(data, output_json: bool = False):
-    """Print data as formatted JSON or rich output."""
     if output_json:
         click.echo(json.dumps(data, indent=2, default=str))
     else:
@@ -158,7 +155,8 @@ def import_trips(vin: str, from_date, to_date, batch_size: int, with_route: bool
 
 
 @main.command(name="trip-stats")
-def trip_stats():
+@click.option("--imperial", is_flag=True, help="Show imperial units (mi/mph) instead of metric (km/km/h).")
+def trip_stats(imperial: bool):
     """Show statistics from the local trip database."""
     from toybaru.trip_store import get_stats, get_trip_count
 
@@ -167,13 +165,16 @@ def trip_stats():
         console.print("[yellow]No trips in database. Run 'toybaru import-trips <VIN>' first.[/yellow]")
         return
 
+    dist = "mi" if imperial else "km"
+    spd = "mph" if imperial else "km/h"
+
     table = Table(title=f"Trip Statistics ({stats['total_trips']} trips)")
     table.add_column("Metric", style="dim")
     table.add_column("Value")
-    table.add_row("Total Distance", f"{stats['total_km']} km")
+    table.add_row("Total Distance", f"{stats['total_km']} {dist}")
     table.add_row("Total Time", f"{stats['total_hours']} h")
-    table.add_row("Avg Speed", f"{stats['avg_speed']} km/h")
-    table.add_row("Max Speed", f"{stats['max_speed']} km/h")
+    table.add_row("Avg Speed", f"{stats['avg_speed']} {spd}")
+    table.add_row("Max Speed", f"{stats['max_speed']} {spd}")
     table.add_row("Avg Score", f"{stats['avg_score']}")
     table.add_row("First Trip", stats['first_trip'] or '?')
     table.add_row("Last Trip", stats['last_trip'] or '?')
@@ -425,7 +426,6 @@ def export(vin: str, from_date, to_date, fmt: str, output: str | None):
         else:
             click.echo(result)
     elif fmt == "csv":
-        # Flatten trips to CSV
         import csv
         import io
 
@@ -455,15 +455,13 @@ def logout():
     """Clear saved credentials and tokens."""
     from toybaru.auth.controller import AuthController, TOKEN_FILE
 
-    # Read creds BEFORE deleting files
-    creds = _load_creds()
+    creds = _load_creds()  # before files get deleted below
 
     if TOKEN_FILE.exists():
         TOKEN_FILE.unlink()
     if CREDS_FILE.exists():
         CREDS_FILE.unlink()
 
-    # Also remove session_meta.json
     meta_file = DATA_DIR / "session_meta.json"
     if meta_file.exists():
         meta_file.unlink()

@@ -1,6 +1,6 @@
 [project]
 name = "toybaru"
-version = "0.1.0"
+version = "0.2.0"
 description = "Toybaru ReCare - Subaru Solterra / Toyota bZ4X Connected Services Dashboard"
 requires-python = ">=3.10"
 license = "GPL-2.0-only"
@@ -34,4 +34,4 @@ where = ["src"]
 asyncio_mode = "auto"
 
 [tool.setuptools.package-data]
-toybaru = ["templates/*.html", "locales/*.json", "sql/**/*.sql"]
+toybaru = ["templates/*.html", "templates/*.svg", "templates/icons/*", "locales/*.json", "sql/**/*.sql"]

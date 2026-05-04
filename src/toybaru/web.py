@@ -20,7 +20,7 @@ from fastapi.responses import HTMLResponse, JSONResponse, StreamingResponse
 from starlette.middleware.base import BaseHTTPMiddleware
 
 from toybaru.client import ToybaruClient
-from toybaru.const import DATA_DIR, REGIONS, BRANDS
+from toybaru.const import DATA_DIR, REGIONS, BRANDS, BRAND_LABELS
 from toybaru.exceptions import OtpRequiredError
 from toybaru.soc_tracker import log_snapshot, get_consumption_estimate, get_snapshot_history
 from toybaru.trip_store import (
@@ -178,7 +178,12 @@ async def safe_call(coro):
         return await coro
     except Exception as e:
         logger.exception("API call failed")
-        return {"error": "An error occurred"}
+        # Surface the actual upstream status so the UI can distinguish
+        # rate-limits from real errors and render sensibly.
+        from toybaru.exceptions import ApiError
+        if isinstance(e, ApiError):
+            return {"error": f"HTTP {e.status_code}", "status_code": e.status_code}
+        return {"error": f"{type(e).__name__}: {str(e)[:120]}"}
 
 
 # --- Pages ---
@@ -186,6 +191,99 @@ async def safe_call(coro):
 @app.get("/", response_class=HTMLResponse)
 async def index():
     return HTMLResponse(content=(TEMPLATES_DIR / "dashboard.html").read_text(encoding="utf-8"))
+
+
+import re as _re
+_CAR_SVG_PATH = TEMPLATES_DIR / "car-topdown.svg"
+_HEX6_RE = _re.compile(r"^[0-9a-fA-F]{6}$")
+_FILL_RE = _re.compile(r'fill="(#[0-9a-fA-F]{6})"')
+
+
+def _tint_car_svg(svg: str, paint_hex: str) -> str:
+    """Replace every light fill in the SVG with a paint-coloured equivalent.
+
+    The Gemini car SVG uses ~50 slightly-different light grey shades (lum 175-255)
+    to render the body with subtle shading. Dark shades (<175) are shadows,
+    windows, tires — left untouched.
+
+    Mapping: a fill with luminance ``lum`` blends toward ``paint_hex`` around
+    a base luminance of 228 (the body's primary tone). Shades brighter than
+    228 blend toward white; shades below blend toward a darker paint. This
+    preserves the SVG's relative shading while recoloring the base.
+    """
+    pr = int(paint_hex[1:3], 16)
+    pg = int(paint_hex[3:5], 16)
+    pb = int(paint_hex[5:7], 16)
+    BASE_LUM = 228  # #e6e5e0 — the Gemini body's dominant tone
+
+    def _recolor(match: _re.Match) -> str:
+        hx = match.group(1).lower()
+        r = int(hx[1:3], 16)
+        g = int(hx[3:5], 16)
+        b = int(hx[5:7], 16)
+        lum = (r + g + b) / 3
+        if lum <= 175:
+            return match.group(0)
+        if lum >= BASE_LUM:
+            # Lighten paint toward white by how much brighter this fill is than the body base.
+            t = (lum - BASE_LUM) / (255 - BASE_LUM)
+            nr = round(pr + (255 - pr) * t)
+            ng = round(pg + (255 - pg) * t)
+            nb = round(pb + (255 - pb) * t)
+        else:
+            # Subtle shading between paint-dark and paint-base (half-darken toward black).
+            t = (BASE_LUM - lum) / (BASE_LUM - 175)
+            nr = round(pr * (1 - 0.5 * t))
+            ng = round(pg * (1 - 0.5 * t))
+            nb = round(pb * (1 - 0.5 * t))
+        return f'fill="#{nr:02x}{ng:02x}{nb:02x}"'
+
+    return _FILL_RE.sub(_recolor, svg)
+
+
+@app.get("/assets/car-topdown.svg")
+async def car_topdown_svg(paint: str | None = None):
+    """Top-down vehicle illustration. Optional `paint` query parameter (6-digit
+    hex, no leading #) tints the body while leaving shadows/windows intact."""
+    from fastapi.responses import Response
+    svg = _CAR_SVG_PATH.read_text(encoding="utf-8")
+    if paint and _HEX6_RE.match(paint):
+        svg = _tint_car_svg(svg, "#" + paint.lower())
+    return Response(
+        content=svg,
+        media_type="image/svg+xml",
+        headers={"Cache-Control": "public, max-age=3600"},
+    )
+
+
+_ICONS_DIR = TEMPLATES_DIR / "icons"
+_ICON_WHITELIST = {
+    "favicon.ico":      "image/x-icon",
+    "favicon-16.png":   "image/png",
+    "favicon-32.png":   "image/png",
+    "favicon-48.png":   "image/png",
+    "favicon-180.png":  "image/png",
+    "favicon-192.png":  "image/png",
+    "favicon-512.png":  "image/png",
+}
+
+
+@app.get("/favicon.ico")
+async def favicon_ico():
+    from fastapi.responses import FileResponse
+    return FileResponse(_ICONS_DIR / "favicon.ico", media_type="image/x-icon",
+                        headers={"Cache-Control": "public, max-age=86400"})
+
+
+@app.get("/assets/icons/{name}")
+async def app_icon(name: str):
+    from fastapi import HTTPException
+    from fastapi.responses import FileResponse
+    media = _ICON_WHITELIST.get(name)
+    if not media:
+        raise HTTPException(404, "icon not found")
+    return FileResponse(_ICONS_DIR / name, media_type=media,
+                        headers={"Cache-Control": "public, max-age=86400"})
 
 
 @app.get("/api/brands")
@@ -239,7 +337,6 @@ async def api_login(request: Request, response: Response):
     if not username or not password:
         return JSONResponse({"error": "Missing credentials"}, status_code=400)
 
-    # Rate limit by IP
     client_ip = request.client.host if request.client else "unknown"
     if not _login_limiter.check(client_ip):
         raise HTTPException(status_code=429, detail="Too many attempts")
@@ -249,7 +346,6 @@ async def api_login(request: Request, response: Response):
         uuid = await client.login()
         vehicles = await client.get_vehicles()
     except OtpRequiredError:
-        # OTP required — save state for second phase
         otp_session = secrets.token_hex(16)
         _otp_pending[otp_session] = {
             "client": client,
@@ -265,15 +361,13 @@ async def api_login(request: Request, response: Response):
         logger.exception("Login failed")
         return JSONResponse({"error": "Authentication failed"}, status_code=401)
 
-    # Create session
     token = secrets.token_hex(32)
     _sessions[token] = (client, time.time())
 
-    # Generate CSRF token
     csrf = secrets.token_hex(16)
     _csrf_tokens[token] = csrf
 
-    # Save only username+region (NO password)
+    # Persisted meta never includes the password.
     DATA_DIR.mkdir(parents=True, exist_ok=True)
     _write_meta_file({"username": username, "region": region})
 
@@ -300,11 +394,9 @@ async def api_login_otp(request: Request, response: Response):
     if not pending:
         return JSONResponse({"error": "OTP session expired or invalid"}, status_code=400)
 
-    # Check OTP session expiry
     if time.time() - pending.get("created_at", 0) > _OTP_MAX_AGE:
         return JSONResponse({"error": "OTP session expired"}, status_code=400)
 
-    # Rate limit by IP + username
     client_ip = request.client.host if request.client else "unknown"
     rate_key = f"{client_ip}:{pending['username']}"
     if not _otp_limiter.check(rate_key):
@@ -337,20 +429,28 @@ async def api_login_otp(request: Request, response: Response):
 
 
 @app.get("/api/auth/status")
-async def api_auth_status(session: str | None = Cookie(None)):
+async def api_auth_status(response: Response, session: str | None = Cookie(None)):
     client = _get_session_client(session)
-    if client:
-        csrf = _csrf_tokens.get(session, "")
-        return {"authenticated": True, "csrf_token": csrf}
-    # Try saved tokens (without legacy credentials.json password login)
-    if META_FILE.exists():
+    if client is None and META_FILE.exists():
         try:
             client = await _require_client(session)
-            csrf = _csrf_tokens.get(session, "")
-            return {"authenticated": True, "csrf_token": csrf}
         except Exception:
-            pass
-    return {"authenticated": False}
+            client = None
+    if client is None:
+        return {"authenticated": False}
+    # On server restart the cookie may not match an in-memory session yet;
+    # re-anchor it so the next request finds the client.
+    token = session if session in _sessions else next(
+        (k for k, (c, _) in _sessions.items() if c is client), None
+    )
+    if token is None:
+        token = secrets.token_hex(32)
+        _sessions[token] = (client, time.time())
+    if token not in _csrf_tokens:
+        _csrf_tokens[token] = secrets.token_hex(16)
+    if session != token:
+        response.set_cookie("session", token, httponly=True, samesite="lax")
+    return {"authenticated": True, "csrf_token": _csrf_tokens[token]}
 
 
 @app.post("/api/logout")
@@ -389,7 +489,6 @@ async def api_all(vin: str, session: str | None = Cookie(None)):
     status = await safe_call(client.get_vehicle_status(vin))
     location = await safe_call(client.get_location(vin))
 
-    # Get vehicle info (image, color, nickname) — cached per session
     vehicle_info: dict[str, Any] = {}
     cache_key = f"vehicle_info_{vin}"
     cached = getattr(client, "_cache", {}).get(cache_key)
@@ -407,7 +506,6 @@ async def api_all(vin: str, session: str | None = Cookie(None)):
                         for c in (caps if isinstance(caps, list) else [])
                         if c.get("display")
                     ]
-                    # Extract subscriptions with expiry dates
                     subs_raw = raw.get("subscriptions", []) + raw.get("services", [])
                     subs = [
                         {
@@ -420,14 +518,14 @@ async def api_all(vin: str, session: str | None = Cookie(None)):
                         for s in (subs_raw if isinstance(subs_raw, list) else [])
                         if s.get("status") == "ACTIVE"
                     ]
-                    # Extract remote service capabilities
                     rsc = raw.get("remoteServiceCapabilities") or {}
-                    # Extract head unit info
                     head_unit = raw.get("headUnit") or {}
-                    # Extract DCM (connected services module) info
                     dcm_info = raw.get("dcm") or {}
-                    # Extended capabilities (moonroof, plug&charge, etc.)
+                    # `features` lists app-level features; `extendedCapabilities` lists hardware ones.
+                    feat = raw.get("features") or {}
+                    active_features = sorted(k for k, val in feat.items() if val == 1) if isinstance(feat, dict) else []
                     ext_caps = raw.get("extendedCapabilities") or {}
+                    active_caps = sorted(k for k, val in ext_caps.items() if val is True) if isinstance(ext_caps, dict) else []
 
                     vehicle_info = {
                         "image": v.image,
@@ -455,10 +553,8 @@ async def api_all(vin: str, session: str | None = Cookie(None)):
                         } if dcm_info else {},
                         "family_sharing": raw.get("familySharing"),
                         "katashiki_code": raw.get("katashikiCode"),
-                        "extended_capabilities": {
-                            k: v for k, v in ext_caps.items()
-                            if isinstance(v, bool)
-                        } if ext_caps else {},
+                        "features": active_features,
+                        "capabilities_raw": active_caps,
                     }
                     break
             if not hasattr(client, "_cache"):
@@ -480,13 +576,8 @@ async def api_all(vin: str, session: str | None = Cookie(None)):
             longitude=loc.get("longitude"),
         )
 
-    brand_code = client.auth.region.brand  # "T" or "S"
-    brand_name = "toyota" if brand_code == "T" else "subaru"
-
-    # Fetch climate settings (NA only)
-    climate_settings = {}
-    if client.api._is_na:
-        climate_settings = await safe_call(client.api.get_climate_settings(vin))
+    climate_settings = await safe_call(client.api.get_climate_settings(vin))
+    climate_status = await safe_call(client.api.get_climate_status(vin))
 
     return {
         "status": status,
@@ -494,10 +585,11 @@ async def api_all(vin: str, session: str | None = Cookie(None)):
         "location": location,
         "telemetry": telemetry,
         "consumption": get_consumption_estimate(),
-        "capabilities": {"trips": not client.api._is_na},
-        "brand": brand_name,
+        "capabilities": {"trips": client.api.endpoints.get("trips") is not None},
+        "brand": BRAND_LABELS.get(client.auth.region.brand, "toyota"),
         "vehicle": vehicle_info,
         "climate_settings": climate_settings,
+        "climate_status": climate_status,
     }
 
 
@@ -521,6 +613,50 @@ async def api_climate_settings(vin: str, session: str | None = Cookie(None)):
     return await safe_call(client.api.get_climate_settings(vin))
 
 
+@app.put("/api/climate-settings/{vin}")
+async def api_update_climate_settings(
+    vin: str, request: Request, session: str | None = Cookie(None),
+):
+    """Accept a climate-settings payload (same shape as GET) and PUT it back to
+    the vehicle. Used by the slider/toggle UI to persist preferences."""
+    vin = _validate_vin(vin)
+    _require_csrf(request, session)
+    client = await _require_client(session)
+    body = await request.json()
+    if not isinstance(body, dict):
+        raise HTTPException(400, "expected JSON object")
+    return await safe_call(client.api.update_climate_settings(vin, body))
+
+
+@app.get("/api/climate-status/{vin}")
+async def api_climate_status(vin: str, session: str | None = Cookie(None)):
+    vin = _validate_vin(vin)
+    client = await _require_client(session)
+    return await safe_call(client.api.get_climate_status(vin))
+
+
+@app.post("/api/climate/{vin}/{cmd}")
+async def api_climate_control(
+    vin: str, cmd: str, request: Request, duration: int = 10,
+    session: str | None = Cookie(None),
+):
+    """Start or stop the remote climate control. `cmd` = start | stop."""
+    vin = _validate_vin(vin)
+    _require_csrf(request, session)
+    if cmd not in ("start", "stop"):
+        raise HTTPException(400, "invalid climate command")
+    client = await _require_client(session)
+    return await safe_call(client.api.send_climate_control(vin, cmd, duration))
+
+
+@app.post("/api/climate-refresh/{vin}")
+async def api_climate_refresh(vin: str, request: Request, session: str | None = Cookie(None)):
+    vin = _validate_vin(vin)
+    _require_csrf(request, session)
+    client = await _require_client(session)
+    return await safe_call(client.api.refresh_climate_status(vin))
+
+
 @app.get("/api/telemetry/{vin}")
 async def api_telemetry(vin: str, session: str | None = Cookie(None)):
     vin = _validate_vin(vin)
@@ -533,14 +669,14 @@ async def api_refresh(vin: str, request: Request, session: str | None = Cookie(N
     vin = _validate_vin(vin)
     _require_csrf(request, session)
     client = await _require_client(session)
-    # Per-VIN rate limit: max 1 refresh per 60 seconds
+    # Per-VIN rate limit: 1 refresh / 60s. The car only wakes so fast.
     now = time.monotonic()
     last = _refresh_timestamps.get(vin, 0)
     if now - last < 60:
         remaining = int(60 - (now - last))
         raise HTTPException(429, f"Rate limited. Try again in {remaining}s.")
     _refresh_timestamps[vin] = now
-    # Send both general + EV-specific refresh to maximize wake reliability
+    # Both endpoints are needed; one alone doesn't reliably wake the car.
     status_result = await safe_call(client.refresh_status(vin))
     ev_result = await safe_call(client.refresh_electric_status(vin))
     return {"status_refresh": status_result, "ev_refresh": ev_result}
@@ -562,7 +698,6 @@ async def api_command(vin: str, command: str, request: Request, session: str | N
     if command not in allowed:
         return JSONResponse({"error": f"Unknown command: {command}"}, status_code=400)
     _require_csrf(request, session)
-    # Rate limit commands by session
     if session and not _command_limiter.check(session):
         raise HTTPException(status_code=429, detail="Too many attempts")
     client = await _require_client(session)
@@ -590,8 +725,7 @@ async def api_sync(vin: str, request: Request, session: str | None = Cookie(None
             logger.exception("Sync fetch error")
             return {"error": "Failed to sync trips", "new": total_new, "updated": total_updated}
 
-        payload = data.get("payload", data)
-        trips = payload.get("trips", [])
+        trips = data.get("trips", [])
         if not trips:
             break
 
@@ -599,7 +733,7 @@ async def api_sync(vin: str, request: Request, session: str | None = Cookie(None
         total_new += new
         total_updated += updated
 
-        meta = payload.get("_metadata", {}).get("pagination", {})
+        meta = data.get("_metadata", {}).get("pagination", {})
         next_offset = meta.get("nextOffset")
         if next_offset is None or next_offset <= offset:
             break
@@ -685,9 +819,8 @@ async def api_import(vin: str, from_date: str = "2020-01-01", to_date: str | Non
                 yield f"data: {json.dumps({'type': 'error', 'message': 'Failed to fetch trips'})}\n\n"
                 break
 
-            payload = data.get("payload", data)
-            trips = payload.get("trips", [])
-            meta = payload.get("_metadata", {}).get("pagination", {})
+            trips = data.get("trips", [])
+            meta = data.get("_metadata", {}).get("pagination", {})
             total_count = meta.get("totalCount", 0)
 
             if not trips:
@@ -835,7 +968,6 @@ async def api_reimport(request: Request, session: str | None = Cookie(None)):
     if len(trips) > 10000:
         return JSONResponse({"error": "Too many trips (max 10,000)"}, status_code=400)
 
-    # Convert from export format back to API format for upsert
     converted = []
     for tr in trips:
         trip = {
