@@ -8,9 +8,23 @@ import pytest
 
 @pytest.fixture(autouse=True)
 def tmp_data_dir(tmp_path):
-    """Redirect DATA_DIR to temp directory for test isolation."""
+    """Redirect DATA_DIR (and every module-level path derived from it) to a temp
+    directory for test isolation.
+
+    `DATA_DIR` is captured at import time into several module constants
+    (controller.TOKEN_FILE, web.META_FILE/CREDS_FILE, ...), so patching only
+    `const.DATA_DIR` is not enough — without these patches a test that exercises
+    the saved-session fallback would read/write the user's REAL token files and
+    could even hit the live API."""
+    import toybaru.auth.controller as _ctrl
+    import toybaru.web as _web
     with patch("toybaru.database.DATA_DIR", tmp_path), \
-         patch("toybaru.const.DATA_DIR", tmp_path):
+         patch("toybaru.const.DATA_DIR", tmp_path), \
+         patch.object(_ctrl, "DATA_DIR", tmp_path), \
+         patch.object(_ctrl, "TOKEN_FILE", tmp_path / "tokens.json"), \
+         patch.object(_web, "DATA_DIR", tmp_path), \
+         patch.object(_web, "META_FILE", tmp_path / "session_meta.json"), \
+         patch.object(_web, "CREDS_FILE", tmp_path / "credentials.json"):
         yield tmp_path
 
 

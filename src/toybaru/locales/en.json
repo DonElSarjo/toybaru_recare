@@ -60,10 +60,36 @@
   },
   "nav": {
     "vehicle": "Vehicle",
+    "charging": "Charging",
     "trips": "Trips",
     "stats": "Statistics",
     "import": "Data",
     "remote": "Remote Control"
+  },
+  "charging": {
+    "stats_title": "Charging Summary",
+    "history_title": "Charge History",
+    "week_sessions": "Sessions (this week)",
+    "leaves": "Eco leaves",
+    "last_charge": "Last charge",
+    "soc": "SoC",
+    "cost": "Cost",
+    "date": "Date",
+    "location": "Location",
+    "type": "Type",
+    "sessions_label": "sessions",
+    "sync": "Sync from car",
+    "updated": "updated",
+    "no_sessions": "No charge sessions yet — press Sync to fetch from the car."
+  },
+  "health": {
+    "title": "Vehicle Health",
+    "mileage": "Odometer",
+    "fuel": "Fuel",
+    "engine_oil": "Engine Oil",
+    "smart_key": "Key Battery",
+    "warnings": "warnings",
+    "no_warnings": "No active warnings"
   },
   "battery": {
     "title": "Battery",

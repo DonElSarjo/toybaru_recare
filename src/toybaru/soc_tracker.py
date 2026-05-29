@@ -2,12 +2,15 @@
 
 from __future__ import annotations
 
+import logging
 import sqlite3
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
 from toybaru.database import get_db as _get_db_raw
+
+logger = logging.getLogger(__name__)
 
 BATTERY_CAPACITY_KWH = 71.4
 
@@ -35,30 +38,43 @@ def log_snapshot(
         charging_status = _cs_map.get(charging_status.lower(), charging_status.lower())
         if charging_status not in ("none", "charging", "connected"):
             charging_status = None
-    conn = _get_db()
-    last = conn.execute(
-        "SELECT soc, odometer FROM snapshots WHERE vin = ? ORDER BY timestamp DESC LIMIT 1",
-        (vin,),
-    ).fetchone()
-    if last and last[0] == soc and last[1] == odometer:
-        conn.close()
-        return
-    ts = datetime.now(timezone.utc).isoformat()
-    conn.execute(
-        "INSERT INTO snapshots (vin, timestamp, soc, range_km, range_ac_km, odometer, charging_status, latitude, longitude) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
-        (vin, ts, soc, range_km, range_ac_km, odometer, charging_status, latitude, longitude),
-    )
-    conn.commit()
-    conn.close()
+    # Snapshot logging is fire-and-forget telemetry: a non-writable DATA_DIR
+    # (e.g. a misowned container volume) must not 500 the dashboard. Degrade
+    # gracefully with a warning instead.
+    try:
+        conn = _get_db()
+        try:
+            last = conn.execute(
+                "SELECT soc, odometer FROM snapshots WHERE vin = ? ORDER BY timestamp DESC LIMIT 1",
+                (vin,),
+            ).fetchone()
+            if last and last[0] == soc and last[1] == odometer:
+                return
+            ts = datetime.now(timezone.utc).isoformat()
+            conn.execute(
+                "INSERT INTO snapshots (vin, timestamp, soc, range_km, range_ac_km, odometer, charging_status, latitude, longitude) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                (vin, ts, soc, range_km, range_ac_km, odometer, charging_status, latitude, longitude),
+            )
+            conn.commit()
+        finally:
+            conn.close()
+    except (sqlite3.Error, OSError) as e:
+        logger.warning("Could not write snapshot (%s); check DATA_DIR is writable.", e)
 
 
 def get_consumption_estimate() -> dict[str, Any]:
     """Calculate kWh/100km from snapshot pairs where car was driven."""
-    conn = _get_db()
-    rows = conn.execute(
-        "SELECT timestamp, soc, range_km, odometer FROM snapshots ORDER BY timestamp ASC"
-    ).fetchall()
-    conn.close()
+    try:
+        conn = _get_db()
+        try:
+            rows = conn.execute(
+                "SELECT timestamp, soc, range_km, odometer FROM snapshots ORDER BY timestamp ASC"
+            ).fetchall()
+        finally:
+            conn.close()
+    except (sqlite3.Error, OSError) as e:
+        logger.warning("Could not read snapshots (%s); check DATA_DIR is writable.", e)
+        return {"entries": 0, "kwh_per_100km": None, "message": "Snapshot data unavailable."}
 
     if len(rows) < 2:
         return {"entries": len(rows), "kwh_per_100km": None, "message": "Zu wenig Datenpunkte."}
@@ -91,8 +107,14 @@ def get_consumption_estimate() -> dict[str, Any]:
 
 
 def get_snapshot_history(limit: int = 100) -> list[dict]:
-    conn = _get_db()
-    conn.row_factory = sqlite3.Row
-    rows = conn.execute("SELECT * FROM snapshots ORDER BY timestamp DESC LIMIT ?", (limit,)).fetchall()
-    conn.close()
+    try:
+        conn = _get_db()
+        try:
+            conn.row_factory = sqlite3.Row
+            rows = conn.execute("SELECT * FROM snapshots ORDER BY timestamp DESC LIMIT ?", (limit,)).fetchall()
+        finally:
+            conn.close()
+    except (sqlite3.Error, OSError) as e:
+        logger.warning("Could not read snapshot history (%s); check DATA_DIR is writable.", e)
+        return []
     return [dict(r) for r in reversed(rows)]

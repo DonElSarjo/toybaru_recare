@@ -122,6 +122,7 @@ def test_new_routes_registered_and_require_auth():
         f"/api/vehicle-health/{_VIN}",
         f"/api/charge-history/{_VIN}",
         f"/api/charge-statistics/{_VIN}",
+        f"/api/db/charges?vin={_VIN}",
     ):
         resp = client.get(path)
         # registered (not 404) and guarded (401 without a session)
