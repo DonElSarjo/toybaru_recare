@@ -585,7 +585,12 @@ async def api_all(vin: str, session: str | None = Cookie(None)):
         "location": location,
         "telemetry": telemetry,
         "consumption": get_consumption_estimate(),
-        "capabilities": {"trips": client.api.endpoints.get("trips") is not None},
+        "capabilities": {
+            "trips": client.api.endpoints.get("trips") is not None,
+            "charge_history": client.api.endpoints.get("charge_history") is not None,
+            "charge_statistics": client.api.endpoints.get("charge_statistics") is not None,
+            "vehicle_health": client.api.endpoints.get("vehicle_health") is not None,
+        },
         "brand": BRAND_LABELS.get(client.auth.region.brand, "toyota"),
         "vehicle": vehicle_info,
         "climate_settings": climate_settings,
@@ -662,6 +667,45 @@ async def api_telemetry(vin: str, session: str | None = Cookie(None)):
     vin = _validate_vin(vin)
     client = await _require_client(session)
     return await safe_call(client.get_telemetry(vin))
+
+
+@app.get("/api/vehicle-health/{vin}")
+async def api_vehicle_health(vin: str, session: str | None = Cookie(None)):
+    """Vehicle health report (NA): mileage, warnings, fluids."""
+    vin = _validate_vin(vin)
+    client = await _require_client(session)
+    return await safe_call(client.get_vehicle_health(vin))
+
+
+@app.get("/api/charge-history/{vin}")
+async def api_charge_history(
+    vin: str,
+    from_date: str | None = None,
+    to_date: str | None = None,
+    charging_type: str | None = None,
+    session: str | None = Cookie(None),
+):
+    """Charge session history (NA). Dates are YYYY-MM-DD; defaults to last 90 days."""
+    vin = _validate_vin(vin)
+    client = await _require_client(session)
+    today = date.today()
+    end = to_date or today.isoformat()
+    start = from_date or (today - timedelta(days=90)).isoformat()
+    return await safe_call(client.get_charge_history(vin, start, end, charging_type))
+
+
+@app.get("/api/charge-statistics/{vin}")
+async def api_charge_statistics(
+    vin: str,
+    month: str | None = None,
+    session: str | None = Cookie(None),
+):
+    """Charge statistics for a month (NA). `month` is MMYYYY; defaults to the
+    current month."""
+    vin = _validate_vin(vin)
+    client = await _require_client(session)
+    month = month or date.today().strftime("%m%Y")
+    return await safe_call(client.get_charge_statistics(vin, month))
 
 
 @app.post("/api/refresh/{vin}")

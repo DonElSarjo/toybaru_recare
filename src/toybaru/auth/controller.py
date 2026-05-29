@@ -313,7 +313,7 @@ class AuthController:
             "Content-Type": "application/x-www-form-urlencoded",
             "User-Agent": USER_AGENT,
         }
-        if self.region.basic_auth:
+        if self.region.basic_auth and self.region.oauth_uses_basic_auth:
             token_headers["Authorization"] = f"Basic {self.region.basic_auth}"
 
         token_data = {
@@ -341,7 +341,7 @@ class AuthController:
             "Content-Type": "application/x-www-form-urlencoded",
             "User-Agent": USER_AGENT,
         }
-        if self.region.basic_auth:
+        if self.region.basic_auth and self.region.oauth_uses_basic_auth:
             refresh_headers["Authorization"] = f"Basic {self.region.basic_auth}"
 
         async with make_client(timeout=30) as client:

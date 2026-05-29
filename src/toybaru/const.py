@@ -34,6 +34,8 @@ class RegionConfig:
     auth_headers: dict = field(default_factory=dict)        # extra headers for OAuth flow
     post_processors: dict = field(default_factory=dict)     # feature -> Api._pp_<name>
     fallbacks: dict = field(default_factory=dict)           # feature -> Api._fb_<name> (used when endpoint is None)
+    drop_headers: tuple = ()                                # base header keys to remove (after request_headers merge)
+    oauth_uses_basic_auth: bool = True                      # send Basic client auth on token/refresh (False where client_id != basic-auth client, e.g. NA public client)
 
 
 # Shared HTTP constants
@@ -82,6 +84,24 @@ _ENDPOINTS_NA = {
     "climate_control": "/v1/global/remote/climate-control",
     "refresh_climate_status": "/v1/global/remote/refresh-climate-status",
     "account": "/v4/account",
+}
+
+# Subaru NA recipe (confirmed live 2026-05-29; see docs/api-inventory.md). The
+# SubaruConnect app talks to onecdn.telematicsct.com with its own header recipe and
+# splits services across prefixes: core under /oneapi/*, charging under /charging/*.
+_ONECDN_BASE = "https://onecdn.telematicsct.com"
+_SUBARU_NA_USER_AGENT = "okhttp/4.8.0 XCAPP-SDK/2.06.152 application/com.subaru.oneapp/2.3.1"
+
+_ENDPOINTS_SUBARU_NA = {
+    **_ENDPOINTS_NA,
+    # Standalone /oneapi/v2/telemetry returns 400 for Subaru NA; telemetry is
+    # embedded in vehicle_status (/oneapi/v1/global/remote/status) instead.
+    "telemetry": None,
+    "vehicle_health": "/v1/vehiclehealth/status",
+    # Charging lives under /charging/* (not /oneapi). Absolute URLs escape the
+    # /oneapi api_base_url; VIN is carried via the X-VIN header (see vin_headers).
+    "charge_history": f"{_ONECDN_BASE}/charging/v2/vehicle/charge-history",
+    "charge_statistics": f"{_ONECDN_BASE}/charging/v2/vehicle/charge-statistics",
 }
 
 # Brand code -> short key for template/i18n lookups
@@ -138,6 +158,10 @@ def _toyota_na() -> RegionConfig:
         auth_headers={},
         post_processors={"electric_status": "normalize_na_electric"},
         fallbacks={"location": "location_from_vehicle_status"},
+        # NA realms issue tokens to the public client `oneappsdkclient`, which does
+        # not match the Basic-auth client (`oneapp`); sending Basic on refresh/
+        # exchange yields invalid_client. Use the public client (no Basic).
+        oauth_uses_basic_auth=False,
     )
 
 
@@ -190,6 +214,7 @@ def _lexus_na() -> RegionConfig:
         auth_headers={**base.auth_headers, "x-appbrand": "L", "brand": "L"},
         post_processors=dict(base.post_processors),
         fallbacks=dict(base.fallbacks),
+        oauth_uses_basic_auth=base.oauth_uses_basic_auth,
     )
 
 
@@ -218,25 +243,46 @@ def _subaru_eu() -> RegionConfig:
 
 
 def _subaru_na() -> RegionConfig:
+    # Confirmed live 2026-05-29 (docs/api-inventory.md, na_discovery/FINDINGS.md).
+    # Host is onecdn.telematicsct.com (NOT api.telematicsct.com, which 401s). The
+    # SubaruConnect header recipe differs from the Toyota one: it needs
+    # X-APPBRAND/X-OSVERSION/X-OSNAME/X-DEVICE-TIMEZONE and x-channel:oneapp, and
+    # must NOT send the HMAC x-client-ref / x-correlationid / x-brand (dropped
+    # below). VIN goes in VIN+vin for /oneapi/* and X-VIN for /charging/* — we send
+    # all three. Token refresh/exchange uses the public client (no Basic auth).
     return RegionConfig(
         name="Subaru NA",
         auth_realm="https://login.subarudriverslogin.com/oauth2/realms/root/realms/tmna-native",
-        api_base_url="https://api.telematicsct.com",
+        api_base_url="https://onecdn.telematicsct.com/oneapi",
         client_id="oneappsdkclient",
         redirect_uri="com.toyota.oneapp:/oauth2Callback",
         basic_auth="b25lYXBwOm9uZWFwcA==",
         api_key="pypIHG015k4ABHWbcI4G0a94F7cC0JDo1OynpAsG",
         brand="S",
         region="NA",
-        auth_service="",
-        endpoints=dict(_ENDPOINTS_NA),
-        endpoint_headers={"telemetry": {"GENERATION": "17CYPLUS"}},
-        request_headers={"x-region": "US", "X-LOCALE": "en-US"},
-        vin_headers=("VIN", "vin"),
+        auth_service="OneAppSignIn",
+        endpoints=dict(_ENDPOINTS_SUBARU_NA),
+        endpoint_headers={},
+        request_headers={
+            "X-LOCALE": "en-US",
+            "x-appbrand": "S",
+            "x-osversion": "Android",
+            "x-osname": "android",
+            "x-device-timezone": "UTC",
+            "x-channel": "oneapp",                 # override base "ONEAPP"
+            "x-appversion": "2.3.1",               # override base CLIENT_VERSION
+            "user-agent": _SUBARU_NA_USER_AGENT,   # override base USER_AGENT
+        },
+        vin_headers=("VIN", "vin", "X-VIN"),
         response_envelope="payload",
         auth_headers={},
-        post_processors={"electric_status": "normalize_na_electric"},
+        post_processors={
+            "electric_status": "normalize_na_electric",
+            "charge_history": "na_charge_history",
+        },
         fallbacks={"location": "location_from_vehicle_status"},
+        drop_headers=("API_KEY", "guid", "x-brand", "x-client-ref", "x-correlationid"),
+        oauth_uses_basic_auth=False,
     )
 
 

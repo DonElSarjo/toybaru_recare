@@ -35,6 +35,7 @@ class Api:
         self.endpoints = dict(region.endpoints)
         self.endpoint_headers = dict(region.endpoint_headers)
         self._base_extra_headers = dict(region.request_headers)
+        self._drop_headers = tuple(region.drop_headers)
         self.vin_header_keys = tuple(region.vin_headers)
         self.response_envelope = region.response_envelope or ""
 
@@ -53,6 +54,15 @@ class Api:
         """Compute x-client-ref HMAC-SHA256."""
         mac = hmac.new(CLIENT_VERSION.encode(), uuid.encode(), hashlib.sha256)
         return mac.hexdigest()
+
+    def _url(self, endpoint: str) -> str:
+        """Resolve an endpoint to a full URL. Absolute endpoints (starting with
+        http) are used as-is — this lets a platform reach a sibling service on a
+        different path prefix than api_base_url (e.g. Subaru NA charging endpoints
+        live under /charging/* while the base is /oneapi)."""
+        if endpoint.startswith("http://") or endpoint.startswith("https://"):
+            return endpoint
+        return f"{self.api_base_url}{endpoint}"
 
     async def _headers(self, vin: str | None = None) -> dict[str, str]:
         token = await self.auth.ensure_token()
@@ -75,6 +85,11 @@ class Api:
             "Content-Type": "application/json",
             **self._base_extra_headers,
         }
+        # request_headers (above) override base values for matching keys; drop_headers
+        # then removes base headers a platform must NOT send (e.g. Subaru NA omits the
+        # HMAC x-client-ref / x-correlationid / x-brand that the Toyota recipe adds).
+        for key in self._drop_headers:
+            h.pop(key, None)
         if vin:
             for key in self.vin_header_keys:
                 h[key] = vin
@@ -93,7 +108,7 @@ class Api:
         headers = await self._headers(vin)
         if extra_headers:
             headers.update(extra_headers)
-        url = f"{self.api_base_url}{endpoint}"
+        url = self._url(endpoint)
 
         async with make_client(timeout=self.timeout) as client:
             resp = await client.request(method, url, headers=headers, json=body, params=params)
@@ -127,7 +142,7 @@ class Api:
     ) -> httpx.Response:
         """Make an authenticated API request and return the raw response."""
         headers = await self._headers(vin)
-        url = f"{self.api_base_url}{endpoint}"
+        url = self._url(endpoint)
 
         async with make_client(timeout=self.timeout) as client:
             resp = await client.request(method, url, headers=headers, json=body, params=params)
@@ -185,6 +200,34 @@ class Api:
 
     async def get_telemetry(self, vin: str) -> dict[str, Any]:
         return await self._call("telemetry", vin=vin)
+
+    async def get_vehicle_health(self, vin: str) -> dict[str, Any]:
+        return await self._call("vehicle_health", vin=vin)
+
+    async def get_charge_history(
+        self,
+        vin: str,
+        from_date: date,
+        to_date: date,
+        charging_type: str | None = None,
+    ) -> dict[str, Any]:
+        """Charge session history (NA). Dates are passed as start-date/end-date
+        query params; VIN rides in the X-VIN header (see vin_headers)."""
+        params: dict[str, Any] = {"start-date": str(from_date), "end-date": str(to_date)}
+        if charging_type:
+            params["charging-type"] = charging_type
+        return await self._call("charge_history", vin=vin, params=params)
+
+    async def get_charge_statistics(
+        self,
+        vin: str,
+        month: str,
+        report_type: str = "monthly",
+    ) -> dict[str, Any]:
+        """Charge statistics (NA). `month` is MMYYYY (e.g. "052026"); the only
+        report-type confirmed for Subaru NA is "monthly"."""
+        params = {"report-type": report_type, "month": month}
+        return await self._call("charge_statistics", vin=vin, params=params)
 
     async def get_trips(
         self,
@@ -265,6 +308,21 @@ class Api:
                 "longitude": status.get("longitude"),
             }
         }
+
+    @staticmethod
+    def _pp_na_charge_history(data: Any) -> dict[str, Any]:
+        """The NA charge-history payload is a per-VIN wrapper:
+        `[{vin, charging_sessions:[...]}]`. Flatten to `{"sessions": [...]}`."""
+        sessions: list[Any] = []
+        if isinstance(data, list):
+            for item in data:
+                if isinstance(item, dict) and isinstance(item.get("charging_sessions"), list):
+                    sessions.extend(item["charging_sessions"])
+                elif isinstance(item, dict):
+                    sessions.append(item)
+        elif isinstance(data, dict) and isinstance(data.get("charging_sessions"), list):
+            sessions = data["charging_sessions"]
+        return {"sessions": sessions}
 
     @staticmethod
     def _pp_normalize_na_electric(data: dict[str, Any]) -> dict[str, Any]:
