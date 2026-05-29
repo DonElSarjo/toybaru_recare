@@ -2109,6 +2109,8 @@ async function _reloadChargeHistory() {
   let hist=null;
   try{ hist=await(await fetch(`/api/db/charges?vin=${currentVin}&limit=200`)).json(); }catch(e){}
   renderChargeHistory(hist);
+  const sessions=Array.isArray(hist)?hist:((hist&&hist.sessions)||[]);
+  renderChargeChart(sessions);
 }
 
 // Fetch new sessions from the car into the local DB, then refresh the table.
@@ -2130,23 +2132,49 @@ async function syncCharges() {
 
 function renderChargeStats(s){
   const el=document.getElementById('chargeStatsCard');
-  if(!s || s.error || s._unavailable){ el.innerHTML=''; return; }
-  const wk=s.current_week_report||{}, last=s.last_charge||{};
-  let h=`<div class="card"><div class="section-title">${tf('charging.stats_title','Charging Summary')}</div>`;
+  const ok = s && !s.error && !s._unavailable;
+  const wk=(ok&&s.current_week_report)||{}, last=(ok&&s.last_charge)||{};
+  let left=`<div class="section-title">${tf('charging.stats_title','Charging Summary')}</div>`;
   const wkBoxes=[];
   if(wk.charging_count!=null) wkBoxes.push([wk.charging_count, tf('charging.week_sessions','Sessions (this week)')]);
   if(wk.total_charge_kwhr!=null) wkBoxes.push([_kwh(wk.total_charge_kwhr), 'kWh']);
   if(wk.leaf_count!=null) wkBoxes.push([wk.leaf_count, tf('charging.leaves','Eco leaves')]);
-  if(wkBoxes.length){ h+=`<div style="display:flex;gap:24px;flex-wrap:wrap;margin-bottom:12px">`; for(const [v,l] of wkBoxes) h+=_sbox(v,l); h+=`</div>`; }
+  if(wkBoxes.length){ left+=`<div style="display:flex;gap:24px;flex-wrap:wrap;margin-bottom:12px">`; for(const [v,l] of wkBoxes) left+=_sbox(v,l); left+=`</div>`; }
   if(Object.keys(last).length){
-    h+=`<div class="meta" style="margin-bottom:6px">${tf('charging.last_charge','Last charge')}</div>`;
-    h+=`<div style="display:flex;gap:24px;flex-wrap:wrap">`;
-    if(last.total_charge_kwhr!=null) h+=_sbox(_kwh(last.total_charge_kwhr),'kWh');
-    if(last.soc_before_charging!=null&&last.soc_after_charging!=null) h+=_sbox(`${_pct(last.soc_before_charging)}→${_pct(last.soc_after_charging)}`, tf('charging.soc','SoC'));
+    left+=`<div class="meta" style="margin-bottom:6px">${tf('charging.last_charge','Last charge')}</div>`;
+    left+=`<div style="display:flex;gap:24px;flex-wrap:wrap">`;
+    if(last.total_charge_kwhr!=null) left+=_sbox(_kwh(last.total_charge_kwhr),'kWh');
+    if(last.soc_before_charging!=null&&last.soc_after_charging!=null) left+=_sbox(`${_pct(last.soc_before_charging)}→${_pct(last.soc_after_charging)}`, tf('charging.soc','SoC'));
     const cost=last.cdr_details&&last.cdr_details.total_amount;
-    if(cost!=null&&cost!=='') h+=_sbox('$'+cost, tf('charging.cost','Cost'));
-    h+=`</div>`;
-    if(last.address) h+=`<div class="meta" style="margin-top:8px">${_escHtml(last.address)}</div>`;
+    if(cost!=null&&cost!=='') left+=_sbox('$'+cost, tf('charging.cost','Cost'));
+    left+=`</div>`;
+    if(last.address) left+=`<div class="meta" style="margin-top:8px">${_escHtml(last.address)}</div>`;
+  }
+  if(!wkBoxes.length && !Object.keys(last).length) left+=`<div class="meta">${tf('charging.summary_unavailable','Summary unavailable')}</div>`;
+  // Two columns: stats on the left, a kWh-per-session chart fills the right
+  // (chart is populated by renderChargeChart once DB sessions load).
+  // align-items:stretch makes both columns equal height; the chart column
+  // centers its content vertically so it fills the right-hand whitespace.
+  el.innerHTML = `<div class="card"><div style="display:flex;gap:24px;flex-wrap:wrap;align-items:stretch">`+
+    `<div style="flex:1;min-width:240px">${left}</div>`+
+    `<div id="chargeChart" style="flex:1.4;min-width:260px;display:flex;flex-direction:column;justify-content:center"></div>`+
+    `</div></div>`;
+}
+
+// Simple bar chart (reuses the EU stats .bar-chart style): kWh per recent session.
+function renderChargeChart(sessions){
+  const el=document.getElementById('chargeChart'); if(!el) return;
+  // DB returns newest-first; take the last 12 and order oldest -> newest.
+  const data=(sessions||[]).slice(0,12).reverse()
+    .map(s=>({kwh:_num(s.total_charge_kwhr), t:s.start_time}))
+    .filter(d=>d.kwh!=null && d.kwh>0);
+  if(data.length<2){ el.innerHTML=''; return; }
+  const max=Math.max(...data.map(d=>d.kwh));
+  let h=`<div class="section-title">${tf('charging.kwh_per_session','kWh per session')}</div><div class="bar-chart" style="height:150px">`;
+  for(const d of data){
+    const ht=Math.max(4,Math.round(d.kwh/max*130));
+    const ms=_toMs(d.t); const lbl=ms!=null?new Date(ms).toLocaleString(LC,{month:'numeric',day:'numeric'}):'';
+    h+=`<div class="bar-col" title="${_escHtml(lbl)}: ${d.kwh.toFixed(1)} kWh"><div class="bar" style="height:${ht}px"></div><div class="bar-label">${_escHtml(lbl)}</div></div>`;
   }
   h+=`</div>`;
   el.innerHTML=h;

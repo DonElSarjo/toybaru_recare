@@ -74,6 +74,8 @@
     "last_charge": "Last charge",
     "soc": "SoC",
     "cost": "Cost",
+    "kwh_per_session": "kWh per session",
+    "summary_unavailable": "Summary unavailable",
     "date": "Date",
     "location": "Location",
     "type": "Type",
