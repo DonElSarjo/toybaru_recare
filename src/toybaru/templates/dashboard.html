@@ -2047,6 +2047,16 @@ async function renderLastTrip() {
 function _sbox(v,l){return `<div class="stat-box" style="padding:0"><div class="stat-num" style="font-size:20px">${_escHtml(v)}</div><div class="stat-label">${_escHtml(l)}</div></div>`}
 // SoC values from the API may already include a "%"; normalize to exactly one.
 function _pct(v){v=String(v==null?'':v).trim();if(!v)return '—';return v.endsWith('%')?v:v+'%'}
+// Numeric parse tolerant of unit suffixes (e.g. "30.5 kWh", "45%").
+function _num(v){if(v==null)return null;const n=parseFloat(String(v).replace(/[^0-9.\-]/g,''));return isNaN(n)?null:n}
+// kWh rounded to 3 decimals to match the rest of the display.
+function _kwh(v){const n=_num(v);return n==null?'—':n.toFixed(3)}
+// Timestamps may be ISO strings or epoch (s or ms); return epoch ms or null.
+function _toMs(t){if(t==null)return null;if(typeof t==='number')return t<1e12?t*1000:t;const s=String(t).trim();if(/^\d+$/.test(s)){const n=Number(s);return n<1e12?n*1000:n}const d=Date.parse(s);return isNaN(d)?null:d}
+function _durMin(start,end){const a=_toMs(start),b=_toMs(end);if(a==null||b==null||b<a)return null;return Math.round((b-a)/60000)}
+function _fmtDur(min){if(min==null)return '—';if(min<60)return min+'m';const h=Math.floor(min/60),m=min%60;return m?`${h}h ${m}m`:`${h}h`}
+// Average charge rate (kW) over the whole session = kWh / hours.
+function _avgKw(kwh,min){const k=_num(kwh);if(k==null||!min)return '—';return (k/(min/60)).toFixed(1)}
 
 async function renderHealth() {
   const el=document.getElementById('healthCard');
@@ -2125,13 +2135,13 @@ function renderChargeStats(s){
   let h=`<div class="card"><div class="section-title">${tf('charging.stats_title','Charging Summary')}</div>`;
   const wkBoxes=[];
   if(wk.charging_count!=null) wkBoxes.push([wk.charging_count, tf('charging.week_sessions','Sessions (this week)')]);
-  if(wk.total_charge_kwhr!=null) wkBoxes.push([wk.total_charge_kwhr, 'kWh']);
+  if(wk.total_charge_kwhr!=null) wkBoxes.push([_kwh(wk.total_charge_kwhr), 'kWh']);
   if(wk.leaf_count!=null) wkBoxes.push([wk.leaf_count, tf('charging.leaves','Eco leaves')]);
   if(wkBoxes.length){ h+=`<div style="display:flex;gap:24px;flex-wrap:wrap;margin-bottom:12px">`; for(const [v,l] of wkBoxes) h+=_sbox(v,l); h+=`</div>`; }
   if(Object.keys(last).length){
     h+=`<div class="meta" style="margin-bottom:6px">${tf('charging.last_charge','Last charge')}</div>`;
     h+=`<div style="display:flex;gap:24px;flex-wrap:wrap">`;
-    if(last.total_charge_kwhr!=null) h+=_sbox(last.total_charge_kwhr,'kWh');
+    if(last.total_charge_kwhr!=null) h+=_sbox(_kwh(last.total_charge_kwhr),'kWh');
     if(last.soc_before_charging!=null&&last.soc_after_charging!=null) h+=_sbox(`${_pct(last.soc_before_charging)}→${_pct(last.soc_after_charging)}`, tf('charging.soc','SoC'));
     const cost=last.cdr_details&&last.cdr_details.total_amount;
     if(cost!=null&&cost!=='') h+=_sbox('$'+cost, tf('charging.cost','Cost'));
@@ -2155,14 +2165,22 @@ function renderChargeHistory(d){
     `<th>${tf('charging.type','Type')}</th>`+
     `<th style="text-align:right">kWh</th>`+
     `<th style="text-align:right">${tf('charging.soc','SoC')}</th>`+
+    `<th style="text-align:right">${tf('charging.duration','Duration')}</th>`+
+    `<th style="text-align:right">${tf('charging.rate','Avg Charge Rate kW')}</th>`+
+    `<th style="text-align:right">${tf('charging.co2','CO₂ lbs/MWh')}</th>`+
     `</tr></thead><tbody>`;
   for(const s of sessions){
     const when=fmtDate(s.start_time||s.end_time);
     const loc=_escHtml(s.address||'—');
     const type=_escHtml(s.charge_location_type||'—');
-    const kwh=s.total_charge_kwhr!=null?_escHtml(s.total_charge_kwhr):'—';
+    const kwh=_kwh(s.total_charge_kwhr);
     const soc=(s.soc_before_charging!=null&&s.soc_after_charging!=null)?`${_pct(s.soc_before_charging)}→${_pct(s.soc_after_charging)}`:'—';
-    h+=`<tr><td>${when}</td><td>${loc}</td><td>${type}</td><td style="text-align:right">${kwh}</td><td style="text-align:right">${soc}</td></tr>`;
+    const min=_durMin(s.start_time,s.end_time);
+    const dur=_fmtDur(min);
+    const rate=_avgKw(s.total_charge_kwhr,min);
+    const wt=s.watttime_details||{};
+    const co2=(wt.co2_value!=null&&wt.co2_value!=='')?_escHtml(String(wt.co2_value)):'—';
+    h+=`<tr><td>${when}</td><td>${loc}</td><td>${type}</td><td style="text-align:right">${kwh}</td><td style="text-align:right">${soc}</td><td style="text-align:right">${dur}</td><td style="text-align:right">${rate}</td><td style="text-align:right">${co2}</td></tr>`;
   }
   h+=`</tbody></table>`;
   el.innerHTML=h;
