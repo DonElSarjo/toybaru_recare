@@ -434,19 +434,13 @@ class AuthController:
                 str(TOKEN_FILE),
                 os.O_WRONLY | os.O_CREAT | os.O_TRUNC,
                 0o600,
-                )
+            )
             try:
                 os.write(fd, content.encode())
             finally:
                 os.close(fd)
         else:
             TOKEN_FILE.write_text(content)
-        except OSError as e:
-            logger.warning(
-                "Could not persist tokens to %s (%s). Login succeeded but tokens "
-                "won't survive a restart until the data dir is writable.",
-                TOKEN_FILE, e,
-            )
 
     def _load_saved_tokens(self) -> None:
         """Load tokens from disk if available."""
