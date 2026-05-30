@@ -424,30 +424,23 @@ class AuthController:
         self._save_tokens()
 
     def _save_tokens(self) -> None:
-        """Persist tokens to disk with restrictive permissions.
-
-        Best-effort: the access/refresh tokens are already held in memory by the
-        time this runs, so a read-only or wrong-permission DATA_DIR (common in
-        containers with a misowned volume) must NOT fail an otherwise-successful
-        login. We log a warning and continue — tokens just won't survive a
-        restart until the data dir is writable."""
+        """Persist tokens to disk with restrictive permissions."""
         if not self._token_info:
             return
-        try:
-            DATA_DIR.mkdir(parents=True, exist_ok=True)
-            content = json.dumps(asdict(self._token_info), indent=2)
-            if os.name != "nt":
-                fd = os.open(
-                    str(TOKEN_FILE),
-                    os.O_WRONLY | os.O_CREAT | os.O_TRUNC,
-                    0o600,
+        DATA_DIR.mkdir(parents=True, exist_ok=True)
+        content = json.dumps(asdict(self._token_info), indent=2)
+        if os.name != "nt":
+            fd = os.open(
+                str(TOKEN_FILE),
+                os.O_WRONLY | os.O_CREAT | os.O_TRUNC,
+                0o600,
                 )
-                try:
-                    os.write(fd, content.encode())
-                finally:
-                    os.close(fd)
-            else:
-                TOKEN_FILE.write_text(content)
+            try:
+                os.write(fd, content.encode())
+            finally:
+                os.close(fd)
+        else:
+            TOKEN_FILE.write_text(content)
         except OSError as e:
             logger.warning(
                 "Could not persist tokens to %s (%s). Login succeeded but tokens "
