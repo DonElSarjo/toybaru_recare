@@ -15,6 +15,7 @@ from pathlib import Path
 from secrets import token_hex
 from typing import Any
 
+import httpx
 from fastapi import FastAPI, HTTPException, Request, Response, Cookie
 from fastapi.responses import HTMLResponse, JSONResponse, StreamingResponse
 from starlette.middleware.base import BaseHTTPMiddleware
@@ -26,6 +27,9 @@ from toybaru.soc_tracker import log_snapshot, get_consumption_estimate, get_snap
 from toybaru.trip_store import (
     upsert_trips, get_trip_count, get_trips_from_db,
     get_latest_trip_timestamp,
+)
+from toybaru.charge_store import (
+    upsert_charges, get_charge_count, get_charges_from_db,
 )
 from toybaru.trip_stats import get_detailed_stats, get_stats
 
@@ -160,29 +164,39 @@ async def _require_client(session_token: str | None) -> ToybaruClient:
 
 
 def _write_meta_file(data: dict) -> None:
-    """Write session_meta.json with restrictive permissions."""
+    """Write session_meta.json with restrictive permissions.
+
+    Best-effort: persisting username/region is a convenience, not required for an
+    active session, so a non-writable DATA_DIR (e.g. a misowned container volume)
+    must not fail login. Log a warning and continue."""
     content = json.dumps(data)
     path = str(META_FILE)
-    if os.name != "nt":
-        fd = os.open(path, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
-        try:
-            os.write(fd, content.encode())
-        finally:
-            os.close(fd)
-    else:
-        META_FILE.write_text(content)
+    try:
+        DATA_DIR.mkdir(parents=True, exist_ok=True)
+        if os.name != "nt":
+            fd = os.open(path, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
+            try:
+                os.write(fd, content.encode())
+            finally:
+                os.close(fd)
+        else:
+            META_FILE.write_text(content)
+    except OSError as e:
+        logger.warning("Could not write %s (%s); session still active.", META_FILE, e)
 
 
 async def safe_call(coro):
+    from toybaru.exceptions import ApiError
     try:
         return await coro
+    except ApiError as e:
+        # An upstream API "no" (e.g. an endpoint not entitled for this vehicle,
+        # like climate on some NA cars) is expected and handled — log it
+        # concisely (no traceback) and surface the status so the UI can adapt.
+        logger.warning("API call returned HTTP %s", e.status_code)
+        return {"error": f"HTTP {e.status_code}", "status_code": e.status_code}
     except Exception as e:
         logger.exception("API call failed")
-        # Surface the actual upstream status so the UI can distinguish
-        # rate-limits from real errors and render sensibly.
-        from toybaru.exceptions import ApiError
-        if isinstance(e, ApiError):
-            return {"error": f"HTTP {e.status_code}", "status_code": e.status_code}
         return {"error": f"{type(e).__name__}: {str(e)[:120]}"}
 
 
@@ -357,6 +371,14 @@ async def api_login(request: Request, response: Response):
             "needs_otp": True,
             "otp_session": otp_session,
         })
+    except httpx.ConnectError as e:
+        # DNS / network failure reaching the auth server — NOT a credentials
+        # problem. Surface it honestly (common in containers with broken DNS).
+        logger.exception("Login failed: cannot reach auth server")
+        return JSONResponse(
+            {"error": f"Cannot reach the authentication server (network/DNS): {e}"},
+            status_code=503,
+        )
     except Exception as e:
         logger.exception("Login failed")
         return JSONResponse({"error": "Authentication failed"}, status_code=401)
@@ -368,7 +390,6 @@ async def api_login(request: Request, response: Response):
     _csrf_tokens[token] = csrf
 
     # Persisted meta never includes the password.
-    DATA_DIR.mkdir(parents=True, exist_ok=True)
     _write_meta_file({"username": username, "region": region})
 
     secure = _is_secure_request(request)
@@ -416,7 +437,6 @@ async def api_login_otp(request: Request, response: Response):
     csrf = secrets.token_hex(16)
     _csrf_tokens[token] = csrf
 
-    DATA_DIR.mkdir(parents=True, exist_ok=True)
     _write_meta_file({"username": pending["username"], "region": pending["region"]})
 
     secure = _is_secure_request(request)
@@ -585,7 +605,12 @@ async def api_all(vin: str, session: str | None = Cookie(None)):
         "location": location,
         "telemetry": telemetry,
         "consumption": get_consumption_estimate(),
-        "capabilities": {"trips": client.api.endpoints.get("trips") is not None},
+        "capabilities": {
+            "trips": client.api.endpoints.get("trips") is not None,
+            "charge_history": client.api.endpoints.get("charge_history") is not None,
+            "charge_statistics": client.api.endpoints.get("charge_statistics") is not None,
+            "vehicle_health": client.api.endpoints.get("vehicle_health") is not None,
+        },
         "brand": BRAND_LABELS.get(client.auth.region.brand, "toyota"),
         "vehicle": vehicle_info,
         "climate_settings": climate_settings,
@@ -662,6 +687,89 @@ async def api_telemetry(vin: str, session: str | None = Cookie(None)):
     vin = _validate_vin(vin)
     client = await _require_client(session)
     return await safe_call(client.get_telemetry(vin))
+
+
+@app.get("/api/vehicle-health/{vin}")
+async def api_vehicle_health(vin: str, session: str | None = Cookie(None)):
+    """Vehicle health report (NA): mileage, warnings, fluids."""
+    vin = _validate_vin(vin)
+    client = await _require_client(session)
+    return await safe_call(client.get_vehicle_health(vin))
+
+
+@app.get("/api/charge-history/{vin}")
+async def api_charge_history(
+    vin: str,
+    from_date: str | None = None,
+    to_date: str | None = None,
+    charging_type: str | None = None,
+    session: str | None = Cookie(None),
+):
+    """Charge session history (NA). Dates are YYYY-MM-DD; defaults to last 90 days."""
+    vin = _validate_vin(vin)
+    client = await _require_client(session)
+    today = date.today()
+    end = to_date or today.isoformat()
+    start = from_date or (today - timedelta(days=90)).isoformat()
+    return await safe_call(client.get_charge_history(vin, start, end, charging_type))
+
+
+@app.get("/api/charge-statistics/{vin}")
+async def api_charge_statistics(
+    vin: str,
+    month: str | None = None,
+    session: str | None = Cookie(None),
+):
+    """Charge statistics for a month (NA). `month` is MMYYYY; defaults to the
+    current month."""
+    vin = _validate_vin(vin)
+    client = await _require_client(session)
+    month = month or date.today().strftime("%m%Y")
+    return await safe_call(client.get_charge_statistics(vin, month))
+
+
+@app.get("/api/db/charges")
+async def api_db_charges(
+    vin: str | None = None,
+    limit: int = 200,
+    session: str | None = Cookie(None),
+):
+    """Charge sessions from the local DB (populated via /api/charges/sync)."""
+    await _require_client(session)
+    return get_charges_from_db(limit=min(limit, 1000), vin=vin)
+
+
+@app.get("/api/db/charges/count")
+async def api_db_charges_count(session: str | None = Cookie(None)):
+    await _require_client(session)
+    return {"count": get_charge_count()}
+
+
+@app.post("/api/charges/sync/{vin}")
+async def api_charges_sync(
+    vin: str,
+    request: Request,
+    from_date: str | None = None,
+    to_date: str | None = None,
+    session: str | None = Cookie(None),
+):
+    """Fetch charge history from the API for a date range and upsert into the DB.
+    Idempotent (keyed on vin+start_time) — safe to re-run. Dates are YYYY-MM-DD;
+    default is the last 12 months."""
+    vin = _validate_vin(vin)
+    _require_csrf(request, session)
+    client = await _require_client(session)
+    today = date.today()
+    end = date.fromisoformat(to_date) if to_date else today
+    start = date.fromisoformat(from_date) if from_date else today - timedelta(days=365)
+    try:
+        data = await client.get_charge_history(vin, start, end)
+    except Exception:
+        logger.exception("Charge sync fetch error")
+        return {"error": "Failed to sync charge history", "new": 0, "updated": 0}
+    sessions = data.get("sessions", []) if isinstance(data, dict) else []
+    new, updated = upsert_charges(sessions, vin=vin)
+    return {"new": new, "updated": updated, "db_total": get_charge_count()}
 
 
 @app.post("/api/refresh/{vin}")

@@ -68,6 +68,29 @@ class ToybaruClient:
         """Get telemetry (odometer, fuel/energy data)."""
         return await self.api.get_telemetry(vin)
 
+    async def get_vehicle_health(self, vin: str) -> dict[str, Any]:
+        """Get vehicle health report (mileage, warnings, fluids). NA."""
+        return await self.api.get_vehicle_health(vin)
+
+    async def get_charge_history(
+        self,
+        vin: str,
+        from_date: date,
+        to_date: date,
+        charging_type: str | None = None,
+    ) -> dict[str, Any]:
+        """Get charge session history (NA)."""
+        return await self.api.get_charge_history(vin, from_date, to_date, charging_type)
+
+    async def get_charge_statistics(
+        self,
+        vin: str,
+        month: str,
+        report_type: str = "monthly",
+    ) -> dict[str, Any]:
+        """Get charge statistics for a month (MMYYYY). NA."""
+        return await self.api.get_charge_statistics(vin, month, report_type)
+
     async def get_trips(
         self,
         vin: str,

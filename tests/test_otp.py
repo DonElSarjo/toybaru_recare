@@ -85,9 +85,9 @@ def _oauth_tokens():
 class TestAuthControllerOtp:
 
     def _make_controller(self) -> AuthController:
-        with patch("toybaru.auth.controller.TOKEN_FILE") as mock_file:
-            mock_file.exists.return_value = False
-            return AuthController(_na_region(), "user@test.com", "password123")
+        # conftest patches TOKEN_FILE to a fresh (nonexistent) tmp path, so no
+        # real tokens load and saves stay in the temp dir.
+        return AuthController(_na_region(), "user@test.com", "password123")
 
     @pytest.mark.asyncio
     async def test_otp_callback_raises_otp_required(self):
@@ -184,12 +184,10 @@ class TestAuthControllerOtp:
             ctx.__aexit__ = AsyncMock(return_value=False)
             mock_make.return_value = ctx
 
-            with patch("toybaru.auth.controller.TOKEN_FILE") as mock_tf:
-                mock_tf.exists.return_value = False
-                with patch.object(ctrl, '_get_jwks_client', return_value=mock_jwks):
-                    with patch("jwt.decode") as mock_decode:
-                        mock_decode.return_value = {"uuid": "user-uuid-abc", "aud": "testclient"}
-                        await ctrl.submit_otp("123456")
+            with patch.object(ctrl, '_get_jwks_client', return_value=mock_jwks):
+                with patch("jwt.decode") as mock_decode:
+                    mock_decode.return_value = {"uuid": "user-uuid-abc", "aud": "testclient"}
+                    await ctrl.submit_otp("123456")
 
         assert ctrl._pending_otp is None
         assert ctrl.is_authenticated

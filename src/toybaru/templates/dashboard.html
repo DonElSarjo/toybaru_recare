@@ -801,9 +801,23 @@ body.dense .bat-pct { font-size: 24px; }
 <div class="page active" id="page-vehicle">
   <div id="vehicleHeroCard"></div>
   <div id="remoteCard"></div>
+  <div class="card" id="healthCard" style="display:none"></div>
   <div class="card" id="lastTripCard"></div>
   <div class="card" id="efficiencyCard"></div>
   <div style="text-align:right"><button class="btn" onclick="loadOverview()" id="refreshOverviewBtn"></button></div>
+</div>
+
+<div class="page" id="page-charging">
+  <div id="chargeStatsCard"></div>
+  <div class="card">
+    <div class="section-title" id="chargeHistTitle"></div>
+    <div style="display:flex;gap:12px;align-items:center;margin-bottom:12px;flex-wrap:wrap">
+      <input type="date" id="chFrom" style="width:auto"> <span class="meta" id="chToLabel"></span> <input type="date" id="chTo" style="width:auto">
+      <button class="btn btn-primary" onclick="syncCharges()" id="chSyncBtn"></button>
+      <span class="meta" id="chMeta"></span>
+    </div>
+    <div id="chargeHistTable"></div>
+  </div>
 </div>
 
 <div class="page" id="page-trips">
@@ -900,6 +914,13 @@ async function loadI18n() {
 
 function t(path) {
   return path.split('.').reduce((o, k) => o?.[k], i) || path;
+}
+
+// Like t(), but returns an English fallback when the key is missing from the
+// active locale (used for newer NA-only strings not yet in every locale file).
+function tf(path, fallback) {
+  const v = t(path);
+  return v === path ? fallback : v;
 }
 
 function tip(label, descKey) {
@@ -1024,14 +1045,22 @@ function applyI18n() {
   const tabBar = document.getElementById('tabBar');
   tabBar.innerHTML = '';
   const tabList = [['nav.vehicle','vehicle']];
+  if (HAS_CHARGE) tabList.push(['nav.charging','charging','Charging']);
   if (HAS_TRIPS) {
     tabList.push(['nav.trips','trips'], ['nav.stats','stats'], ['nav.import','import']);
   }
-  for (const [key, id] of tabList) {
+  // Charging panel static labels
+  const _chTo = document.getElementById('chToLabel');
+  if (_chTo) _chTo.textContent = t('import.to').toLowerCase();
+  const _chSync = document.getElementById('chSyncBtn');
+  if (_chSync) _chSync.textContent = tf('charging.sync', 'Sync from car');
+  const _chTitle = document.getElementById('chargeHistTitle');
+  if (_chTitle) _chTitle.textContent = tf('charging.history_title', 'Charge History');
+  for (const [key, id, fb] of tabList) {
     const d = document.createElement('div');
     d.className = 'tab' + (id === 'vehicle' ? ' active' : '');
     d.dataset.tab = id;
-    d.textContent = t(key);
+    d.textContent = fb ? tf(key, fb) : t(key);
     d.onclick = () => switchTab(id);
     tabBar.appendChild(d);
   }
@@ -1047,6 +1076,8 @@ let _climateStateOrig = null;
 let _csrfToken = '';
 let UNIT = 'km';  // mirrors bat.evRange.unit
 let HAS_TRIPS = true;
+let HAS_CHARGE = false;   // charge history/statistics (NA)
+let HAS_HEALTH = false;   // vehicle health report (NA)
 
 function _postHeaders() {
   const h = {'Content-Type': 'application/json'};
@@ -1089,6 +1120,7 @@ function switchTab(id) {
   if (id === 'stats') loadStats();
   if (id === 'import') loadDbInfo();
   if (id === 'trips' && !document.querySelector('#tripsTable table')) loadTripsPage();
+  if (id === 'charging' && !document.querySelector('#chargeHistTable table')) loadCharging();
 }
 
 // --- Helpers ---
@@ -1333,13 +1365,16 @@ async function loadOverview() {
   if (allData.battery?.evRange?.unit) {
     UNIT = normUnit(allData.battery.evRange.unit);
   }
-  const prevHasTrips = HAS_TRIPS;
+  const prevHasTrips = HAS_TRIPS, prevHasCharge = HAS_CHARGE;
   if (allData.capabilities) {
-    HAS_TRIPS = allData.capabilities.trips !== false;
+    const cap = allData.capabilities;
+    HAS_TRIPS = cap.trips !== false;
+    HAS_CHARGE = !!(cap.charge_history || cap.charge_statistics);
+    HAS_HEALTH = !!cap.vehicle_health;
     // NA accounts (no trips) get US-formatted dates/times.
-    if (allData.capabilities.trips === false) LC = 'en-US';
+    if (cap.trips === false) LC = 'en-US';
   }
-  if (HAS_TRIPS !== prevHasTrips) applyI18n();
+  if (HAS_TRIPS !== prevHasTrips || HAS_CHARGE !== prevHasCharge) applyI18n();
   if (allData.brand) {
     applyBrand(allData.brand);
   }
@@ -1347,6 +1382,7 @@ async function loadOverview() {
   renderEfficiency(allData);
   renderRemote(allData.vehicle?.remote_capabilities, allData.climate_settings, allData.climate_status);
   renderLastTrip();
+  renderHealth();
   document.getElementById('lastUpdate').textContent = new Date().toLocaleTimeString(LC);
 }
 
@@ -2005,6 +2041,177 @@ async function renderLastTrip() {
 
   el.innerHTML=h;
   el.querySelector('[data-trip-id]')?.addEventListener('click', function() { showTrip(this.dataset.tripId); });
+}
+
+// --- Vehicle health (NA) ---
+function _sbox(v,l){return `<div class="stat-box" style="padding:0"><div class="stat-num" style="font-size:20px">${_escHtml(v)}</div><div class="stat-label">${_escHtml(l)}</div></div>`}
+// SoC values from the API may already include a "%"; normalize to exactly one.
+function _pct(v){v=String(v==null?'':v).trim();if(!v)return '—';return v.endsWith('%')?v:v+'%'}
+// Numeric parse tolerant of unit suffixes (e.g. "30.5 kWh", "45%").
+function _num(v){if(v==null)return null;const n=parseFloat(String(v).replace(/[^0-9.\-]/g,''));return isNaN(n)?null:n}
+// kWh rounded to 3 decimals to match the rest of the display.
+function _kwh(v){const n=_num(v);return n==null?'—':n.toFixed(3)}
+// Timestamps may be ISO strings or epoch (s or ms); return epoch ms or null.
+function _toMs(t){if(t==null)return null;if(typeof t==='number')return t<1e12?t*1000:t;const s=String(t).trim();if(/^\d+$/.test(s)){const n=Number(s);return n<1e12?n*1000:n}const d=Date.parse(s);return isNaN(d)?null:d}
+function _durMin(start,end){const a=_toMs(start),b=_toMs(end);if(a==null||b==null||b<a)return null;return Math.round((b-a)/60000)}
+function _fmtDur(min){if(min==null)return '—';if(min<60)return min+'m';const h=Math.floor(min/60),m=min%60;return m?`${h}h ${m}m`:`${h}h`}
+// Average charge rate (kW) over the whole session = kWh / hours.
+function _avgKw(kwh,min){const k=_num(kwh);if(k==null||!min)return '—';return (k/(min/60)).toFixed(1)}
+
+async function renderHealth() {
+  const el=document.getElementById('healthCard');
+  if(!HAS_HEALTH){el.style.display='none';return}
+  let d;
+  try{ d=await(await fetch(`/api/vehicle-health/${currentVin}`)).json(); }
+  catch(e){ el.style.display='none'; return; }
+  if(!d || d.error || d._unavailable){ el.style.display='none'; return; }
+  el.style.display='';
+  const boxes=[];
+  if(d.mileage!=null) boxes.push([d.mileage+(d.mileageUnit?(' '+d.mileageUnit):''), tf('health.mileage','Odometer')]);
+  if(d.fuelLevel!=null) boxes.push([d.fuelLevel+(d.fuelUnit?(' '+d.fuelUnit):''), tf('health.fuel','Fuel')]);
+  if(d.quantityOfEngOilDesc||d.quantityOfEngOilStatus!=null) boxes.push([d.quantityOfEngOilDesc||d.quantityOfEngOilStatus, tf('health.engine_oil','Engine Oil')]);
+  if(d.smartKeyBatDesc||d.smartKeyBatStatus!=null) boxes.push([d.smartKeyBatDesc||d.smartKeyBatStatus, tf('health.smart_key','Key Battery')]);
+  let h=`<div class="section-title">${tf('health.title','Vehicle Health')}</div>`;
+  if(boxes.length){ h+=`<div style="display:flex;gap:24px;flex-wrap:wrap">`; for(const [v,l] of boxes) h+=_sbox(v,l); h+=`</div>`; }
+  // `warning` shape varies; handle list / object / scalar defensively.
+  const warn=d.warning; let warnItems=[];
+  if(Array.isArray(warn)) warnItems=warn.filter(Boolean);
+  else if(warn && typeof warn==='object') warnItems=Object.values(warn).filter(Boolean);
+  else if(warn) warnItems=[warn];
+  if(warnItems.length) h+=`<div style="margin-top:12px;color:var(--red);font-size:13px">${icon('warning')} ${warnItems.length} ${tf('health.warnings','warnings')}</div>`;
+  else h+=`<div class="meta" style="margin-top:12px;font-size:13px">${icon('check')} ${tf('health.no_warnings','No active warnings')}</div>`;
+  el.innerHTML=h;
+}
+
+// --- Charging (NA): live summary + DB-backed history ---
+async function loadCharging() {
+  if(!currentVin)return;
+  // Prefill the SYNC date range (last 12 months) if empty. These drive what
+  // Sync fetches from the car — the table itself is served from the local DB.
+  const today=new Date().toISOString().slice(0,10);
+  const fromEl=document.getElementById('chFrom'), toEl=document.getElementById('chTo');
+  if(!toEl.value) toEl.value=today;
+  if(!fromEl.value) fromEl.value=new Date(Date.now()-365*864e5).toISOString().slice(0,10);
+
+  // Summary is a live "current" snapshot (like battery status), not persisted.
+  const statsEl=document.getElementById('chargeStatsCard');
+  statsEl.innerHTML=`<div class="card"><div class="section-title">${tf('charging.stats_title','Charging Summary')}</div><div class="meta">${t('app.loading')}</div></div>`;
+  let stats=null;
+  try{ stats=await(await fetch(`/api/charge-statistics/${currentVin}`)).json(); }catch(e){}
+  renderChargeStats(stats);
+
+  // History is read from the local DB (populated via Sync).
+  await _reloadChargeHistory();
+}
+
+async function _reloadChargeHistory() {
+  document.getElementById('chMeta').textContent=t('app.loading');
+  let hist=null;
+  try{ hist=await(await fetch(`/api/db/charges?vin=${currentVin}&limit=200`)).json(); }catch(e){}
+  renderChargeHistory(hist);
+  const sessions=Array.isArray(hist)?hist:((hist&&hist.sessions)||[]);
+  renderChargeChart(sessions);
+}
+
+// Fetch new sessions from the car into the local DB, then refresh the table.
+async function syncCharges() {
+  if(!currentVin)return;
+  const btn=document.getElementById('chSyncBtn'), meta=document.getElementById('chMeta');
+  const from=document.getElementById('chFrom').value, to=document.getElementById('chTo').value;
+  btn.disabled=true; const orig=btn.textContent; btn.textContent=t('trips.syncing'); btn.style.opacity='.6';
+  let r=null;
+  try{
+    const qs=[]; if(from)qs.push('from_date='+from); if(to)qs.push('to_date='+to);
+    r=await(await fetch(`/api/charges/sync/${currentVin}?${qs.join('&')}`,{method:'POST',headers:_postHeaders()})).json();
+  }catch(e){ r={error:e.message||String(e)}; }
+  btn.disabled=false; btn.textContent=orig; btn.style.opacity='1';
+  await _reloadChargeHistory();  // sets meta to the session count
+  if(r && r.error) meta.textContent=t('app.error')+': '+r.error;
+  else if(r) meta.textContent=`+${r.new} / ${r.updated} ${tf('charging.updated','updated')} · ${r.db_total} ${tf('charging.sessions_label','sessions')}`;
+}
+
+function renderChargeStats(s){
+  const el=document.getElementById('chargeStatsCard');
+  const ok = s && !s.error && !s._unavailable;
+  const wk=(ok&&s.current_week_report)||{}, last=(ok&&s.last_charge)||{};
+  let left=`<div class="section-title">${tf('charging.stats_title','Charging Summary')}</div>`;
+  const wkBoxes=[];
+  if(wk.charging_count!=null) wkBoxes.push([wk.charging_count, tf('charging.week_sessions','Sessions (this week)')]);
+  if(wk.total_charge_kwhr!=null) wkBoxes.push([_kwh(wk.total_charge_kwhr), 'kWh']);
+  if(wk.leaf_count!=null) wkBoxes.push([wk.leaf_count, tf('charging.leaves','Eco leaves')]);
+  if(wkBoxes.length){ left+=`<div style="display:flex;gap:24px;flex-wrap:wrap;margin-bottom:12px">`; for(const [v,l] of wkBoxes) left+=_sbox(v,l); left+=`</div>`; }
+  if(Object.keys(last).length){
+    left+=`<div class="meta" style="margin-bottom:6px">${tf('charging.last_charge','Last charge')}</div>`;
+    left+=`<div style="display:flex;gap:24px;flex-wrap:wrap">`;
+    if(last.total_charge_kwhr!=null) left+=_sbox(_kwh(last.total_charge_kwhr),'kWh');
+    if(last.soc_before_charging!=null&&last.soc_after_charging!=null) left+=_sbox(`${_pct(last.soc_before_charging)}→${_pct(last.soc_after_charging)}`, tf('charging.soc','SoC'));
+    const cost=last.cdr_details&&last.cdr_details.total_amount;
+    if(cost!=null&&cost!=='') left+=_sbox('$'+cost, tf('charging.cost','Cost'));
+    left+=`</div>`;
+    if(last.address) left+=`<div class="meta" style="margin-top:8px">${_escHtml(last.address)}</div>`;
+  }
+  if(!wkBoxes.length && !Object.keys(last).length) left+=`<div class="meta">${tf('charging.summary_unavailable','Summary unavailable')}</div>`;
+  // Two columns: stats on the left, a kWh-per-session chart fills the right
+  // (chart is populated by renderChargeChart once DB sessions load).
+  // align-items:stretch makes both columns equal height; the chart column
+  // centers its content vertically so it fills the right-hand whitespace.
+  el.innerHTML = `<div class="card"><div style="display:flex;gap:24px;flex-wrap:wrap;align-items:stretch">`+
+    `<div style="flex:1;min-width:240px">${left}</div>`+
+    `<div id="chargeChart" style="flex:1.4;min-width:260px;display:flex;flex-direction:column;justify-content:center"></div>`+
+    `</div></div>`;
+}
+
+// Simple bar chart (reuses the EU stats .bar-chart style): kWh per recent session.
+function renderChargeChart(sessions){
+  const el=document.getElementById('chargeChart'); if(!el) return;
+  // DB returns newest-first; take the last 12 and order oldest -> newest.
+  const data=(sessions||[]).slice(0,12).reverse()
+    .map(s=>({kwh:_num(s.total_charge_kwhr), t:s.start_time}))
+    .filter(d=>d.kwh!=null && d.kwh>0);
+  if(data.length<2){ el.innerHTML=''; return; }
+  const max=Math.max(...data.map(d=>d.kwh));
+  let h=`<div class="section-title">${tf('charging.kwh_per_session','kWh per session')}</div><div class="bar-chart" style="height:150px">`;
+  for(const d of data){
+    const ht=Math.max(4,Math.round(d.kwh/max*130));
+    const ms=_toMs(d.t); const lbl=ms!=null?new Date(ms).toLocaleString(LC,{month:'numeric',day:'numeric'}):'';
+    h+=`<div class="bar-col" title="${_escHtml(lbl)}: ${d.kwh.toFixed(1)} kWh"><div class="bar" style="height:${ht}px"></div><div class="bar-label">${_escHtml(lbl)}</div></div>`;
+  }
+  h+=`</div>`;
+  el.innerHTML=h;
+}
+
+function renderChargeHistory(d){
+  const el=document.getElementById('chargeHistTable'), meta=document.getElementById('chMeta');
+  if(d && d.error){ el.innerHTML=`<div class="meta" style="padding:24px">${t('app.error')}: ${_escHtml(d.error)}</div>`; meta.textContent=''; return; }
+  // DB endpoint returns a list; live endpoint returned {sessions:[...]}.
+  const sessions=Array.isArray(d)?d:((d&&d.sessions)||[]);
+  if(!sessions.length){ el.innerHTML=`<div class="meta" style="padding:24px">${tf('charging.no_sessions','No charge sessions yet — press Sync to fetch from the car.')}</div>`; meta.textContent=''; return; }
+  meta.textContent=`${sessions.length} ${tf('charging.sessions_label','sessions')}`;
+  let h=`<table><thead><tr>`+
+    `<th>${tf('charging.date','Date')}</th>`+
+    `<th>${tf('charging.location','Location')}</th>`+
+    `<th>${tf('charging.type','Type')}</th>`+
+    `<th style="text-align:right">kWh</th>`+
+    `<th style="text-align:right">${tf('charging.soc','SoC')}</th>`+
+    `<th style="text-align:right">${tf('charging.duration','Duration')}</th>`+
+    `<th style="text-align:right">${tf('charging.rate','Avg Charge Rate kW')}</th>`+
+    `<th style="text-align:right">${tf('charging.co2','CO₂ lbs/MWh')}</th>`+
+    `</tr></thead><tbody>`;
+  for(const s of sessions){
+    const when=fmtDate(s.start_time||s.end_time);
+    const loc=_escHtml(s.address||'—');
+    const type=_escHtml(s.charge_location_type||'—');
+    const kwh=_kwh(s.total_charge_kwhr);
+    const soc=(s.soc_before_charging!=null&&s.soc_after_charging!=null)?`${_pct(s.soc_before_charging)}→${_pct(s.soc_after_charging)}`:'—';
+    const min=_durMin(s.start_time,s.end_time);
+    const dur=_fmtDur(min);
+    const rate=_avgKw(s.total_charge_kwhr,min);
+    const wt=s.watttime_details||{};
+    const co2=(wt.co2_value!=null&&wt.co2_value!=='')?_escHtml(String(wt.co2_value)):'—';
+    h+=`<tr><td>${when}</td><td>${loc}</td><td>${type}</td><td style="text-align:right">${kwh}</td><td style="text-align:right">${soc}</td><td style="text-align:right">${dur}</td><td style="text-align:right">${rate}</td><td style="text-align:right">${co2}</td></tr>`;
+  }
+  h+=`</tbody></table>`;
+  el.innerHTML=h;
 }
 
 // --- Trips ---
