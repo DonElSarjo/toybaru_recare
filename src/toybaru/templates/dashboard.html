@@ -2613,7 +2613,7 @@ class RouteMap {
     }
   }
 
-  _loadTile(z,tx,ty){const k=`${z}/${tx}/${ty}`;if(this.tileCache[k])return this.tileCache[k];const img=new Image();img.crossOrigin='anonymous';img.src=`https://tile.openstreetmap.org/${z}/${tx}/${ty}.png`;img.onload=()=>this.render();this.tileCache[k]=img;return img}
+  _loadTile(z,tx,ty){const k=`${z}/${tx}/${ty}`;if(this.tileCache[k])return this.tileCache[k];const img=new Image();img.crossOrigin='anonymous';img.referrerPolicy='origin';img.src=`https://tile.openstreetmap.org/${z}/${tx}/${ty}.png`;img.onload=()=>this.render();this.tileCache[k]=img;return img}
   render(){
     const ctx=this.ctx,dpr=this.dpr;ctx.fillStyle='#161b22';ctx.fillRect(0,0,this.canvas.width,this.canvas.height);
     const tz=Math.round(this.zoom),tN=Math.pow(2,tz),rN=Math.pow(2,this.zoom),sc=rN/tN,ts2=256*sc;
