@@ -207,7 +207,7 @@ class AuthController:
 
             resp = await client.post(auth_url, json=data, headers=headers)
             if resp.status_code != 200:
-                raise AuthenticationError(f"Authentication failed (HTTP {resp.status_code})")
+                raise AuthenticationError(f"Authentication failed (HTTP {resp.status_code}): {resp.text[:500]}")
 
             data = resp.json()
             if "tokenId" in data:
@@ -245,7 +245,7 @@ class AuthController:
             # Continue callback loop (submit OTP)
             resp = await client.post(auth_url, json=data, headers=headers)
             if resp.status_code != 200:
-                raise AuthenticationError(f"Authentication failed (HTTP {resp.status_code})")
+                raise AuthenticationError(f"Authentication failed (HTTP {resp.status_code}): {resp.text[:500]}")
 
             result = resp.json()
             if "tokenId" in result:
@@ -296,7 +296,7 @@ class AuthController:
 
         resp = await client.get(authorize_url, headers=headers)
         if resp.status_code != 302:
-            raise AuthenticationError(f"Authorization failed (HTTP {resp.status_code})")
+            raise AuthenticationError(f"Authorization failed (HTTP {resp.status_code}): {resp.text[:500]}")
 
         location = resp.headers.get("location", "")
         parsed = parse_qs(urlparse(location).query)
@@ -329,7 +329,7 @@ class AuthController:
 
         resp = await client.post(token_url, headers=token_headers, data=token_data)
         if resp.status_code != 200:
-            raise AuthenticationError(f"Token exchange failed (HTTP {resp.status_code})")
+            raise AuthenticationError(f"Token exchange failed (HTTP {resp.status_code}): {resp.text[:500]}")
 
         return resp.json()
 
@@ -356,7 +356,7 @@ class AuthController:
                 },
             )
             if resp.status_code != 200:
-                raise AuthenticationError(f"Token refresh failed (HTTP {resp.status_code})")
+                raise AuthenticationError(f"Token refresh failed (HTTP {resp.status_code}): {resp.text[:500]}")
 
             self._update_tokens(resp.json())
 
