@@ -926,7 +926,18 @@ async def api_climate_control(
     if cmd not in ("start", "stop"):
         raise HTTPException(400, "invalid climate command")
     client = await _require_client(session)
-    return await safe_call(client.api.send_climate_control(vin, cmd, duration))
+    try:
+        request_data = await request.json()
+    except Exception:
+        request_data = {}
+    if not isinstance(request_data, dict):
+        raise HTTPException(400, "expected JSON object")
+    settings = request_data.get("settings")
+    if settings is not None and not isinstance(settings, dict):
+        raise HTTPException(400, "settings must be an object")
+    return await safe_call(
+        client.api.send_climate_control(vin, cmd, duration, settings=settings)
+    )
 
 
 @app.post("/api/climate-refresh/{vin}")

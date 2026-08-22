@@ -12,9 +12,8 @@ DATA_DIR = Path(os.environ.get("TOYBARU_DATA_DIR", Path.home() / ".config" / "to
 class RegionConfig:
     """Platform profile. All per-(brand × region) differences live here.
 
-    The `endpoints`, `endpoint_headers`, `request_headers`, `vin_headers`,
-    `response_envelope`, and `auth_headers` fields are read by Api/AuthController
-    at construction time — downstream code never branches on brand or region.
+    Endpoint versions, safe read fallbacks, and request dialects are owned by
+    the profile so downstream code never branches on brand or region.
     """
     name: str
     auth_realm: str
@@ -27,7 +26,9 @@ class RegionConfig:
     region: str             # "EU" | "NA" | "US"
     auth_service: str = ""
     endpoints: dict = field(default_factory=dict)           # feature -> URL or None
+    endpoint_fallbacks: dict = field(default_factory=dict)  # feature -> ordered legacy read URLs
     endpoint_headers: dict = field(default_factory=dict)    # feature -> extra headers
+    request_styles: dict = field(default_factory=dict)      # feature -> provider wire dialect
     request_headers: dict = field(default_factory=dict)     # applied to every API request
     vin_headers: tuple = ("VIN",)                           # keys under which VIN is set
     response_envelope: str = ""                             # e.g. "payload" for NA unwrap
@@ -44,7 +45,7 @@ USER_AGENT = "okhttp/4.10.0"
 
 # --- Endpoint libraries. Feature keys are stable; platform builders pick per feature. ---
 
-_ENDPOINTS_EU = {
+_ENDPOINTS_EU_LEGACY = {
     "vehicles": "/v2/vehicle/guid",
     "vehicle_status": "/v1/global/remote/status",
     "engine_status": "/v1/global/remote/engine-status",
@@ -63,6 +64,25 @@ _ENDPOINTS_EU = {
     "climate_control": "/v1/global/remote/climate-control",
     "refresh_climate_status": "/v1/global/remote/refresh-climate-status",
     "account": "/v4/account",
+}
+
+# Toyota's European OneApp backend migrated these routes in July 2026. Keep the
+# legacy library separate because Subaru EU has not been validated against the
+# migrated Toyota routes, and no North American profile should inherit them.
+_ENDPOINTS_TOYOTA_EU_2026 = {
+    **_ENDPOINTS_EU_LEGACY,
+    "vehicle_status": "/v1/vehicle/status",
+    "refresh_status": "/v1/remote/status",
+    "climate_settings": "/v1/vehicle/climate-settings",
+    "climate_status": "/v1/vehicle/climate-status",
+    "climate_control": "/v2/remote/climate-control",
+    "refresh_climate_status": "/v1/remote/refresh-climate-status",
+}
+
+_TOYOTA_EU_READ_FALLBACKS = {
+    "vehicle_status": ("/v1/global/remote/status",),
+    "climate_settings": ("/v1/global/remote/climate-settings",),
+    "climate_status": ("/v1/global/remote/climate-status",),
 }
 
 _ENDPOINTS_NA = {
@@ -129,8 +149,14 @@ def _toyota_eu() -> RegionConfig:
         brand="T",
         region="EU",
         auth_service="oneapp",
-        endpoints=dict(_ENDPOINTS_EU),
+        endpoints=dict(_ENDPOINTS_TOYOTA_EU_2026),
+        endpoint_fallbacks=dict(_TOYOTA_EU_READ_FALLBACKS),
         endpoint_headers={},
+        request_styles={
+            "refresh_status": "header-only",
+            "climate_control": "v2",
+            "climate_settings_write": "unsupported",
+        },
         request_headers={"x-region": "EU"},
         vin_headers=("VIN",),
         response_envelope="",
@@ -166,8 +192,9 @@ def _toyota_na() -> RegionConfig:
 
 
 def _lexus_eu() -> RegionConfig:
-    # Lexus EU shares Toyota EU OAuth realm + credentials (pytoyoda controller.py:92-99).
-    # Only additional brand-identification headers differ.
+    # Lexus EU shares Toyota EU OAuth credentials, but the July 2026 endpoint
+    # migration is only evidenced for MyToyota. Retain the legacy routes until
+    # MyLexus is independently confirmed rather than inheriting Toyota's dialect.
     base = _toyota_eu()
     return RegionConfig(
         name="Lexus EU",
@@ -180,8 +207,10 @@ def _lexus_eu() -> RegionConfig:
         brand="L",
         region="EU",
         auth_service=base.auth_service,
-        endpoints=dict(base.endpoints),
+        endpoints=dict(_ENDPOINTS_EU_LEGACY),
+        endpoint_fallbacks={},
         endpoint_headers=dict(base.endpoint_headers),
+        request_styles={},
         request_headers={**base.request_headers, "x-appbrand": "L", "brand": "L"},
         vin_headers=base.vin_headers,
         response_envelope=base.response_envelope,
@@ -233,8 +262,10 @@ def _subaru_eu() -> RegionConfig:
         brand="S",
         region="EU",
         auth_service="oneapp",
-        endpoints=dict(_ENDPOINTS_EU),
+        endpoints=dict(_ENDPOINTS_EU_LEGACY),
+        endpoint_fallbacks={},
         endpoint_headers={},
+        request_styles={},
         request_headers={"x-region": "EU", "brand": "S", "x-appbrand": "S"},
         vin_headers=("VIN",),
         response_envelope="",

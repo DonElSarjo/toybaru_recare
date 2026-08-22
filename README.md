@@ -223,6 +223,11 @@ cp regions.example.json ~/.config/toybaru/regions.json
 
 Edit the file to change values. You only need to include the fields you want to override -- missing fields fall back to the built-in defaults. See `regions.example.json` for the full structure.
 
+Endpoint versions are profile-specific. Toyota EU uses the migrated 2026 status
+and climate routes with safe read-only legacy fallbacks; Lexus, Subaru, and North
+American profiles keep their independently validated routes. Automatic fallback
+is never performed for authentication failures, refresh requests, or commands.
+
 ### Adding a language
 
 Create a new JSON file in `src/toybaru/locales/`, for example `fr.json`:

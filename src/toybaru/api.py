@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import hashlib
 import hmac
+import logging
 from datetime import date, datetime, timezone
 from typing import Any
 from uuid import uuid4
@@ -20,6 +21,8 @@ from toybaru.auth.controller import AuthController
 from toybaru.http import make_client
 from toybaru.const import CLIENT_VERSION, USER_AGENT
 from toybaru.exceptions import ApiError
+
+logger = logging.getLogger(__name__)
 
 
 class Api:
@@ -33,7 +36,12 @@ class Api:
         self.api_base_url = region.api_base_url
         self.api_key = region.api_key
         self.endpoints = dict(region.endpoints)
+        self.endpoint_fallbacks = {
+            feature: (paths,) if isinstance(paths, str) else tuple(paths)
+            for feature, paths in region.endpoint_fallbacks.items()
+        }
         self.endpoint_headers = dict(region.endpoint_headers)
+        self.request_styles = dict(region.request_styles)
         self._base_extra_headers = dict(region.request_headers)
         self._drop_headers = tuple(region.drop_headers)
         self.vin_header_keys = tuple(region.vin_headers)
@@ -172,12 +180,31 @@ class Api:
             return {"_unavailable": feature}
 
         extra_headers = self.endpoint_headers.get(feature)
-        url = f"{endpoint}{query_suffix}" if query_suffix else endpoint
-        data = await self.request(
-            method, url,
-            vin=vin, body=body, params=params,
-            extra_headers=extra_headers,
-        )
+        candidates = (endpoint, *self.endpoint_fallbacks.get(feature, ()))
+        data: dict[str, Any]
+        for index, candidate in enumerate(candidates):
+            url = f"{candidate}{query_suffix}" if query_suffix else candidate
+            try:
+                data = await self.request(
+                    method, url,
+                    vin=vin, body=body, params=params,
+                    extra_headers=extra_headers,
+                )
+                break
+            except ApiError as exc:
+                has_fallback = index + 1 < len(candidates)
+                safe_compatibility_failure = (
+                    method.upper() == "GET"
+                    and exc.status_code in {404, 405, 410}
+                )
+                if not has_fallback or not safe_compatibility_failure:
+                    raise
+                logger.info(
+                    "Endpoint %s unavailable for %s (HTTP %s); trying configured read fallback",
+                    candidate,
+                    feature,
+                    exc.status_code,
+                )
         post = self._post_processors.get(feature)
         return post(data) if post is not None else data
 
@@ -254,11 +281,14 @@ class Api:
         return await self._call("service_history", vin=vin)
 
     async def refresh_vehicle_status(self, vin: str) -> dict[str, Any]:
+        body = None
+        if self.request_styles.get("refresh_status") != "header-only":
+            body = {"guid": self.auth.uuid, "vin": vin}
         return await self._call(
             "refresh_status",
             method="POST",
             vin=vin,
-            body={"guid": self.auth.uuid, "vin": vin},
+            body=body,
         )
 
     async def send_command(self, vin: str, command: str, extra: dict | None = None) -> dict[str, Any]:
@@ -293,6 +323,11 @@ class Api:
     async def update_climate_settings(self, vin: str, settings: dict[str, Any]) -> dict[str, Any]:
         """Persist new target temperature / seat heat / defog preferences back
         to the vehicle's climate config. Same endpoint as GET, PUT method."""
+        if self.request_styles.get("climate_settings_write") == "unsupported":
+            return {
+                "_unavailable": "climate_settings_write",
+                "reason": "This provider applies climate settings with the start command",
+            }
         return await self._call("climate_settings", method="PUT", vin=vin, body=settings)
 
     async def get_climate_status(self, vin: str) -> dict[str, Any]:
@@ -301,12 +336,38 @@ class Api:
     async def refresh_climate_status(self, vin: str) -> dict[str, Any]:
         return await self._call("refresh_climate_status", method="POST", vin=vin)
 
-    async def send_climate_control(self, vin: str, command: str, engine_start_time: int = 10) -> dict[str, Any]:
+    async def send_climate_control(
+        self,
+        vin: str,
+        command: str,
+        engine_start_time: int = 10,
+        settings: dict[str, Any] | None = None,
+    ) -> dict[str, Any]:
         """Send a climate-control command. Callers pass friendly `start`/`stop`;
         the Subaru/Toyota gateway expects `engine-start` / `engine-stop` on the
         wire (response code ONE-GLOBAL-RS-10003 confirms those are the only
         allowed values). `engine_start_time` minutes only applies to start.
         """
+        if self.request_styles.get("climate_control") == "v2":
+            body: dict[str, Any] = {"command": command}
+            if command == "start":
+                if engine_start_time:
+                    body["duration"] = engine_start_time
+                settings = settings or {}
+                temperature = settings.get("temperature")
+                if isinstance(temperature, dict):
+                    body["temperature"] = temperature
+                elif temperature is not None:
+                    body["temperature"] = {
+                        "value": temperature,
+                        "unit": settings.get("temperatureUnit", "C"),
+                    }
+                for key in ("heatingOptions", "seatOptions"):
+                    if isinstance(settings.get(key), dict):
+                        body[key] = settings[key]
+                body["saveSettings"] = False
+            return await self._call("climate_control", method="POST", vin=vin, body=body)
+
         wire_cmd = {"start": "engine-start", "stop": "engine-stop"}.get(command, command)
         body: dict[str, Any] = {"command": wire_cmd}
         if wire_cmd == "engine-start" and engine_start_time:

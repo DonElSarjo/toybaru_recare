@@ -1862,9 +1862,10 @@ function renderRemote(remoteCaps, climateSettings, climateStatus, remoteCommands
     _climateState = cs ? JSON.parse(JSON.stringify(cs)) : null;
     _climateStateOrig = cs ? JSON.parse(JSON.stringify(cs)) : null;
 
-    const running = !!(cst && cst.status);
-    const unit = cs?.temperatureUnit || 'F';
-    const targetTemp = cs?.temperature ?? cst?.targetTemperature?.value;
+    const climateState = String(cst?.status ?? '').toLowerCase();
+    const running = cst?.status === true || ['running','starting','started'].includes(climateState);
+    const unit = cs?.temperatureUnit || cs?.temperature?.unit || cst?.targetTemperature?.unit || 'F';
+    const targetTemp = cs?.temperature?.value ?? cs?.temperature ?? cst?.targetTemperature?.value;
     const currentTemp = cst?.currentTemperature?.value;
     const duration = cst?.duration;
     const startedAt = cst?.startedAt;
@@ -2033,7 +2034,10 @@ async function sendClimate(action) {
     }
     if (!confirm(t('remote.confirm'))) return;
     show(t('app.loading'));
-    const r = await fetch(`/api/climate/${currentVin}/${action}`, { method: 'POST', headers: _postHeaders() });
+    const body = action === 'start' && _climateState ? {settings: _climateState} : {};
+    const r = await fetch(`/api/climate/${currentVin}/${action}`, {
+      method: 'POST', headers: _postHeaders(), body: JSON.stringify(body),
+    });
     const j = await r.json().catch(() => ({}));
     if (!r.ok || j.error) {
       show(_escHtml(j.error || `HTTP ${r.status}`));
