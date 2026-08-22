@@ -267,6 +267,23 @@ class Api:
             body.update(extra)
         return await self._call("command", method="POST", vin=vin, body=body)
 
+    async def send_electric_command(
+        self,
+        vin: str,
+        command: str,
+        reservation: dict[str, Any] | None = None,
+    ) -> dict[str, Any]:
+        """Send an electric command using the documented OneApp envelope.
+
+        Provider authorization belongs to the web/service layer; this method is
+        deliberately a thin transport so region profiles retain endpoint and
+        header ownership.
+        """
+        body: dict[str, Any] = {"command": command}
+        if reservation is not None:
+            body["reservationCharge"] = reservation
+        return await self._call("electric_command", method="POST", vin=vin, body=body)
+
     async def get_account(self) -> dict[str, Any]:
         return await self._call("account")
 

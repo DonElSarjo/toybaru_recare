@@ -5,6 +5,8 @@ exactly the header recipe + URLs we proved work live (na_discovery/FINDINGS.md,
 docs/api-inventory.md), and that the EU recipe is unchanged.
 """
 
+from unittest.mock import AsyncMock
+
 from toybaru.api import Api
 from toybaru.const import REGIONS
 
@@ -134,6 +136,28 @@ def test_pp_na_electric_preserves_read_only_charge_management_fields():
 def test_pp_na_electric_ignores_remaining_time_sentinel():
     result = Api._pp_normalize_na_electric({"chargeInfo": {"remainingChargeTime": 65535}})
     assert "remainingChargeTime" not in result
+
+
+async def test_electric_command_transport_uses_profile_endpoint_and_envelope():
+    api = _api("subaru-na")
+    api._call = AsyncMock(return_value={"returnCode": "000000"})
+    reservation = {
+        "chargeType": "startOnly",
+        "day": "MONDAY",
+        "startTime": {"hour": 23, "minute": 0},
+    }
+
+    result = await api.send_electric_command(
+        "JVIN0000000000000", "SET_CHARGING_TIME", reservation
+    )
+
+    assert result == {"returnCode": "000000"}
+    api._call.assert_awaited_once_with(
+        "electric_command",
+        method="POST",
+        vin="JVIN0000000000000",
+        body={"command": "SET_CHARGING_TIME", "reservationCharge": reservation},
+    )
 
 
 # --- web routes registered + auth-guarded ---

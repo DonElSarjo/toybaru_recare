@@ -21,8 +21,9 @@ from fastapi.responses import HTMLResponse, JSONResponse, StreamingResponse
 from starlette.middleware.base import BaseHTTPMiddleware
 
 from toybaru.client import ToybaruClient
+from toybaru.command_audit import get_commands as get_command_audit, log_command
 from toybaru.const import DATA_DIR, REGIONS, BRANDS, BRAND_LABELS
-from toybaru.exceptions import OtpRequiredError
+from toybaru.exceptions import ApiError, OtpRequiredError
 from toybaru.soc_tracker import log_snapshot, get_consumption_estimate, get_snapshot_history
 from toybaru.trip_store import (
     upsert_trips, get_trip_count, get_trips_from_db,
@@ -87,6 +88,7 @@ class _RateLimiter:
 _login_limiter = _RateLimiter(max_attempts=5, window_seconds=900)
 _otp_limiter = _RateLimiter(max_attempts=5, window_seconds=300)
 _command_limiter = _RateLimiter(max_attempts=20, window_seconds=60)
+_electric_command_limiter = _RateLimiter(max_attempts=3, window_seconds=300)
 
 
 # --- Session store: token -> (ToybaruClient, created_at) (Fix 9) ---
@@ -132,7 +134,7 @@ def _vehicle_display_label(vehicle: Any, provider_brand: str) -> str:
 
 
 def _charge_management_view(client: ToybaruClient, battery: Any) -> dict[str, Any]:
-    """Build the read-only charge-management view exposed to the dashboard.
+    """Build the safety-gated charge-management view exposed to the dashboard.
 
     Subaru NA schedule payloads remain experimental until a sanitized fixture
     confirms their schema. Battery/remaining-time data stays available, while
@@ -143,6 +145,10 @@ def _charge_management_view(client: ToybaruClient, battery: Any) -> dict[str, An
     region = client.auth.region
     experimental = region.brand == "S" and region.region == "NA"
     enabled = not experimental or _env_enabled("TOYBARU_EXPERIMENTAL_CHARGE_SCHEDULES")
+    commands_enabled = (
+        client.api.endpoints.get("electric_command") is not None
+        and _env_enabled("TOYBARU_EXPERIMENTAL_CHARGE_COMMANDS")
+    )
     schedules = data.get("chargingSchedules") if enabled else None
     if schedules is not None and not isinstance(schedules, list):
         schedules = [schedules]
@@ -155,7 +161,68 @@ def _charge_management_view(client: ToybaruClient, battery: Any) -> dict[str, An
         "schedules": schedules or [],
         "next_event": data.get("nextChargingEvent") if enabled else None,
         "remaining_charge_time": data.get("remainingChargeTime"),
+        "commands_enabled": commands_enabled,
+        "commands_experimental": experimental,
+        "commands_reason": (
+            None if commands_enabled
+            else "Electric commands are disabled by the operator safety gate"
+        ),
     }
+
+
+_CHARGE_DAYS = {
+    "MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY", "SUNDAY"
+}
+_CHARGE_TIME_RE = re.compile(r"^(?:[01]\d|2[0-3]):[0-5]\d$")
+
+
+def _charge_time(value: Any, field: str) -> dict[str, int]:
+    text = str(value or "")
+    if not _CHARGE_TIME_RE.fullmatch(text):
+        raise HTTPException(400, f"{field} must use 24-hour HH:MM format")
+    hour, minute = text.split(":", 1)
+    return {"hour": int(hour), "minute": int(minute)}
+
+
+def _build_electric_command(
+    action: str, request_data: dict[str, Any]
+) -> tuple[str, dict[str, Any] | None]:
+    """Validate a friendly Phase 3 action and build the OneApp wire payload."""
+    if action == "charge-now":
+        return "CHARGE_NOW", None
+    if action != "set-charging-time":
+        raise HTTPException(400, "Unsupported electric command")
+
+    day = str(request_data.get("day", "")).upper()
+    if day not in _CHARGE_DAYS:
+        raise HTTPException(400, "day must be an uppercase weekday name")
+    charge_type = request_data.get("charge_type", "startOnly")
+    if charge_type not in {"startOnly", "startEnd"}:
+        raise HTTPException(400, "charge_type must be startOnly or startEnd")
+    reservation: dict[str, Any] = {
+        "chargeType": charge_type,
+        "day": day,
+        "startTime": _charge_time(request_data.get("start_time"), "start_time"),
+    }
+    end_time = request_data.get("end_time")
+    if charge_type == "startEnd":
+        reservation["endTime"] = _charge_time(end_time, "end_time")
+    elif end_time:
+        raise HTTPException(400, "end_time requires charge_type=startEnd")
+    return "SET_CHARGING_TIME", reservation
+
+
+def _electric_ack(data: Any) -> tuple[str | None, str | None]:
+    """Extract only the asynchronous request id and return code."""
+    if not isinstance(data, dict):
+        return None, None
+    payload = data.get("payload") if isinstance(data.get("payload"), dict) else data
+    request_id = payload.get("appRequestNo") or payload.get("requestId")
+    return_code = payload.get("returnCode") or payload.get("responseCode")
+    return (
+        str(request_id) if request_id is not None else None,
+        str(return_code) if return_code is not None else None,
+    )
 
 
 # Ordered capability aliases for each dashboard command. Remote-service flags
@@ -992,6 +1059,143 @@ async def api_refresh(vin: str, request: Request, session: str | None = Cookie(N
     status_result = await safe_call(client.refresh_status(vin))
     ev_result = await safe_call(client.refresh_electric_status(vin))
     return {"status_refresh": status_result, "ev_refresh": ev_result}
+
+
+@app.post("/api/electric-command/{vin}/{action}")
+async def api_electric_command(
+    vin: str,
+    action: str,
+    request: Request,
+    session: str | None = Cookie(None),
+):
+    """Send an opt-in electric command and record a local audit entry.
+
+    The response is only an asynchronous gateway acknowledgement; it never
+    claims the vehicle has completed the requested action.
+    """
+    vin = _validate_vin(vin)
+    _require_csrf(request, session)
+    client = await _require_client(session)
+    try:
+        request_data = await request.json()
+    except Exception:
+        request_data = {}
+    if not isinstance(request_data, dict):
+        raise HTTPException(400, "expected JSON object")
+    command, reservation = _build_electric_command(action, request_data)
+    audit_request = {"reservationCharge": reservation} if reservation else None
+
+    if request_data.get("confirmed") is not True:
+        audit_id = log_command(
+            vin=vin,
+            command=command,
+            request=audit_request,
+            outcome="blocked",
+            response_summary="Explicit confirmation missing",
+        )
+        return JSONResponse(
+            {
+                "accepted": False,
+                "error": "Explicit command confirmation is required",
+                "audit_id": audit_id,
+            },
+            status_code=400,
+        )
+
+    enabled = (
+        client.api.endpoints.get("electric_command") is not None
+        and _env_enabled("TOYBARU_EXPERIMENTAL_CHARGE_COMMANDS")
+    )
+    if not enabled:
+        audit_id = log_command(
+            vin=vin,
+            command=command,
+            request=audit_request,
+            outcome="blocked",
+            response_summary="Operator safety gate disabled",
+        )
+        return JSONResponse(
+            {
+                "accepted": False,
+                "error": "Electric commands are disabled by the operator safety gate",
+                "audit_id": audit_id,
+            },
+            status_code=403,
+        )
+
+    rate_key = f"{session}:{vin}"
+    if not _electric_command_limiter.check(rate_key):
+        audit_id = log_command(
+            vin=vin,
+            command=command,
+            request=audit_request,
+            outcome="blocked",
+            response_summary="Per-vehicle command rate limit",
+        )
+        return JSONResponse(
+            {"accepted": False, "error": "Electric command rate limit exceeded", "audit_id": audit_id},
+            status_code=429,
+        )
+
+    try:
+        result = await client.send_electric_command(vin, command, reservation)
+        request_id, return_code = _electric_ack(result)
+        accepted = return_code == "000000"
+        outcome = "accepted" if accepted else "rejected"
+        audit_id = log_command(
+            vin=vin,
+            command=command,
+            request=audit_request,
+            outcome=outcome,
+            response_code=return_code,
+            response_summary="Gateway acknowledged request" if accepted else "Gateway rejected request",
+        )
+        body = {
+            "accepted": accepted,
+            "asynchronous": True,
+            "request_id": request_id,
+            "return_code": return_code,
+            "audit_id": audit_id,
+        }
+        return JSONResponse(body, status_code=202 if accepted else 409)
+    except ApiError as exc:
+        audit_id = log_command(
+            vin=vin,
+            command=command,
+            request=audit_request,
+            outcome="rejected",
+            response_code=str(exc.status_code),
+            response_summary="Provider HTTP rejection",
+        )
+        return JSONResponse(
+            {"accepted": False, "error": f"Provider rejected command (HTTP {exc.status_code})", "audit_id": audit_id},
+            status_code=502,
+        )
+    except Exception:
+        logger.exception("Electric command failed")
+        audit_id = log_command(
+            vin=vin,
+            command=command,
+            request=audit_request,
+            outcome="error",
+            response_summary="Unexpected command transport error",
+        )
+        return JSONResponse(
+            {"accepted": False, "error": "Electric command failed", "audit_id": audit_id},
+            status_code=500,
+        )
+
+
+@app.get("/api/command-audit")
+async def api_command_audit(
+    vin: str | None = None,
+    limit: int = 50,
+    session: str | None = Cookie(None),
+):
+    """Return the local command audit trail; never contacts the provider."""
+    await _require_client(session)
+    normalized_vin = _validate_vin(vin) if vin else None
+    return get_command_audit(vin=normalized_vin, limit=limit)
 
 
 @app.post("/api/command/{vin}/{command}")

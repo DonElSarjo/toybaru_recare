@@ -2239,11 +2239,14 @@ function _eventText(event) {
   const days=event.daysOfWeek||event.days||event.weekdays;
   const start=event.startTime||event.start||event.chargeStartTime||event.time;
   const end=event.endTime||event.end||event.chargeEndTime;
+  const timeText=value=>value&&typeof value==='object'&&value.hour!=null
+    ? `${String(value.hour).padStart(2,'0')}:${String(value.minute||0).padStart(2,'0')}`
+    : value;
   const parts=[];
   if(event.name||event.label||event.type)parts.push(event.name||event.label||event.type);
   if(Array.isArray(days)&&days.length)parts.push(days.join(', '));
   else if(days)parts.push(String(days));
-  if(start&&end)parts.push(`${start}–${end}`); else if(start)parts.push(String(start));
+  if(start&&end)parts.push(`${timeText(start)}–${timeText(end)}`); else if(start)parts.push(String(timeText(start)));
   if(event.enabled===false)parts.push(tf('charging.schedule_disabled','disabled'));
   return parts.join(' · ');
 }
@@ -2252,9 +2255,10 @@ function renderChargeManagement(cm, battery) {
   const el=document.getElementById('chargeManagementCard');
   if(!cm){el.innerHTML='';return}
   const remaining=cm.remaining_charge_time;
+  const commandTag=cm.commands_enabled?tf('charging.experimental_controls','Experimental controls'):tf('charging.read_only','Read only');
   let h=`<div class="card"><div style="display:flex;justify-content:space-between;gap:12px;align-items:center">
     <div class="section-title">${_escHtml(tf('charging.management_title','Charge Management'))}</div>
-    <span class="tag">${_escHtml(tf('charging.read_only','Read only'))}</span>
+    <span class="tag ${cm.commands_enabled?'tag-warn':''}">${_escHtml(commandTag)}</span>
   </div>`;
   const boxes=[];
   if(battery?.chargingStatus)boxes.push([battery.chargingStatus,tf('battery.status','Status')]);
@@ -2273,7 +2277,84 @@ function renderChargeManagement(cm, battery) {
       h+='</div>';
     }else if(!next){h+=`<div class="meta" style="margin-top:10px">${_escHtml(tf('charging.no_schedule_data','No schedule data was returned.'))}</div>`;}
   }
+  if(cm.commands_enabled){
+    const scheduleEnabled=cm.enabled&&cm.can_set_next_charging_event===true;
+    h+=`<div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--border)">
+      <div style="color:var(--yellow);font-size:13px;margin-bottom:10px">${icon('warning')} ${_escHtml(tf('charging.experimental_warning','Experimental provider protocol. Every command requires confirmation and is audited.'))}</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:end">
+        <button class="btn btn-primary" id="chargeNowBtn" onclick="sendElectricCommand('charge-now')">${_escHtml(tf('charging.charge_now','Charge now'))}</button>
+        <label class="meta">${_escHtml(tf('charging.day','Day'))}<select id="chargeScheduleDay" style="display:block;margin-top:4px" ${scheduleEnabled?'':'disabled'}>
+          ${['MONDAY','TUESDAY','WEDNESDAY','THURSDAY','FRIDAY','SATURDAY','SUNDAY'].map(day=>`<option value="${day}">${day}</option>`).join('')}
+        </select></label>
+        <label class="meta">${_escHtml(tf('charging.start','Start'))}<input type="time" id="chargeScheduleStart" value="23:00" style="display:block;margin-top:4px;width:auto" ${scheduleEnabled?'':'disabled'}></label>
+        <label class="meta">${_escHtml(tf('charging.end','End (optional)'))}<input type="time" id="chargeScheduleEnd" style="display:block;margin-top:4px;width:auto" ${scheduleEnabled?'':'disabled'}></label>
+        <button class="btn" id="chargeScheduleBtn" onclick="sendElectricCommand('set-charging-time')" ${scheduleEnabled?'':'disabled'}>${_escHtml(tf('charging.save_schedule','Save schedule'))}</button>
+      </div>
+      ${scheduleEnabled?'':`<div class="meta" style="margin-top:8px">${_escHtml(tf('charging.schedule_capability_required','The vehicle has not confirmed schedule-control capability.'))}</div>`}
+      <div class="meta" id="electricCommandStatus" style="margin-top:10px;min-height:16px"></div>
+    </div>`;
+  }else{
+    h+=`<div class="meta" style="margin-top:12px">${_escHtml(cm.commands_reason||tf('charging.commands_disabled','Charging commands are disabled.'))}</div>`;
+  }
+  h+=`<details style="margin-top:12px"><summary>${_escHtml(tf('charging.command_activity','Command activity'))}</summary>
+    <button class="btn btn-sm" style="margin-top:8px" onclick="loadCommandAudit()">${_escHtml(tf('charging.load_audit','Load local audit'))}</button>
+    <div id="electricCommandAudit"></div></details>`;
   el.innerHTML=h+'</div>';
+}
+
+async function sendElectricCommand(action){
+  if(!currentVin)return;
+  const status=document.getElementById('electricCommandStatus');
+  const payload={};
+  let description=tf('charging.charge_now','Charge now');
+  if(action==='set-charging-time'){
+    const day=document.getElementById('chargeScheduleDay')?.value;
+    const start=document.getElementById('chargeScheduleStart')?.value;
+    const end=document.getElementById('chargeScheduleEnd')?.value;
+    if(!day||!start){if(status)status.textContent=tf('charging.schedule_required','Choose a day and start time.');return}
+    payload.day=day;payload.start_time=start;
+    payload.charge_type=end?'startEnd':'startOnly';
+    if(end)payload.end_time=end;
+    description=`${tf('charging.save_schedule','Save schedule')}: ${day} ${start}${end?'–'+end:''}`;
+  }
+  const warning=`${description}\n\n${tf('charging.command_confirm','This experimental command will be sent to the vehicle and recorded in the local audit log. Continue?')}`;
+  if(!confirm(warning))return;
+  payload.confirmed=true;
+  const buttons=Array.from(document.querySelectorAll('#chargeManagementCard button'));
+  const disabledBefore=buttons.map(button=>button.disabled);
+  buttons.forEach(button=>button.disabled=true);
+  if(status)status.textContent=t('app.loading');
+  try{
+    const response=await fetch(`/api/electric-command/${currentVin}/${action}`,{method:'POST',headers:_postHeaders(),body:JSON.stringify(payload)});
+    const result=await response.json().catch(()=>({}));
+    if(!response.ok||!result.accepted){if(status)status.textContent=result.error||`HTTP ${response.status}`;return}
+    const requestId=result.request_id?` · ${result.request_id}`:'';
+    if(status)status.textContent=tf('charging.command_accepted','Gateway accepted the request; vehicle completion is not yet confirmed.')+requestId;
+    setTimeout(async()=>{
+      try{
+        const battery=await(await fetch(`/api/battery/${currentVin}`)).json();
+        if(!battery.error){
+          allData.battery=battery;
+          if(allData.charge_management)allData.charge_management.remaining_charge_time=battery.remainingChargeTime;
+          renderChargeManagement(allData.charge_management,battery);
+        }
+      }catch(e){}
+    },6000);
+  }catch(error){if(status)status.textContent=error.message||String(error)}
+  finally{buttons.forEach((button,index)=>button.disabled=disabledBefore[index])}
+}
+
+async function loadCommandAudit(){
+  const el=document.getElementById('electricCommandAudit');if(!el||!currentVin)return;
+  el.innerHTML=`<div class="meta" style="margin-top:8px">${_escHtml(t('app.loading'))}</div>`;
+  try{
+    const rows=await(await fetch(`/api/command-audit?vin=${currentVin}&limit=20`)).json();
+    if(!Array.isArray(rows)||!rows.length){el.innerHTML=`<div class="meta" style="margin-top:8px">${_escHtml(tf('charging.no_command_activity','No command activity recorded.'))}</div>`;return}
+    el.innerHTML=rows.map(row=>`<div style="padding:7px 0;border-top:1px solid var(--border);font-size:12px">
+      <span>${_escHtml(row.command)}</span> · <span>${_escHtml(row.outcome)}</span>
+      <span class="meta" style="float:right">${_escHtml(fmtDate(row.created_at))}</span>
+    </div>`).join('');
+  }catch(error){el.innerHTML=`<div class="meta" style="color:var(--red);margin-top:8px">${_escHtml(error.message||String(error))}</div>`}
 }
 
 async function _reloadChargeHistory() {

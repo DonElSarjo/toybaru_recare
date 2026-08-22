@@ -124,6 +124,15 @@ class ToybaruClient:
         """Send remote command (door-lock, door-unlock, engine-start, engine-stop)."""
         return await self.api.send_command(vin, command, extra)
 
+    async def send_electric_command(
+        self,
+        vin: str,
+        command: str,
+        reservation: dict[str, Any] | None = None,
+    ) -> dict[str, Any]:
+        """Send an explicitly authorized electric charging command."""
+        return await self.api.send_electric_command(vin, command, reservation)
+
     async def get_account(self) -> dict[str, Any]:
         """Get account info."""
         return await self.api.get_account()

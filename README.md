@@ -203,6 +203,7 @@ toybaru raw GET /v2/vehicle/guid
 | `TOYBARU_DATA_DIR` | `~/.config/toybaru` | Directory for databases, tokens, and config |
 | `TOYBARU_SECURE_COOKIES` | `false` | Set to `true` to require HTTPS for session cookies (auto-detected if behind a reverse proxy with `X-Forwarded-Proto: https`) |
 | `TOYBARU_EXPERIMENTAL_CHARGE_SCHEDULES` | `false` | Display preserved Subaru NA charging-schedule fields. Read-only; enable only while validating a sanitized provider fixture. |
+| `TOYBARU_EXPERIMENTAL_CHARGE_COMMANDS` | `false` | Enable confirmation-gated Charge Now and schedule commands with local auditing. Subaru NA uses an unconfirmed EU-analogue payload; leave disabled until a provider fixture is validated. |
 
 ## Configuration
 

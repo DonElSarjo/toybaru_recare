@@ -2,8 +2,9 @@
 
 import json
 import time
-from unittest.mock import AsyncMock, MagicMock
+from unittest.mock import AsyncMock, MagicMock, patch
 
+import pytest
 from fastapi.testclient import TestClient
 
 from toybaru.models.vehicle import Vehicle
@@ -12,7 +13,10 @@ from toybaru.web import (
     app,
     _sessions,
     _capability_values,
+    _build_electric_command,
     _charge_management_view,
+    _csrf_tokens,
+    _electric_ack,
     _resolve_remote_commands,
     _vehicle_display_label,
 )
@@ -258,6 +262,110 @@ def test_subaru_na_charge_schedule_flag_exposes_preserved_data(monkeypatch):
     assert view["enabled"] is True
     assert view["schedules"] == [schedule]
     assert view["next_event"] == schedule
+
+
+def test_electric_command_builder_validates_documented_wire_shape():
+    command, reservation = _build_electric_command("charge-now", {})
+    assert command == "CHARGE_NOW"
+    assert reservation is None
+
+    command, reservation = _build_electric_command("set-charging-time", {
+        "day": "monday",
+        "start_time": "23:15",
+        "end_time": "06:30",
+        "charge_type": "startEnd",
+    })
+    assert command == "SET_CHARGING_TIME"
+    assert reservation == {
+        "chargeType": "startEnd",
+        "day": "MONDAY",
+        "startTime": {"hour": 23, "minute": 15},
+        "endTime": {"hour": 6, "minute": 30},
+    }
+
+    with pytest.raises(Exception):
+        _build_electric_command("set-charging-time", {
+            "day": "MONDAY", "start_time": "25:00"
+        })
+
+
+def test_electric_ack_exposes_only_async_identifiers():
+    assert _electric_ack({"appRequestNo": "req-1", "returnCode": "000000", "extra": "x"}) == (
+        "req-1", "000000"
+    )
+
+
+def test_electric_command_route_is_blocked_by_default(monkeypatch):
+    c = _authed_client()
+    token = "test-session-token"
+    _csrf_tokens[token] = "csrf"
+    mock_client = _sessions[token][0]
+    mock_client.api.endpoints = {"electric_command": "/electric"}
+    mock_client.send_electric_command = AsyncMock()
+    monkeypatch.delenv("TOYBARU_EXPERIMENTAL_CHARGE_COMMANDS", raising=False)
+
+    with patch("toybaru.web.log_command", return_value=11):
+        response = c.post(
+            "/api/electric-command/JF2ABCDE6GH123456/charge-now",
+            headers={"X-CSRF-Token": "csrf"},
+            json={"confirmed": True},
+        )
+
+    assert response.status_code == 403
+    assert response.json()["audit_id"] == 11
+    mock_client.send_electric_command.assert_not_awaited()
+
+
+def test_electric_command_route_returns_async_ack_when_enabled(monkeypatch):
+    c = _authed_client()
+    token = "test-session-token"
+    _csrf_tokens[token] = "csrf"
+    mock_client = _sessions[token][0]
+    mock_client.api.endpoints = {"electric_command": "/electric"}
+    mock_client.send_electric_command = AsyncMock(
+        return_value={"appRequestNo": "req-2", "returnCode": "000000"}
+    )
+    monkeypatch.setenv("TOYBARU_EXPERIMENTAL_CHARGE_COMMANDS", "true")
+
+    with patch("toybaru.web.log_command", return_value=12):
+        response = c.post(
+            "/api/electric-command/JF2ABCDE6GH123456/charge-now",
+            headers={"X-CSRF-Token": "csrf"},
+            json={"confirmed": True},
+        )
+
+    assert response.status_code == 202
+    assert response.json() == {
+        "accepted": True,
+        "asynchronous": True,
+        "request_id": "req-2",
+        "return_code": "000000",
+        "audit_id": 12,
+    }
+    mock_client.send_electric_command.assert_awaited_once_with(
+        "JF2ABCDE6GH123456", "CHARGE_NOW", None
+    )
+
+
+def test_electric_command_route_requires_server_confirmation(monkeypatch):
+    c = _authed_client()
+    token = "test-session-token"
+    _csrf_tokens[token] = "csrf"
+    mock_client = _sessions[token][0]
+    mock_client.api.endpoints = {"electric_command": "/electric"}
+    mock_client.send_electric_command = AsyncMock()
+    monkeypatch.setenv("TOYBARU_EXPERIMENTAL_CHARGE_COMMANDS", "true")
+
+    with patch("toybaru.web.log_command", return_value=13):
+        response = c.post(
+            "/api/electric-command/JF2ABCDE6GH123456/charge-now",
+            headers={"X-CSRF-Token": "csrf"},
+            json={},
+        )
+
+    assert response.status_code == 400
+    assert response.json()["error"] == "Explicit command confirmation is required"
+    mock_client.send_electric_command.assert_not_awaited()
 
 
 def test_read_only_history_routes_call_client_methods():
