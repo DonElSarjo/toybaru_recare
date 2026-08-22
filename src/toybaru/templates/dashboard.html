@@ -1380,7 +1380,13 @@ async function loadOverview() {
   }
   renderVehicleHero(allData);
   renderEfficiency(allData);
-  renderRemote(allData.vehicle?.remote_capabilities, allData.climate_settings, allData.climate_status);
+  renderRemote(
+    allData.vehicle?.remote_capabilities,
+    allData.climate_settings,
+    allData.climate_status,
+    allData.vehicle?.remote_command_capabilities,
+    allData.vehicle?.capability_context,
+  );
   renderLastTrip();
   renderHealth();
   document.getElementById('lastUpdate').textContent = new Date().toLocaleTimeString(LC);
@@ -1709,7 +1715,7 @@ function renderEfficiency(all) {
   el.innerHTML=h;
 }
 
-function renderRemote(remoteCaps, climateSettings, climateStatus) {
+function renderRemote(remoteCaps, climateSettings, climateStatus, remoteCommands, capabilityContext) {
   const el=document.getElementById('remoteCard');
   const rc = remoteCaps || {};
   // Backend returns {_unavailable: "climate_settings"} on platforms that don't
@@ -1717,35 +1723,49 @@ function renderRemote(remoteCaps, climateSettings, climateStatus) {
   const cs = climateSettings && !climateSettings.error && !climateSettings._unavailable ? climateSettings : null;
   const cst = climateStatus && !climateStatus.error && !climateStatus._unavailable ? climateStatus : null;
 
-  // Capability map — command -> boolean/undefined. undefined means "assume capable"
-  const capMap = {
+  // Compatibility map for cached/older API responses. New responses contain
+  // normalized decisions with the provider field that produced each result.
+  const legacyCapMap = {
     'door-lock': rc.dlockUnlockCapable,
     'door-unlock': rc.dlockUnlockCapable,
-    'trunk-lock': rc.trunkCapable || rc.trunkCommandCapable,
-    'trunk-unlock': rc.trunkCapable || rc.trunkCommandCapable,
-    'headlight-on': rc.headLightCapable || rc.headlightCommandCapable,
-    'headlight-off': rc.headLightCapable || rc.headlightCommandCapable,
+    'trunk-lock': rc.trunkCapable ?? rc.trunkCommandCapable,
+    'trunk-unlock': rc.trunkCapable ?? rc.trunkCommandCapable,
+    'headlight-on': rc.headLightCapable ?? rc.headlightCommandCapable,
+    'headlight-off': rc.headLightCapable ?? rc.headlightCommandCapable,
     'hazard-on': rc.hazardCapable,
     'hazard-off': rc.hazardCapable,
-    'sound-horn': rc.hornCommandCapable,
-    'buzzer-warning': rc.hornCommandCapable,
+    'sound-horn': rc.hornCommandCapable ?? rc.hornCapable,
+    'buzzer-warning': rc.hornCommandCapable ?? rc.hornCapable,
     'engine-start': rc.estartEnabled,
     'engine-stop': rc.estopEnabled,
     'find-vehicle': rc.vehicleFinderCapable,
   };
 
+  const capabilityDecision = cmd => {
+    const normalized = remoteCommands?.[cmd];
+    if (normalized && Object.prototype.hasOwnProperty.call(normalized, 'supported')) return normalized;
+    return {supported: legacyCapMap[cmd], source: null, reason: 'Legacy capability response'};
+  };
+  const capabilityTitle = (label, cmd) => {
+    if (!DEBUG) return label;
+    const d = capabilityDecision(cmd);
+    const state = d.supported === true ? 'enabled' : d.supported === false ? 'disabled' : 'unknown';
+    const source = d.source ? ` via ${d.source}` : '';
+    return `${label} — ${state}${source}`;
+  };
+
   function primaryBtn(cmd, label, glyph) {
-    const disabled = capMap[cmd] === false;
+    const disabled = capabilityDecision(cmd).supported === false;
     const disAttr = disabled ? 'disabled' : '';
     const g = icon(glyph);
-    return `<button class="tb-remote-btn" data-cmd="${_escAttr(cmd)}" ${disAttr} title="${_escAttr(label)}">${g ? g + ' ' : ''}${_escHtml(label)}</button>`;
+    return `<button class="tb-remote-btn" data-cmd="${_escAttr(cmd)}" ${disAttr} title="${_escAttr(capabilityTitle(label, cmd))}">${g ? g + ' ' : ''}${_escHtml(label)}</button>`;
   }
   function secondaryBtn(cmd, label, variant) {
-    const disabled = capMap[cmd] === false;
+    const disabled = capabilityDecision(cmd).supported === false;
     const disAttr = disabled ? 'disabled' : '';
     let cls = 'btn btn-sm';
     if (variant === 'destructive') cls += ' btn-destructive';
-    return `<button class="${cls}" data-cmd="${_escAttr(cmd)}" ${disAttr} title="${_escAttr(label)}">${_escHtml(label)}</button>`;
+    return `<button class="${cls}" data-cmd="${_escAttr(cmd)}" ${disAttr} title="${_escAttr(capabilityTitle(label, cmd))}">${_escHtml(label)}</button>`;
   }
 
   let h = `<div class="tb-remote">
@@ -1792,6 +1812,33 @@ function renderRemote(remoteCaps, climateSettings, climateStatus) {
       </div>
     </div>
   </details>`;
+
+  if (DEBUG) {
+    const commands = remoteCommands || {};
+    const diagnostics = Object.entries(commands).map(([command, decision]) => {
+      const supported = decision?.supported;
+      const state = supported === true ? 'enabled' : supported === false ? 'disabled' : 'unknown';
+      const color = supported === true ? 'var(--green)' : supported === false ? 'var(--red)' : 'var(--muted)';
+      return `<div class="row" style="gap:12px">
+        <code style="min-width:130px">${_escHtml(command)}</code>
+        <span style="min-width:60px;color:${color}">${_escHtml(state)}</span>
+        <span class="meta" style="overflow-wrap:anywhere">${_escHtml(decision?.source || decision?.reason || 'Legacy capability response')}</span>
+      </div>`;
+    }).join('');
+    const ctx = capabilityContext || {};
+    const provider = [ctx.provider, ctx.region, ctx.brand].filter(Boolean).join(' · ');
+    const subscriptions = Array.isArray(ctx.active_subscriptions) && ctx.active_subscriptions.length
+      ? ctx.active_subscriptions.join(', ')
+      : 'No active subscription metadata returned';
+    h += `<details class="tb-remote-more" open>
+      <summary>Capability diagnostics</summary>
+      <div class="tb-remote-more-body">
+        <div class="meta">Provider: ${_escHtml(provider || 'unknown')}</div>
+        <div class="meta">Active subscriptions: ${_escHtml(subscriptions)}</div>
+        ${diagnostics || '<div class="meta">No normalized command capabilities returned.</div>'}
+      </div>
+    </details>`;
+  }
 
   if (cs || cst) {
     // Stage edits in _climateState; nothing is sent until the user clicks Apply.
@@ -1946,7 +1993,13 @@ async function applyClimateSettings() {
 function revertClimateSettings() {
   if (!_climateStateOrig) return;
   _climateState = JSON.parse(JSON.stringify(_climateStateOrig));
-  renderRemote(allData.vehicle?.remote_capabilities, _climateState, allData.climate_status);
+  renderRemote(
+    allData.vehicle?.remote_capabilities,
+    _climateState,
+    allData.climate_status,
+    allData.vehicle?.remote_command_capabilities,
+    allData.vehicle?.capability_context,
+  );
 }
 
 async function sendClimate(action) {

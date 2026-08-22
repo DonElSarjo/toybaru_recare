@@ -7,7 +7,7 @@ from unittest.mock import MagicMock
 from fastapi.testclient import TestClient
 
 from toybaru.trip_store import upsert_trips
-from toybaru.web import app, _sessions
+from toybaru.web import app, _sessions, _capability_values, _resolve_remote_commands
 
 
 def _client():
@@ -126,3 +126,46 @@ def test_db_trip_not_found():
     resp = c.get("/api/db/trip/nonexistent-id")
     assert resp.status_code == 200
     assert "error" in resp.json()
+
+
+def test_capability_values_preserves_false_and_scalar_diagnostics():
+    raw = {
+        "enabled": True,
+        "disabled": False,
+        "version": 2,
+        "label": "yes",
+        "nested": {"x": 1},
+    }
+    assert _capability_values(raw) == {
+        "enabled": True,
+        "disabled": False,
+        "version": 2,
+        "label": "yes",
+    }
+
+
+def test_remote_command_resolution_falls_back_to_extended_aliases():
+    resolved = _resolve_remote_commands({}, {"hornCapable": True, "lightsCapable": False})
+    assert resolved["sound-horn"] == {
+        "supported": True,
+        "source": "extendedCapabilities.hornCapable",
+        "reason": "Capability flag is enabled",
+    }
+    assert resolved["headlight-on"]["supported"] is False
+    assert resolved["headlight-on"]["source"] == "extendedCapabilities.lightsCapable"
+
+
+def test_remote_service_capability_takes_precedence_over_hardware():
+    resolved = _resolve_remote_commands(
+        {"hornCommandCapable": False},
+        {"hornCapable": True},
+    )
+    assert resolved["sound-horn"]["supported"] is False
+    assert resolved["sound-horn"]["source"] == "remoteServiceCapabilities.hornCommandCapable"
+
+
+def test_remote_command_resolution_records_unknown_provenance():
+    resolved = _resolve_remote_commands({}, {})
+    assert resolved["door-lock"]["supported"] is None
+    assert resolved["door-lock"]["source"] is None
+    assert "legacy fallback" in resolved["door-lock"]["reason"]

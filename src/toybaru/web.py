@@ -99,6 +99,111 @@ _refresh_timestamps: dict[str, float] = {}  # per-VIN rate limiting
 _otp_pending: dict[str, dict] = {}
 
 
+# Ordered capability aliases for each dashboard command. Remote-service flags
+# are authoritative when present; extended capabilities describe vehicle
+# hardware and are used as a fallback for provider schemas which omit the
+# command-specific flag (notably hornCapable/lightsCapable).
+_REMOTE_COMMAND_CAPABILITIES: dict[str, tuple[tuple[str, str], ...]] = {
+    "door-lock": (
+        ("remoteServiceCapabilities", "dlockUnlockCapable"),
+        ("extendedCapabilities", "dlockUnlockCapable"),
+    ),
+    "door-unlock": (
+        ("remoteServiceCapabilities", "dlockUnlockCapable"),
+        ("extendedCapabilities", "dlockUnlockCapable"),
+    ),
+    "trunk-lock": (
+        ("remoteServiceCapabilities", "trunkCapable"),
+        ("remoteServiceCapabilities", "trunkCommandCapable"),
+        ("extendedCapabilities", "trunkCapable"),
+    ),
+    "trunk-unlock": (
+        ("remoteServiceCapabilities", "trunkCapable"),
+        ("remoteServiceCapabilities", "trunkCommandCapable"),
+        ("extendedCapabilities", "trunkCapable"),
+    ),
+    "headlight-on": (
+        ("remoteServiceCapabilities", "headLightCapable"),
+        ("remoteServiceCapabilities", "headlightCommandCapable"),
+        ("extendedCapabilities", "lightsCapable"),
+        ("extendedCapabilities", "headLightCapable"),
+    ),
+    "headlight-off": (
+        ("remoteServiceCapabilities", "headLightCapable"),
+        ("remoteServiceCapabilities", "headlightCommandCapable"),
+        ("extendedCapabilities", "lightsCapable"),
+        ("extendedCapabilities", "headLightCapable"),
+    ),
+    "hazard-on": (
+        ("remoteServiceCapabilities", "hazardCapable"),
+        ("extendedCapabilities", "hazardCapable"),
+    ),
+    "hazard-off": (
+        ("remoteServiceCapabilities", "hazardCapable"),
+        ("extendedCapabilities", "hazardCapable"),
+    ),
+    "sound-horn": (
+        ("remoteServiceCapabilities", "hornCommandCapable"),
+        ("extendedCapabilities", "hornCapable"),
+    ),
+    "buzzer-warning": (
+        ("remoteServiceCapabilities", "hornCommandCapable"),
+        ("extendedCapabilities", "hornCapable"),
+    ),
+    "engine-start": (
+        ("remoteServiceCapabilities", "estartEnabled"),
+        ("extendedCapabilities", "engineStartCapable"),
+    ),
+    "engine-stop": (
+        ("remoteServiceCapabilities", "estopEnabled"),
+        ("extendedCapabilities", "engineStopCapable"),
+    ),
+    "find-vehicle": (
+        ("remoteServiceCapabilities", "vehicleFinderCapable"),
+        ("extendedCapabilities", "vehicleFinderCapable"),
+    ),
+}
+
+
+def _capability_values(value: Any) -> dict[str, bool | int | float | str | None]:
+    """Retain JSON-safe scalar capability values, including explicit false."""
+    if not isinstance(value, dict):
+        return {}
+    return {
+        str(key): item
+        for key, item in value.items()
+        if item is None or isinstance(item, (bool, int, float, str))
+    }
+
+
+def _resolve_remote_commands(
+    remote_service: dict[str, Any], extended: dict[str, Any]
+) -> dict[str, dict[str, Any]]:
+    """Resolve dashboard commands and record the exact evidence used."""
+    sources = {
+        "remoteServiceCapabilities": remote_service,
+        "extendedCapabilities": extended,
+    }
+    resolved: dict[str, dict[str, Any]] = {}
+    for command, aliases in _REMOTE_COMMAND_CAPABILITIES.items():
+        decision: dict[str, Any] = {
+            "supported": None,
+            "source": None,
+            "reason": "No recognized capability flag; legacy fallback applies",
+        }
+        for group, key in aliases:
+            raw = sources[group].get(key)
+            if isinstance(raw, bool):
+                decision = {
+                    "supported": raw,
+                    "source": f"{group}.{key}",
+                    "reason": "Capability flag is enabled" if raw else "Capability flag is disabled",
+                }
+                break
+        resolved[command] = decision
+    return resolved
+
+
 def _get_session_client(session_token: str | None) -> ToybaruClient | None:
     if not session_token:
         return None
@@ -510,7 +615,7 @@ async def api_all(vin: str, session: str | None = Cookie(None)):
     location = await safe_call(client.get_location(vin))
 
     vehicle_info: dict[str, Any] = {}
-    cache_key = f"vehicle_info_{vin}"
+    cache_key = f"vehicle_info_v2_{vin}"
     cached = getattr(client, "_cache", {}).get(cache_key)
     if cached:
         vehicle_info = cached
@@ -538,14 +643,14 @@ async def api_all(vin: str, session: str | None = Cookie(None)):
                         for s in (subs_raw if isinstance(subs_raw, list) else [])
                         if s.get("status") == "ACTIVE"
                     ]
-                    rsc = raw.get("remoteServiceCapabilities") or {}
+                    rsc = _capability_values(raw.get("remoteServiceCapabilities"))
                     head_unit = raw.get("headUnit") or {}
                     dcm_info = raw.get("dcm") or {}
                     # `features` lists app-level features; `extendedCapabilities` lists hardware ones.
-                    feat = raw.get("features") or {}
-                    active_features = sorted(k for k, val in feat.items() if val == 1) if isinstance(feat, dict) else []
-                    ext_caps = raw.get("extendedCapabilities") or {}
-                    active_caps = sorted(k for k, val in ext_caps.items() if val is True) if isinstance(ext_caps, dict) else []
+                    feat = _capability_values(raw.get("features"))
+                    active_features = sorted(k for k, val in feat.items() if val == 1)
+                    ext_caps = _capability_values(raw.get("extendedCapabilities"))
+                    active_caps = sorted(k for k, val in ext_caps.items() if val is True)
 
                     vehicle_info = {
                         "image": v.image,
@@ -557,10 +662,24 @@ async def api_all(vin: str, session: str | None = Cookie(None)):
                         "subscriptions": subs,
                         "manufactured_date": raw.get("manufacturedDate"),
                         "first_use_date": raw.get("dateOfFirstUse"),
-                        "remote_capabilities": {
-                            k: v for k, v in rsc.items()
-                            if isinstance(v, bool) or isinstance(v, str)
-                        } if rsc else {},
+                        # Keep the legacy field for existing consumers and add
+                        # structured sources + normalized decisions for UI and
+                        # provider diagnostics.
+                        "remote_capabilities": rsc,
+                        "remote_command_capabilities": _resolve_remote_commands(rsc, ext_caps),
+                        "capability_sources": {
+                            "features": feat,
+                            "extendedCapabilities": ext_caps,
+                            "remoteServiceCapabilities": rsc,
+                        },
+                        "capability_context": {
+                            "provider": client.auth.region.name,
+                            "region": client.auth.region.region,
+                            "brand": BRAND_LABELS.get(client.auth.region.brand, "toyota"),
+                            "active_subscriptions": [
+                                sub["name"] for sub in subs if sub.get("name")
+                            ],
+                        },
                         "head_unit": {
                             "description": head_unit.get("description"),
                             "generation": head_unit.get("generation"),
