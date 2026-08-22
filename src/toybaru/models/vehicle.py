@@ -36,6 +36,15 @@ class ElectricStatus(BaseModel):
     ev_range: dict | None = Field(None, alias="evRange")
     ev_range_with_ac: dict | None = Field(None, alias="evRangeWithAc")
     remaining_charge_time: int | None = Field(None, alias="remainingChargeTime")
+    can_set_next_charging_event: bool | None = Field(
+        None, alias="canSetNextChargingEvent"
+    )
+    charging_schedules: list[dict[str, Any]] | None = Field(
+        None, alias="chargingSchedules"
+    )
+    next_charging_event: dict[str, Any] | None = Field(
+        None, alias="nextChargingEvent"
+    )
     last_update_timestamp: datetime | None = Field(None, alias="lastUpdateTimestamp")
     model_config = {"extra": "allow", "populate_by_name": True}
 

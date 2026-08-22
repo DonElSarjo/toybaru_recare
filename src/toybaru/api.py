@@ -327,14 +327,21 @@ class Api:
     @staticmethod
     def _pp_normalize_na_electric(data: dict[str, Any]) -> dict[str, Any]:
         """Reshape the NA electric-status response (nested under vehicleInfo.chargeInfo)
-        into the EU-style flat dict that the rest of the app expects."""
+        into the EU-style flat dict that the rest of the app expects.
+
+        Charge-management objects are intentionally preserved rather than
+        interpreted.  Their exact schema varies by provider, and Subaru NA has
+        not yet been confirmed with a captured fixture.
+        """
         charge_info = data.get("vehicleInfo", {}).get("chargeInfo", {})
         if not charge_info:
             charge_info = data.get("chargeInfo", data)
 
         plug = charge_info.get("plugStatus")
         connector = charge_info.get("connectorStatus")
-        remaining = charge_info.get("remainingChargeTime")
+        remaining = charge_info.get(
+            "remainingChargeTime", charge_info.get("remainingChargingTime")
+        )
         if plug == 4 or plug == 40:
             charging_status = "charging"
         elif plug == 12 or (plug is not None and connector in (None, 0)):
@@ -363,6 +370,28 @@ class Api:
 
         if remaining is not None and remaining != 65535:
             result["remainingChargeTime"] = remaining
+
+        # Providers have returned these fields both inside chargeInfo and at
+        # the electric-status root. Keep the original JSON structures so a
+        # future provider fixture can drive stricter models without losing
+        # information in today's read-only dashboard.
+        def _charge_value(key: str) -> Any:
+            if key in charge_info:
+                return charge_info[key]
+            vehicle_info = data.get("vehicleInfo", {})
+            if isinstance(vehicle_info, dict) and key in vehicle_info:
+                return vehicle_info[key]
+            return data.get(key)
+
+        can_set_event = _charge_value("canSetNextChargingEvent")
+        schedules = _charge_value("chargingSchedules")
+        next_event = _charge_value("nextChargingEvent")
+        if can_set_event is not None:
+            result["canSetNextChargingEvent"] = can_set_event
+        if schedules is not None:
+            result["chargingSchedules"] = schedules
+        if next_event is not None:
+            result["nextChargingEvent"] = next_event
 
         acq = data.get("vehicleInfo", {}).get("acquisitionDatetime")
         if acq:

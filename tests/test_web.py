@@ -2,12 +2,20 @@
 
 import json
 import time
-from unittest.mock import MagicMock
+from unittest.mock import AsyncMock, MagicMock
 
 from fastapi.testclient import TestClient
 
+from toybaru.models.vehicle import Vehicle
 from toybaru.trip_store import upsert_trips
-from toybaru.web import app, _sessions, _capability_values, _resolve_remote_commands
+from toybaru.web import (
+    app,
+    _sessions,
+    _capability_values,
+    _charge_management_view,
+    _resolve_remote_commands,
+    _vehicle_display_label,
+)
 
 
 def _client():
@@ -144,6 +152,49 @@ def test_capability_values_preserves_false_and_scalar_diagnostics():
     }
 
 
+def test_vehicle_display_label_replaces_conflicting_provider_brand():
+    vehicle = MagicMock()
+    vehicle.alias = None
+    vehicle.model_description = "2026 Lexus MY TRAILSEEKER Touring"
+    vehicle.model_name = "MY TRAILSEEKER Touring"
+    vehicle.model_year = "2026"
+    vehicle.vin = "synthetic"
+
+    assert _vehicle_display_label(vehicle, "S") == "2026 MY TRAILSEEKER Touring"
+
+
+def test_vehicle_display_label_preserves_valid_description_and_alias():
+    vehicle = MagicMock()
+    vehicle.alias = None
+    vehicle.model_description = "2026 Lexus RZ 450e"
+    vehicle.model_name = "RZ 450e"
+    vehicle.model_year = "2026"
+    vehicle.vin = "synthetic"
+    assert _vehicle_display_label(vehicle, "L") == "2026 Lexus RZ 450e"
+
+    vehicle.alias = "My car"
+    assert _vehicle_display_label(vehicle, "S") == "My car"
+
+
+def test_vehicles_route_adds_normalized_label_without_changing_provider_data():
+    c = _authed_client()
+    mock_client = _sessions["test-session-token"][0]
+    mock_client.auth.region.brand = "S"
+    mock_client.get_vehicles = AsyncMock(return_value=[Vehicle.model_validate({
+        "vin": "JF2ABCDE6GH123456",
+        "displayModelDescription": "2026 Lexus MY TRAILSEEKER Touring",
+        "modelName": "MY TRAILSEEKER Touring",
+        "modelYear": "2026",
+    })])
+
+    response = c.get("/api/vehicles")
+
+    assert response.status_code == 200
+    vehicle = response.json()[0]
+    assert vehicle["display_label"] == "2026 MY TRAILSEEKER Touring"
+    assert vehicle["model_description"] == "2026 Lexus MY TRAILSEEKER Touring"
+
+
 def test_remote_command_resolution_falls_back_to_extended_aliases():
     resolved = _resolve_remote_commands({}, {"hornCapable": True, "lightsCapable": False})
     assert resolved["sound-horn"] == {
@@ -169,3 +220,63 @@ def test_remote_command_resolution_records_unknown_provenance():
     assert resolved["door-lock"]["supported"] is None
     assert resolved["door-lock"]["source"] is None
     assert "legacy fallback" in resolved["door-lock"]["reason"]
+
+
+def test_subaru_na_charge_schedules_are_experimental_by_default(monkeypatch):
+    client = MagicMock()
+    client.auth.region.brand = "S"
+    client.auth.region.region = "NA"
+    monkeypatch.delenv("TOYBARU_EXPERIMENTAL_CHARGE_SCHEDULES", raising=False)
+
+    view = _charge_management_view(client, {
+        "remainingChargeTime": 45,
+        "canSetNextChargingEvent": True,
+        "chargingSchedules": [{"startTime": "22:00"}],
+        "nextChargingEvent": {"startTime": "22:00"},
+    })
+
+    assert view["experimental"] is True
+    assert view["enabled"] is False
+    assert view["remaining_charge_time"] == 45
+    assert view["schedules"] == []
+    assert view["next_event"] is None
+
+
+def test_subaru_na_charge_schedule_flag_exposes_preserved_data(monkeypatch):
+    client = MagicMock()
+    client.auth.region.brand = "S"
+    client.auth.region.region = "NA"
+    monkeypatch.setenv("TOYBARU_EXPERIMENTAL_CHARGE_SCHEDULES", "true")
+    schedule = {"startTime": "22:00"}
+
+    view = _charge_management_view(client, {
+        "canSetNextChargingEvent": True,
+        "chargingSchedules": schedule,
+        "nextChargingEvent": schedule,
+    })
+
+    assert view["enabled"] is True
+    assert view["schedules"] == [schedule]
+    assert view["next_event"] == schedule
+
+
+def test_read_only_history_routes_call_client_methods():
+    c = _authed_client()
+    mock_client = _sessions["test-session-token"][0]
+    mock_client.get_notifications = AsyncMock(
+        return_value={"notifications": [{"title": "Charge complete"}]}
+    )
+    mock_client.get_service_history = AsyncMock(
+        return_value={"services": [{"description": "Inspection"}]}
+    )
+    vin = "JF2ABCDE6GH123456"
+
+    notifications = c.get(f"/api/notifications/{vin}")
+    services = c.get(f"/api/service-history/{vin}")
+
+    assert notifications.status_code == 200
+    assert notifications.json()["notifications"][0]["title"] == "Charge complete"
+    assert services.status_code == 200
+    assert services.json()["services"][0]["description"] == "Inspection"
+    mock_client.get_notifications.assert_awaited_once_with(vin)
+    mock_client.get_service_history.assert_awaited_once_with(vin)

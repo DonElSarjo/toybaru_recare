@@ -99,6 +99,65 @@ _refresh_timestamps: dict[str, float] = {}  # per-VIN rate limiting
 _otp_pending: dict[str, dict] = {}
 
 
+def _env_enabled(name: str) -> bool:
+    """Return True for the conventional explicit environment flag values."""
+    return os.environ.get(name, "").strip().lower() in {"1", "true", "yes", "on"}
+
+
+def _vehicle_display_label(vehicle: Any, provider_brand: str) -> str:
+    """Choose a vehicle label without trusting contradictory provider branding.
+
+    Some Subaru NA Trailseeker records currently identify the vehicle as brand
+    ``S`` while ``displayModelDescription`` starts with "Lexus". Preserve the
+    original field in the API response, but construct a neutral year/model label
+    when a description names a different supported brand.
+    """
+    alias = str(getattr(vehicle, "alias", None) or "").strip()
+    if alias:
+        return alias
+
+    description = str(getattr(vehicle, "model_description", None) or "").strip()
+    expected_brand = BRAND_LABELS.get(provider_brand, "").lower()
+    conflicting_brand = any(
+        brand != expected_brand and re.search(rf"\b{re.escape(brand)}\b", description, re.I)
+        for brand in BRAND_LABELS.values()
+    )
+    model_name = str(getattr(vehicle, "model_name", None) or "").strip()
+    model_year = str(getattr(vehicle, "model_year", None) or "").strip()
+    neutral_label = " ".join(part for part in (model_year, model_name) if part)
+
+    if description and not conflicting_brand:
+        return description
+    return neutral_label or description or str(getattr(vehicle, "vin", None) or "Vehicle")
+
+
+def _charge_management_view(client: ToybaruClient, battery: Any) -> dict[str, Any]:
+    """Build the read-only charge-management view exposed to the dashboard.
+
+    Subaru NA schedule payloads remain experimental until a sanitized fixture
+    confirms their schema. Battery/remaining-time data stays available, while
+    schedule objects are withheld unless the operator explicitly enables the
+    experiment.
+    """
+    data = battery if isinstance(battery, dict) and "error" not in battery else {}
+    region = client.auth.region
+    experimental = region.brand == "S" and region.region == "NA"
+    enabled = not experimental or _env_enabled("TOYBARU_EXPERIMENTAL_CHARGE_SCHEDULES")
+    schedules = data.get("chargingSchedules") if enabled else None
+    if schedules is not None and not isinstance(schedules, list):
+        schedules = [schedules]
+    return {
+        "enabled": enabled,
+        "experimental": experimental,
+        "can_set_next_charging_event": (
+            data.get("canSetNextChargingEvent") if enabled else None
+        ),
+        "schedules": schedules or [],
+        "next_event": data.get("nextChargingEvent") if enabled else None,
+        "remaining_charge_time": data.get("remainingChargeTime"),
+    }
+
+
 # Ordered capability aliases for each dashboard command. Remote-service flags
 # are authoritative when present; extended capabilities describe vehicle
 # hardware and are used as a fallback for provider schemas which omit the
@@ -602,7 +661,14 @@ async def api_logout(request: Request, response: Response, session: str | None =
 async def api_vehicles(session: str | None = Cookie(None)):
     client = await _require_client(session)
     vehicles = await client.get_vehicles()
-    return [v.model_dump() for v in vehicles]
+    result = []
+    for vehicle in vehicles:
+        item = vehicle.model_dump()
+        item["display_label"] = _vehicle_display_label(
+            vehicle, client.auth.region.brand
+        )
+        result.append(item)
+    return result
 
 
 @app.get("/api/all/{vin}")
@@ -729,11 +795,14 @@ async def api_all(vin: str, session: str | None = Cookie(None)):
             "charge_history": client.api.endpoints.get("charge_history") is not None,
             "charge_statistics": client.api.endpoints.get("charge_statistics") is not None,
             "vehicle_health": client.api.endpoints.get("vehicle_health") is not None,
+            "notifications": client.api.endpoints.get("notifications") is not None,
+            "service_history": client.api.endpoints.get("service_history") is not None,
         },
         "brand": BRAND_LABELS.get(client.auth.region.brand, "toyota"),
         "vehicle": vehicle_info,
         "climate_settings": climate_settings,
         "climate_status": climate_status,
+        "charge_management": _charge_management_view(client, battery),
     }
 
 
@@ -814,6 +883,22 @@ async def api_vehicle_health(vin: str, session: str | None = Cookie(None)):
     vin = _validate_vin(vin)
     client = await _require_client(session)
     return await safe_call(client.get_vehicle_health(vin))
+
+
+@app.get("/api/notifications/{vin}")
+async def api_notifications(vin: str, session: str | None = Cookie(None)):
+    """Read notification and warning history without refreshing the vehicle."""
+    vin = _validate_vin(vin)
+    client = await _require_client(session)
+    return await safe_call(client.get_notifications(vin))
+
+
+@app.get("/api/service-history/{vin}")
+async def api_service_history(vin: str, session: str | None = Cookie(None)):
+    """Read recorded service history without refreshing the vehicle."""
+    vin = _validate_vin(vin)
+    client = await _require_client(session)
+    return await safe_call(client.get_service_history(vin))
 
 
 @app.get("/api/charge-history/{vin}")

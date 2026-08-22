@@ -108,6 +108,34 @@ def test_pp_na_charge_history_empty():
     assert Api._pp_na_charge_history([{"vin": "x", "charging_sessions": []}]) == {"sessions": []}
 
 
+def test_pp_na_electric_preserves_read_only_charge_management_fields():
+    data = {
+        "vehicleInfo": {
+            "chargeInfo": {
+                "chargeRemainingAmount": 72,
+                "remainingChargingTime": 95,
+                "canSetNextChargingEvent": True,
+                "chargingSchedules": [
+                    {"enabled": True, "daysOfWeek": ["MON"], "startTime": "23:00"}
+                ],
+                "nextChargingEvent": {"startTime": "23:00"},
+            }
+        }
+    }
+
+    result = Api._pp_normalize_na_electric(data)
+
+    assert result["remainingChargeTime"] == 95
+    assert result["canSetNextChargingEvent"] is True
+    assert result["chargingSchedules"] == data["vehicleInfo"]["chargeInfo"]["chargingSchedules"]
+    assert result["nextChargingEvent"] == {"startTime": "23:00"}
+
+
+def test_pp_na_electric_ignores_remaining_time_sentinel():
+    result = Api._pp_normalize_na_electric({"chargeInfo": {"remainingChargeTime": 65535}})
+    assert "remainingChargeTime" not in result
+
+
 # --- web routes registered + auth-guarded ---
 
 _VIN = "JF2ABCDE6GH123456"  # synthetic, valid VIN format
@@ -122,6 +150,8 @@ def test_new_routes_registered_and_require_auth():
         f"/api/vehicle-health/{_VIN}",
         f"/api/charge-history/{_VIN}",
         f"/api/charge-statistics/{_VIN}",
+        f"/api/notifications/{_VIN}",
+        f"/api/service-history/{_VIN}",
         f"/api/db/charges?vin={_VIN}",
     ):
         resp = client.get(path)

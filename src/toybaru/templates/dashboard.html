@@ -802,12 +802,23 @@ body.dense .bat-pct { font-size: 24px; }
   <div id="vehicleHeroCard"></div>
   <div id="remoteCard"></div>
   <div class="card" id="healthCard" style="display:none"></div>
+  <div class="card" id="vehicleHistoryCard" style="display:none">
+    <div style="display:flex;justify-content:space-between;gap:12px;align-items:center">
+      <div>
+        <div class="section-title" id="vehicleHistoryTitle">Notifications &amp; Maintenance</div>
+        <div class="meta" id="vehicleHistoryHint">Loaded only when requested.</div>
+      </div>
+      <button class="btn btn-sm" onclick="loadVehicleHistory()" id="vehicleHistoryBtn">Load history</button>
+    </div>
+    <div id="vehicleHistoryContent"></div>
+  </div>
   <div class="card" id="lastTripCard"></div>
   <div class="card" id="efficiencyCard"></div>
   <div style="text-align:right"><button class="btn" onclick="loadOverview()" id="refreshOverviewBtn"></button></div>
 </div>
 
 <div class="page" id="page-charging">
+  <div id="chargeManagementCard"></div>
   <div id="chargeStatsCard"></div>
   <div class="card">
     <div class="section-title" id="chargeHistTitle"></div>
@@ -1078,6 +1089,9 @@ let UNIT = 'km';  // mirrors bat.evRange.unit
 let HAS_TRIPS = true;
 let HAS_CHARGE = false;   // charge history/statistics (NA)
 let HAS_HEALTH = false;   // vehicle health report (NA)
+let HAS_NOTIFICATIONS = false;
+let HAS_SERVICE_HISTORY = false;
+let _historyLoadedVin = null;
 
 function _postHeaders() {
   const h = {'Content-Type': 'application/json'};
@@ -1351,7 +1365,7 @@ async function loadVehicles() {
   sel.innerHTML = '';
   vehicles.forEach(v => {
     const o = document.createElement('option');
-    o.value = v.vin; o.textContent = v.alias || v.model_description || v.vin; sel.appendChild(o);
+    o.value = v.vin; o.textContent = v.display_label || v.alias || v.model_description || v.vin; sel.appendChild(o);
   });
   if (vehicles.length) { currentVin = vehicles[0].vin; sel.value = currentVin; }
   sel.onchange = () => { currentVin = sel.value; loadOverview(); };
@@ -1371,6 +1385,8 @@ async function loadOverview() {
     HAS_TRIPS = cap.trips !== false;
     HAS_CHARGE = !!(cap.charge_history || cap.charge_statistics);
     HAS_HEALTH = !!cap.vehicle_health;
+    HAS_NOTIFICATIONS = !!cap.notifications;
+    HAS_SERVICE_HISTORY = !!cap.service_history;
     // NA accounts (no trips) get US-formatted dates/times.
     if (cap.trips === false) LC = 'en-US';
   }
@@ -1389,6 +1405,7 @@ async function loadOverview() {
   );
   renderLastTrip();
   renderHealth();
+  renderVehicleHistoryShell();
   document.getElementById('lastUpdate').textContent = new Date().toLocaleTimeString(LC);
 }
 
@@ -2136,9 +2153,68 @@ async function renderHealth() {
   el.innerHTML=h;
 }
 
+// --- Notifications + maintenance (documented read-only endpoints) ---
+function renderVehicleHistoryShell() {
+  const el=document.getElementById('vehicleHistoryCard');
+  const available=HAS_NOTIFICATIONS||HAS_SERVICE_HISTORY;
+  el.style.display=available?'':'none';
+  if(!available)return;
+  document.getElementById('vehicleHistoryTitle').textContent=tf('history.title','Notifications & Maintenance');
+  document.getElementById('vehicleHistoryHint').textContent=tf('history.on_demand','Loaded only when requested.');
+  document.getElementById('vehicleHistoryBtn').textContent=tf('history.load','Load history');
+  if(_historyLoadedVin!==currentVin) document.getElementById('vehicleHistoryContent').innerHTML='';
+}
+
+function _historyItems(data, keys) {
+  if(!data||data.error||data._unavailable)return [];
+  if(Array.isArray(data))return data;
+  if(typeof data!=='object')return [data];
+  for(const key of keys){ if(Array.isArray(data[key]))return data[key]; }
+  if(data.payload)return _historyItems(data.payload,keys);
+  if(data.data)return _historyItems(data.data,keys);
+  return Object.keys(data).length?[data]:[];
+}
+
+function _historyRows(items, kind) {
+  if(!items.length)return `<div class="meta" style="margin-top:10px">${_escHtml(tf('history.none','No records returned.'))}</div>`;
+  return items.slice(0,20).map(raw=>{
+    const item=(raw&&typeof raw==='object')?raw:{description:String(raw)};
+    const title=item.title||item.notificationTitle||item.subject||item.serviceType||item.type||item.category||tf(`history.${kind}`,kind==='notifications'?'Notifications':'Service history');
+    const description=item.description||item.detailedDescription||item.message||item.body||item.dealerName||'';
+    const when=item.createdAt||item.creationDate||item.notificationDate||item.serviceDate||item.date||item.timestamp;
+    const mileage=item.mileage||item.odometer;
+    return `<div style="padding:10px 0;border-top:1px solid var(--border)">
+      <div style="display:flex;justify-content:space-between;gap:12px"><span>${_escHtml(title)}</span><span class="meta">${when?_escHtml(fmtDate(when)):''}</span></div>
+      ${description?`<div class="meta" style="margin-top:3px">${_escHtml(description)}</div>`:''}
+      ${mileage!=null?`<div class="meta">${_escHtml(mileage)} ${_escHtml(distLabel())}</div>`:''}
+    </div>`;
+  }).join('');
+}
+
+async function loadVehicleHistory() {
+  if(!currentVin)return;
+  const btn=document.getElementById('vehicleHistoryBtn'), content=document.getElementById('vehicleHistoryContent');
+  btn.disabled=true; content.innerHTML=`<div class="meta" style="margin-top:12px">${_escHtml(t('app.loading'))}</div>`;
+  let notifications=null, services=null;
+  if(HAS_NOTIFICATIONS){try{notifications=await(await fetch(`/api/notifications/${currentVin}`)).json();}catch(e){notifications={error:String(e)}}}
+  // Deliberately sequential: avoid a burst against the provider API.
+  if(HAS_SERVICE_HISTORY){try{services=await(await fetch(`/api/service-history/${currentVin}`)).json();}catch(e){services={error:String(e)}}}
+  const nItems=_historyItems(notifications,['notifications','notificationHistory','messages','items']);
+  const sItems=_historyItems(services,['serviceHistory','services','records','items']);
+  const historyBody=(response,items,kind)=>response?.error
+    ? `<div class="meta" style="margin-top:10px;color:var(--red)">${_escHtml(tf('history.unavailable','Unavailable'))}: ${_escHtml(response.error)}</div>`
+    : _historyRows(items,kind);
+  let h='';
+  if(HAS_NOTIFICATIONS)h+=`<div style="margin-top:14px"><div class="section-title">${_escHtml(tf('history.notifications','Notifications'))}</div>${historyBody(notifications,nItems,'notifications')}</div>`;
+  if(HAS_SERVICE_HISTORY)h+=`<div style="margin-top:14px"><div class="section-title">${_escHtml(tf('history.service','Service history'))}</div>${historyBody(services,sItems,'service')}</div>`;
+  content.innerHTML=h;
+  _historyLoadedVin=currentVin; btn.disabled=false; btn.textContent=tf('history.reload','Reload history');
+}
+
 // --- Charging (NA): live summary + DB-backed history ---
 async function loadCharging() {
   if(!currentVin)return;
+  renderChargeManagement(allData.charge_management, allData.battery);
   // Prefill the SYNC date range (last 12 months) if empty. These drive what
   // Sync fetches from the car — the table itself is served from the local DB.
   const today=new Date().toISOString().slice(0,10);
@@ -2155,6 +2231,49 @@ async function loadCharging() {
 
   // History is read from the local DB (populated via Sync).
   await _reloadChargeHistory();
+}
+
+function _eventText(event) {
+  if(event==null)return '';
+  if(typeof event!=='object')return String(event);
+  const days=event.daysOfWeek||event.days||event.weekdays;
+  const start=event.startTime||event.start||event.chargeStartTime||event.time;
+  const end=event.endTime||event.end||event.chargeEndTime;
+  const parts=[];
+  if(event.name||event.label||event.type)parts.push(event.name||event.label||event.type);
+  if(Array.isArray(days)&&days.length)parts.push(days.join(', '));
+  else if(days)parts.push(String(days));
+  if(start&&end)parts.push(`${start}–${end}`); else if(start)parts.push(String(start));
+  if(event.enabled===false)parts.push(tf('charging.schedule_disabled','disabled'));
+  return parts.join(' · ');
+}
+
+function renderChargeManagement(cm, battery) {
+  const el=document.getElementById('chargeManagementCard');
+  if(!cm){el.innerHTML='';return}
+  const remaining=cm.remaining_charge_time;
+  let h=`<div class="card"><div style="display:flex;justify-content:space-between;gap:12px;align-items:center">
+    <div class="section-title">${_escHtml(tf('charging.management_title','Charge Management'))}</div>
+    <span class="tag">${_escHtml(tf('charging.read_only','Read only'))}</span>
+  </div>`;
+  const boxes=[];
+  if(battery?.chargingStatus)boxes.push([battery.chargingStatus,tf('battery.status','Status')]);
+  if(remaining!=null)boxes.push([_fmtDur(_num(remaining)),tf('battery.full_in','Full in')]);
+  if(cm.can_set_next_charging_event!=null)boxes.push([cm.can_set_next_charging_event?tf('charging.available','Available'):tf('charging.unavailable','Unavailable'),tf('charging.schedule_control','Schedule control')]);
+  if(boxes.length){h+=`<div style="display:flex;gap:24px;flex-wrap:wrap;margin:10px 0">`;for(const [v,l] of boxes)h+=_sbox(v,l);h+='</div>';}
+  if(!cm.enabled&&cm.experimental){
+    h+=`<div class="meta">${_escHtml(tf('charging.experimental_disabled','Subaru NA schedule display is experimental and currently disabled.'))}</div>`;
+  }else{
+    const next=_eventText(cm.next_event);
+    if(next)h+=`<div style="margin-top:10px"><div class="meta">${_escHtml(tf('charging.next_event','Next charging event'))}</div><div>${_escHtml(next)}</div></div>`;
+    const schedules=Array.isArray(cm.schedules)?cm.schedules:[];
+    if(schedules.length){
+      h+=`<div style="margin-top:12px"><div class="meta">${_escHtml(tf('charging.schedules','Schedules'))}</div>`;
+      for(const schedule of schedules)h+=`<div style="padding:8px 0;border-top:1px solid var(--border)">${_escHtml(_eventText(schedule)||tf('charging.schedule','Charging schedule'))}</div>`;
+      h+='</div>';
+    }else if(!next){h+=`<div class="meta" style="margin-top:10px">${_escHtml(tf('charging.no_schedule_data','No schedule data was returned.'))}</div>`;}
+  }
+  el.innerHTML=h+'</div>';
 }
 
 async function _reloadChargeHistory() {
