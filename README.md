@@ -1,8 +1,8 @@
 # Toybaru ReCare
 
-A self-hosted dashboard for the Subaru Solterra and Toyota bZ4X that gives you access to your own driving data -- the data that Subaru and Toyota collect but never show you.
+A self-hosted dashboard for the Subaru Solterra and Trailseeker, Toyota bZ4X, and related Toyota/Lexus EVs that gives you access to your own vehicle data -- the data that Subaru and Toyota collect but never show you.
 
-Primary target is **EU (Subaru Solterra on SubaruConnect)**. NA (Toyota bZ4X on Toyota Connected Services) is supported for login and the parts of the API that work, but is best-effort -- see the notes below.
+Primary target is **EU (Subaru Solterra on SubaruConnect)**. North American Toyota, Lexus, and Subaru profiles are supported for login and the parts of each provider API that work. NA capabilities differ substantially by provider and vehicle; see the provider notes below.
 
 ## Why this exists
 
@@ -52,6 +52,8 @@ So I built a dashboard around it. Import your trips, store them locally (so Suba
 - Last known GPS position on a map
 - Top-down vehicle illustration on the start page, tinted to match your car's actual paint colour
 - Remote controls (still in testing -- see notes): lock/unlock doors, lock/unlock hatch, headlights on/off, hazard lights on/off, sound horn, buzzer warning, engine start/stop, find vehicle
+- Provider-aware command capability resolution: controls are disabled when the provider explicitly reports that a command is unsupported
+- Capability diagnostics available by appending `?debug` to the dashboard URL; the panel shows the provider, active subscriptions, capability decision, and source field for each command. An unknown capability is not confirmation that a command is supported.
 - Unit labels follow the upstream account setting (km/h vs mph, °C vs °F). The dashboard never converts values -- it only shows the unit string the API reports.
 - Date/time format adapts to region (DD/MM/YYYY 24h for EU; MM/DD/YYYY 12h AM/PM for NA)
 - Last trip summary with key metrics (EU only -- see note below)
@@ -116,7 +118,8 @@ So I built a dashboard around it. Import your trips, store them locally (so Suba
 - Sanitized error messages (detailed errors logged server-side only)
 - XSS hardening (textContent for dynamic content, no inline handlers with user data)
 - Security headers (X-Frame-Options, X-Content-Type-Options, Referrer-Policy)
-- Rate limiting on login, OTP, and vehicle command endpoints
+- Rate limiting on login, OTP, vehicle commands, and experimental electric commands
+- Explicit confirmation, operator-controlled feature gates, and a local audit trail for experimental charging commands
 - Session expiry with automatic cleanup
 - VIN format validation
 - Docker container runs as non-root user
@@ -130,8 +133,25 @@ So I built a dashboard around it. Import your trips, store them locally (so Suba
 - Vehicle info: image, color, nickname, capabilities, subscriptions, manufactured/first-use dates
 - Solar panel status detection (equipped vs N/A)
 - Charge cycle tracking via plugInHistory counter
-- Trips, Statistics, and Data tabs automatically hidden for NA users (Toyota NA does not provide trip or charging history data)
+- Trips, Statistics, and Data tabs automatically hidden when the selected provider profile has no trip endpoint
+- Toyota NA does not currently expose trip or charging-session history through the configured API profile
 - Unit display follows the API's per-field unit (e.g. miles/mph for a NA account, km/km/h for an EU account) -- no client-side conversion
+
+**Subaru NA / Trailseeker Support**
+- Subaru North America authentication and provider-specific OneApp headers
+- Battery, vehicle status, location, remote capabilities, and vehicle-health data
+- Charging history and charging statistics from the Subaru NA charging service
+- Charge-management summary with remaining charging time
+- Charging schedules and the next charging event can be preserved and displayed behind the read-only `TOYBARU_EXPERIMENTAL_CHARGE_SCHEDULES` gate while the provider schema is being validated
+- Notifications and service/maintenance history are loaded only when requested, avoiding unnecessary provider requests
+- No trip-history endpoint is configured for Subaru NA
+
+**Experimental Charging Controls**
+- Charge Now and charging-schedule commands are disabled by default and require `TOYBARU_EXPERIMENTAL_CHARGE_COMMANDS=true`
+- Every command requires an explicit confirmation in the dashboard and is subject to a separate per-vehicle rate limit
+- Command attempts and provider outcomes are recorded in a local audit log
+- A successful response means the provider gateway accepted an asynchronous request; it does not confirm that the vehicle completed the command
+- The Subaru NA schedule-command payload is based on an EU analogue and remains unverified; leave the feature disabled until a sanitized provider fixture has been validated
 
 **Multi-language**
 - 9 locales: German (`de`), English UK (`en`), English US (`en-US`), Spanish ES (`es-ES`), Spanish MX (`es-MX`), French FR (`fr-FR`), French CA (`fr-CA`), Japanese (`ja-JP`), Dutch (`nl-NL`)
@@ -159,8 +179,8 @@ So I built a dashboard around it. Import your trips, store them locally (so Suba
 ### Docker (recommended)
 
 ```bash
-git clone https://github.com/youruser/toybaru.git
-cd toybaru
+git clone https://github.com/kingmook/toybaru_recare.git
+cd toybaru_recare
 docker compose up -d
 ```
 
@@ -173,8 +193,8 @@ Your data is stored in a Docker volume (`toybaru-data`). It persists across cont
 Requires Python 3.10+.
 
 ```bash
-git clone https://github.com/youruser/toybaru.git
-cd toybaru
+git clone https://github.com/kingmook/toybaru_recare.git
+cd toybaru_recare
 python -m venv .venv
 source .venv/bin/activate
 pip install .
@@ -205,6 +225,23 @@ toybaru raw GET /v2/vehicle/guid
 | `TOYBARU_EXPERIMENTAL_CHARGE_SCHEDULES` | `false` | Display preserved Subaru NA charging-schedule fields. Read-only; enable only while validating a sanitized provider fixture. |
 | `TOYBARU_EXPERIMENTAL_CHARGE_COMMANDS` | `false` | Enable confirmation-gated Charge Now and schedule commands with local auditing. Subaru NA uses an unconfirmed EU-analogue payload; leave disabled until a provider fixture is validated. |
 
+For Docker, pass an opt-in flag through the `toybaru` service environment. For example, this enables only the read-only schedule display:
+
+```yaml
+services:
+  toybaru:
+    environment:
+      - TOYBARU_EXPERIMENTAL_CHARGE_SCHEDULES=true
+```
+
+Recreate the container after changing its environment:
+
+```bash
+docker compose up -d --force-recreate toybaru
+```
+
+Do not enable `TOYBARU_EXPERIMENTAL_CHARGE_COMMANDS` for Subaru NA until the command payload has been validated against a sanitized provider fixture. Enabling it allows confirmed dashboard actions to contact the vehicle gateway.
+
 ## Configuration
 
 ### Region config
@@ -224,9 +261,13 @@ cp regions.example.json ~/.config/toybaru/regions.json
 Edit the file to change values. You only need to include the fields you want to override -- missing fields fall back to the built-in defaults. See `regions.example.json` for the full structure.
 
 Endpoint versions are profile-specific. Toyota EU uses the migrated 2026 status
-and climate routes with safe read-only legacy fallbacks; Lexus, Subaru, and North
-American profiles keep their independently validated routes. Automatic fallback
-is never performed for authentication failures, refresh requests, or commands.
+routes and V2 climate-control payloads. Only safe Toyota EU `GET` requests may
+fall back to a configured legacy route, and only after a `404`, `405`, or `410`.
+Fallback is never performed for writes, refresh requests, authentication errors,
+rate limits, or server failures. The Toyota EU profile also rejects the legacy
+standalone climate-settings write locally instead of translating it into a
+vehicle command. Lexus, Subaru, and North American profiles retain their
+independently validated routes and request formats.
 
 ### Adding a language
 
@@ -254,7 +295,8 @@ Use `en.json` as a template. The language will appear automatically in the dropd
 3. **EU users:** Go to the **Data** tab, set the "From" date to when you got your car and click **Start import**
 4. Wait for the import to finish (about 1 minute per 100 trips)
 5. Go to **Trips** to browse your data, **Statistics** for the overview
-6. **NA users:** Trip and charging history data is not available from Toyota's API. The Vehicle tab shows battery, status, location, and remote controls.
+6. **Toyota NA users:** Trip and charging-session history are not available through the configured API profile. Vehicle data, remote controls, and on-demand notification/service history remain available where returned by the provider.
+7. **Subaru NA users:** Trip history is unavailable, but supported vehicles can expose charging history/statistics, vehicle health, charge-management data, and on-demand notification/service history.
 
 After the initial import, use the **Fetch new trips** button on the Trips tab to pull only the latest data.
 
@@ -262,10 +304,11 @@ See [CHANGELOG.md](CHANGELOG.md) for release notes.
 
 ## Important notes
 
-- **Tested on a 2023 Subaru Solterra (EU / Germany) and a 2026 Toyota bZ4X XLE FWD PLUS (NA / US).** EU is the primary target. Other regions may work but are untested.
+- **Tested on a 2023 Subaru Solterra (EU / Germany), a 2026 Toyota bZ4X XLE FWD PLUS (NA / US), and a 2026 Subaru Trailseeker (NA).** EU remains the primary target. Availability still varies by provider, subscription, model, and region.
 - **Remote commands are still in testing.** They are wired up end-to-end and will return success when the cloud accepts the command, but they are fire-and-forget: the car has to wake up to actually execute them (15-60s). Availability varies by model and region. Treat a success response as "cloud accepted", not "car did it".
 - **Toyota NA uses OTP via email for authentication.** The codes arrive from `donotreply@toyotaconnectedservices.com` (Toyota) or `noreply@subaruconnectedservices.io` (Subaru) and may land in your spam folder.
-- **Toyota NA does not provide trip or charging history data.** Neither trip logs nor charging session history are available through Toyota's North America API. The Trips, Statistics, and Data tabs are automatically hidden for NA users. Only vehicle status, battery, location, and remote controls are available.
+- **Toyota NA does not provide trip or charging-session history through the configured profile.** Those tabs are hidden when their backing endpoints are unavailable. This limitation does not apply to Subaru NA charging history/statistics, although Subaru NA still has no configured trip-history endpoint.
+- **Subaru NA charging controls are experimental and disabled by default.** Read-only schedule fields and write commands have separate operator flags. Commands require confirmation, are rate-limited and audited, and return only an asynchronous gateway acknowledgement.
 - **Subaru deletes trip data after approximately 12 months.** This is why local storage matters. Import your data regularly.
 - **The API does not provide kWh consumption per trip.** The endpoints for energy data exist but return 403 (Forbidden) for the Subaru API client.
 - **No official API documentation exists.** This project is based on reverse-engineering the mobile apps and community research (see Credits).
