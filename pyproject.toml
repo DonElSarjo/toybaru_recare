@@ -1,7 +1,7 @@
 [project]
 name = "toybaru"
-version = "0.2.0"
-description = "Toybaru ReCare - Subaru Solterra / Toyota bZ4X Connected Services Dashboard"
+version = "0.3.0"
+description = "Toybaru ReCare - Subaru Solterra and Trailseeker / Toyota bZ4X Connected Services Dashboard"
 requires-python = ">=3.10"
 license = "GPL-2.0-only"
 dependencies = [
